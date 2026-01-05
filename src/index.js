@@ -1,5 +1,12 @@
-const { app, BrowserWindow } = require('electron');
+const { app, BaseWindow, WebContentsView } = require('electron');
 const path = require('node:path');
+
+
+
+let tabs = []
+
+
+
 
 // Handle creating/removing shortcuts on Windows when installing/uninstalling.
 if (require('electron-squirrel-startup')) {
@@ -8,7 +15,7 @@ if (require('electron-squirrel-startup')) {
 
 const createWindow = () => {
   // Create the browser window.
-  const mainWindow = new BrowserWindow({
+  const mainWindow = new BaseWindow({
     width: 800,
     height: 600,
     webPreferences: {
@@ -16,23 +23,41 @@ const createWindow = () => {
     },
   });
 
-  // and load the index.html of the app.
-  mainWindow.loadFile(path.join(__dirname, 'index.html'));
+  const view1 = new WebContentsView();
+  mainWindow.contentView.addChildView(view1);
+  view1.webContents.loadURL('https://google.com');
+  
 
-  // Open the DevTools.
-  mainWindow.webContents.openDevTools();
+
+  const resize = () => {
+    let bounds = mainWindow.contentView.getBounds()
+    view1.setBounds(bounds);
+  }
+
+  resize();
+
+  mainWindow.on('resize', () => {
+    resize();
+  });
+
 };
 
 // This method will be called when Electron has finished
 // initialization and is ready to create browser windows.
 // Some APIs can only be used after this event occurs.
+
+
 app.whenReady().then(() => {
   createWindow();
+
+
+
+
 
   // On OS X it's common to re-create a window in the app when the
   // dock icon is clicked and there are no other windows open.
   app.on('activate', () => {
-    if (BrowserWindow.getAllWindows().length === 0) {
+    if (BaseWindow.getAllWindows().length === 0) {
       createWindow();
     }
   });
