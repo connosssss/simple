@@ -4,6 +4,8 @@ const path = require('node:path');
 
 
 let tabs = []
+let mainWindow = null;
+let mainTab = null;
 
 
 
@@ -15,7 +17,7 @@ if (require('electron-squirrel-startup')) {
 
 const createWindow = () => {
   // Create the browser window.
-  const mainWindow = new BaseWindow({
+  mainWindow = new BaseWindow({
     width: 800,
     height: 600,
     webPreferences: {
@@ -23,24 +25,23 @@ const createWindow = () => {
     },
   });
 
-  const view1 = new WebContentsView();
-  mainWindow.contentView.addChildView(view1);
-  view1.webContents.loadURL('https://google.com');
+  mainTab = new WebContentsView();
+  mainWindow.contentView.addChildView(mainTab);
+  mainTab.webContents.loadURL('https://google.com');
+
   
-
-
-  const resize = () => {
-    let bounds = mainWindow.contentView.getBounds()
-    view1.setBounds(bounds);
-  }
-
   resize();
+
 
   mainWindow.on('resize', () => {
     resize();
   });
-
 };
+
+const resize = () => {
+    let bounds = mainWindow.contentView.getBounds()
+    mainTab.setBounds(bounds);
+  }
 
 // This method will be called when Electron has finished
 // initialization and is ready to create browser windows.
@@ -48,14 +49,22 @@ const createWindow = () => {
 
 
 app.whenReady().then(() => {
-  createWindow();
+
+  let res = createWindow();
+  mainWindow = res[0];
+  mainTab = res[1];
 
 
+  
+
+
+  
 
 
 
   // On OS X it's common to re-create a window in the app when the
   // dock icon is clicked and there are no other windows open.
+  // MAY NEED TO FIX THIS PART !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!:p!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
   app.on('activate', () => {
     if (BaseWindow.getAllWindows().length === 0) {
       createWindow();
