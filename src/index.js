@@ -1,4 +1,4 @@
-const { app, BaseWindow, WebContentsView } = require('electron');
+const { app, BaseWindow, WebContentsView, globalShortcut  } = require('electron');
 const path = require('node:path');
 
 
@@ -43,6 +43,41 @@ const resize = () => {
     mainTab.setBounds(bounds);
   }
 
+const createTab = () => {
+  let newTab = new WebContentsView();
+  tabs.push(newTab);
+  newTab.webContents.loadURL('https://google.com');
+  
+  mainTab = newTab;
+  switchTab(tabs.length - 1);
+
+  resize();
+
+}
+
+const switchTab = (tabID) => {
+  if (tabID < tabs.length) {
+
+    mainWindow.contentView.removeChildView(mainTab);
+    mainTab = tabs[tabID];
+    mainWindow.contentView.addChildView(mainTab);
+    resize();
+
+  }
+} 
+
+const keybindSetup = () => {
+  globalShortcut.register('CommandOrControl+T', () => {
+    console.log("attempt");
+    createTab();
+    console.log(tabs);
+  })
+
+  globalShortcut.register('Shift+1', () => {switchTab(0);})
+  globalShortcut.register('Shift+2', () => {switchTab(1);})
+  globalShortcut.register('Shift+3', () => {switchTab(2);}) 
+}
+
 // This method will be called when Electron has finished
 // initialization and is ready to create browser windows.
 // Some APIs can only be used after this event occurs.
@@ -50,13 +85,12 @@ const resize = () => {
 
 app.whenReady().then(() => {
 
-  let res = createWindow();
-  mainWindow = res[0];
-  mainTab = res[1];
+  createWindow();
+  
   tabs.push(mainTab);
 
-  
 
+  keybindSetup();
   
   // On OS X it's common to re-create a window in the app when the
   // dock icon is clicked and there are no other windows open.
