@@ -53,15 +53,11 @@ app.whenReady().then(() => {
   let res = createWindow();
   mainWindow = res[0];
   mainTab = res[1];
-
-
-  
-
+  tabs.push(mainTab);
 
   
 
-
-
+  
   // On OS X it's common to re-create a window in the app when the
   // dock icon is clicked and there are no other windows open.
   // MAY NEED TO FIX THIS PART !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!:p!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -75,6 +71,9 @@ app.whenReady().then(() => {
 // Quit when all windows are closed, except on macOS. There, it's common
 // for applications and their menu bar to stay active until the user quits
 // explicitly with Cmd + Q.
+
+
+
 app.on('window-all-closed', () => {
   if (process.platform !== 'darwin') {
     app.quit();
