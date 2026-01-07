@@ -27,7 +27,7 @@ const createWindow = () => {
 
   mainTab = new WebContentsView();
   mainWindow.contentView.addChildView(mainTab);
-  mainTab.webContents.loadURL('https://google.com');
+  mainTab.webContents.loadFile(path.join(__dirname, 'index.html'));
 
   
   resize();
