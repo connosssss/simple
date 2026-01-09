@@ -1,4 +1,4 @@
-const { app, BaseWindow, WebContentsView, globalShortcut,   } = require('electron');
+const { app, BaseWindow, WebContentsView, globalShortcut, ipcMain   } = require('electron');
 const path = require('node:path');
 
 
@@ -20,13 +20,15 @@ const createWindow = () => {
   mainWindow = new BaseWindow({
     width: 800,
     height: 600,
-    webPreferences: {
-      preload: path.join(__dirname, 'preload.js'),
-    },
+    
   });
   
 
-  mainTab = new WebContentsView();
+  mainTab = new WebContentsView({
+    webPreferences: {
+      preload: path.join(__dirname, 'preload.js'),
+    }
+  });
   
   mainWindow.contentView.addChildView(mainTab);
   mainTab.webContents.loadFile(path.join(__dirname, 'index.html'));
@@ -48,6 +50,7 @@ const resize = () => {
 
 const createTab = () => {
   let newTab = new WebContentsView();
+  
   tabs.push(newTab);
   newTab.webContents.loadURL('https://google.com');
   
@@ -79,6 +82,20 @@ const keybindSetup = () => {
   globalShortcut.register('Shift+1', () => {switchTab(0);})
   globalShortcut.register('Shift+2', () => {switchTab(1);})
   globalShortcut.register('Shift+3', () => {switchTab(2);}) 
+
+
+
+
+
+
+
+
+
+
+
+  /// IPC SETUP
+
+  ipcMain.on("createTab", createTab)
 }
 
 // This method will be called when Electron has finished
