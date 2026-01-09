@@ -6,8 +6,23 @@
     <link rel="stylesheet" href="index.css" />
     <script src="https://cdn.tailwindcss.com"></script>
   </head>
-  <body>
-    <h1>💖 Hello World!</h1>
-    <p>Welcome to your Electron application.</p>
+
+
+  <body class="h-screen w-screen overflow-hidden m-0 p-0">
+    <div class="w-screen flex flex-row bg-gray-300">
+      <div id="tabs-list"></div>
+      <button id="new-tab">New Tab</button>
+
+    </div>
+
+
+    <script>
+
+      
+
+      document.getElementById("new-tab").onclick = () => {
+        // do something
+      }
+    </script>
   </body>
 </html>

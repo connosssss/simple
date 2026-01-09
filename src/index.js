@@ -1,4 +1,4 @@
-const { app, BaseWindow, WebContentsView, globalShortcut  } = require('electron');
+const { app, BaseWindow, WebContentsView, globalShortcut,   } = require('electron');
 const path = require('node:path');
 
 
@@ -24,10 +24,13 @@ const createWindow = () => {
       preload: path.join(__dirname, 'preload.js'),
     },
   });
+  
 
   mainTab = new WebContentsView();
+  
   mainWindow.contentView.addChildView(mainTab);
   mainTab.webContents.loadFile(path.join(__dirname, 'index.html'));
+  mainTab.webContents.openDevTools();
 
   
   resize();
