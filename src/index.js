@@ -6,6 +6,7 @@ const path = require('node:path');
 let tabs = []
 let mainWindow = null;
 let mainTab = null;
+let ui = null;
 
 
 
@@ -24,15 +25,18 @@ const createWindow = () => {
   });
   
 
-  mainTab = new WebContentsView({
+
+  ui = new WebContentsView({
     webPreferences: {
       preload: path.join(__dirname, 'preload.js'),
     }
   });
+
   
-  mainWindow.contentView.addChildView(mainTab);
-  mainTab.webContents.loadFile(path.join(__dirname, 'index.html'));
-  mainTab.webContents.openDevTools();
+  
+  mainWindow.contentView.addChildView(ui);
+  ui.webContents.loadFile(path.join(__dirname, 'index.html'));
+  //ui.webContents.openDevTools();
 
   
   resize();
@@ -45,7 +49,19 @@ const createWindow = () => {
 
 const resize = () => {
     let bounds = mainWindow.contentView.getBounds()
-    mainTab.setBounds(bounds);
+
+
+    ui.setBounds({x:0, y: 0, width: bounds.width, height: 50})
+    
+    
+    if (mainTab) {
+      mainTab.setBounds({ 
+        x: 0, 
+        y: 40, 
+        width: bounds.width, 
+        height: bounds.height - 40 
+      });
+    }
   }
 
 const createTab = () => {
@@ -64,9 +80,14 @@ const createTab = () => {
 const switchTab = (tabID) => {
   if (tabID < tabs.length) {
 
-    mainWindow.contentView.removeChildView(mainTab);
+    if (mainTab) {
+      mainWindow.contentView.removeChildView(mainTab)
+    }
+
     mainTab = tabs[tabID];
     mainWindow.contentView.addChildView(mainTab);
+
+
     resize();
 
   }
@@ -107,7 +128,6 @@ app.whenReady().then(() => {
 
   createWindow();
   
-  tabs.push(mainTab);
 
 
   keybindSetup();
