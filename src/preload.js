@@ -9,5 +9,8 @@ const { contextBridge, ipcRenderer } = require('electron/renderer')
 
 contextBridge.exposeInMainWorld("electronAPI", {
 
-    createTab: () => ipcRenderer.send("createTab")
+    createTab: () => ipcRenderer.send("createTab"),
+    switchTab: (index) => ipcRenderer.send("switchTab", index),
+    onUpdateTabs: (callback) => ipcRenderer.on('updateTabs', (event, tabs) => callback(tabs))
+
 })

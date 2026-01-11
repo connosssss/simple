@@ -10,19 +10,14 @@
 
   <body class="h-screen w-screen overflow-hidden m-0 p-0">
     <div class="w-screen flex flex-row bg-gray-300">
-      <div id="tabs-list"></div>
+      <div id="tabs-list" class="flex flex-row overflow-x-auto gap-1"></div>
       <button id="new-tab">New Tab</button>
 
     </div>
 
 
-    <script>
+    <script src ="./renderer.js">
 
-
-
-      document.getElementById("new-tab").onclick = () => {
-        window.electronAPI.createTab()
-      }
     </script>
   </body>
 </html>

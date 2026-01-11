@@ -1,4 +1,4 @@
-const { app, BaseWindow, WebContentsView, globalShortcut, ipcMain   } = require('electron');
+const { app, BaseWindow, WebContentsView, globalShortcut, ipcMain, Menu   } = require('electron');
 const path = require('node:path');
 
 
@@ -7,6 +7,7 @@ let tabs = []
 let mainWindow = null;
 let mainTab = null;
 let ui = null;
+let currentIndex = -1;
 
 
 
@@ -86,12 +87,22 @@ const switchTab = (tabID) => {
 
     mainTab = tabs[tabID];
     mainWindow.contentView.addChildView(mainTab);
-
+    currentIndex = tabID
 
     resize();
+    sendTabData();
 
   }
 } 
+
+const sendTabData = () => {
+  const tabData = tabs.map((tab, index) => ({
+    index: index,
+    isActive: index === currentIndex
+  }));
+
+  ui.webContents.send("updateTabs", tabData)
+}
 
 const keybindSetup = () => {
   globalShortcut.register('CommandOrControl+T', () => {
@@ -100,9 +111,9 @@ const keybindSetup = () => {
     console.log(tabs);
   })
 
-  globalShortcut.register('Shift+1', () => {switchTab(0);})
-  globalShortcut.register('Shift+2', () => {switchTab(1);})
-  globalShortcut.register('Shift+3', () => {switchTab(2);}) 
+  globalShortcut.register('Shift+Control+1', () => {switchTab(0);})
+  globalShortcut.register('Shift+Control+2', () => {switchTab(1);})
+  globalShortcut.register('Shift+Control+3', () => {switchTab(2);}) 
 
 
 
@@ -117,6 +128,7 @@ const keybindSetup = () => {
   /// IPC SETUP
 
   ipcMain.on("createTab", createTab)
+  ipcMain.on("switchTab", (event, tabID) => switchTab(tabID))
 }
 
 // This method will be called when Electron has finished
