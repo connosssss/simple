@@ -25,7 +25,7 @@ const renderTabs = (tabs) => {
     tabs.forEach((tab, index) => {
         const tabE = document.createElement("div");
         tabE.className = `flex items-center px-4 cursor-pointer ${tab.isActive ? `bg-slate-600 hover:bg-slate-500` : `bg-slate-800 hover:bg-slate-700`} text-white `;
-        tabE.textContent = tab.index + 1;
+        tabE.textContent = tab.title || "New Tab";
 
         tabE.onclick = () => {
             window.electronAPI.switchTab(index);

@@ -1,4 +1,5 @@
 const { app, BaseWindow, WebContentsView, globalShortcut, ipcMain, Menu   } = require('electron');
+const { create } = require('node:domain');
 const path = require('node:path');
 
 
@@ -40,7 +41,7 @@ const createWindow = () => {
   //ui.webContents.openDevTools();
 
   
-  resize();
+
 
 
   mainWindow.on('resize', () => {
@@ -98,10 +99,13 @@ const switchTab = (tabID) => {
 const sendTabData = () => {
   const tabData = tabs.map((tab, index) => ({
     index: index,
-    isActive: index === currentIndex
+    isActive: index === currentIndex,
+    title: tab.webContents.getTitle()
   }));
+  
 
   ui.webContents.send("updateTabs", tabData)
+  console.log("tab data sent");
 }
 
 const keybindSetup = () => {
@@ -125,10 +129,17 @@ const keybindSetup = () => {
 
 
 
-  /// IPC SETUP
+  /// IPC SETUP + OTHER 
 
   ipcMain.on("createTab", createTab)
-  ipcMain.on("switchTab", (event, tabID) => switchTab(tabID))
+  ipcMain.on("switchTab", (event, tabID) => switchTab(tabID));
+  
+  
+  
+  
+  mainTab?.webContents.on('page-title-updated', () => {
+    sendTabData();
+  });
 }
 
 // This method will be called when Electron has finished
@@ -139,6 +150,8 @@ const keybindSetup = () => {
 app.whenReady().then(() => {
 
   createWindow();
+  // tabs not displaying correctly on load 
+  createTab();
   
 
 
