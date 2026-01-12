@@ -1,4 +1,4 @@
-const { app, BaseWindow, WebContentsView, globalShortcut, ipcMain, Menu   } = require('electron');
+const { app, BaseWindow, WebContentsView, globalShortcut, ipcMain, Menu } = require('electron');
 const { create } = require('node:domain');
 const path = require('node:path');
 
@@ -23,9 +23,9 @@ const createWindow = () => {
   mainWindow = new BaseWindow({
     width: 800,
     height: 600,
-    
+
   });
-  
+
 
 
   ui = new WebContentsView({
@@ -34,13 +34,13 @@ const createWindow = () => {
     }
   });
 
-  
-  
+
+
   mainWindow.contentView.addChildView(ui);
   ui.webContents.loadFile(path.join(__dirname, 'index.html'));
   //ui.webContents.openDevTools();
 
-  
+
 
 
 
@@ -50,28 +50,28 @@ const createWindow = () => {
 };
 
 const resize = () => {
-    let bounds = mainWindow.contentView.getBounds()
+  let bounds = mainWindow.contentView.getBounds()
 
 
-    ui.setBounds({x:0, y: 0, width: bounds.width, height: 50})
-    
-    
-    if (mainTab) {
-      mainTab.setBounds({ 
-        x: 0, 
-        y: 40, 
-        width: bounds.width, 
-        height: bounds.height - 40 
-      });
-    }
+  ui.setBounds({ x: 0, y: 0, width: bounds.width, height: 50 })
+
+
+  if (mainTab) {
+    mainTab.setBounds({
+      x: 0,
+      y: 40,
+      width: bounds.width,
+      height: bounds.height - 40
+    });
   }
+}
 
 const createTab = () => {
   let newTab = new WebContentsView();
-  
+
   tabs.push(newTab);
   newTab.webContents.loadURL('https://google.com');
-  
+
   mainTab = newTab;
   switchTab(tabs.length - 1);
 
@@ -94,7 +94,36 @@ const switchTab = (tabID) => {
     sendTabData();
 
   }
-} 
+}
+
+const closeTab = (tabID) => {
+  if (tabID < tabs.length) {
+    let tabToClose = tabs[tabID];
+
+    tabs.splice(tabID, 1);
+    mainWindow.contentView.removeChildView(tabToClose);
+    tabToClose.webContents.close();
+
+    if (tabID === currentIndex) {
+
+      if (tabs.length > 0) {
+        switchTab(0);
+      }
+
+      else {
+        mainTab = null;
+        currentIndex = -1;
+      }
+    }
+
+
+
+
+
+    sendTabData();
+  }
+
+}
 
 const sendTabData = () => {
   const tabData = tabs.map((tab, index) => ({
@@ -102,7 +131,7 @@ const sendTabData = () => {
     isActive: index === currentIndex,
     title: tab.webContents.getTitle()
   }));
-  
+
 
   ui.webContents.send("updateTabs", tabData)
   console.log("tab data sent");
@@ -115,9 +144,9 @@ const keybindSetup = () => {
     console.log(tabs);
   })
 
-  globalShortcut.register('Shift+Control+1', () => {switchTab(0);})
-  globalShortcut.register('Shift+Control+2', () => {switchTab(1);})
-  globalShortcut.register('Shift+Control+3', () => {switchTab(2);}) 
+  globalShortcut.register('Shift+Control+1', () => { switchTab(0); })
+  globalShortcut.register('Shift+Control+2', () => { switchTab(1); })
+  globalShortcut.register('Shift+Control+3', () => { switchTab(2); })
 
 
 
@@ -133,10 +162,11 @@ const keybindSetup = () => {
 
   ipcMain.on("createTab", createTab)
   ipcMain.on("switchTab", (event, tabID) => switchTab(tabID));
-  
-  
-  
-  
+  ipcMain.on("closeTab", (event, tabID) => closeTab(tabID));
+
+
+
+
   mainTab?.webContents.on('page-title-updated', () => {
     sendTabData();
   });
@@ -152,11 +182,11 @@ app.whenReady().then(() => {
   createWindow();
   // tabs not displaying correctly on load 
   createTab();
-  
+
 
 
   keybindSetup();
-  
+
   // On OS X it's common to re-create a window in the app when the
   // dock icon is clicked and there are no other windows open.
   // MAY NEED TO FIX THIS PART !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!:p!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
