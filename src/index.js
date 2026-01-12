@@ -41,6 +41,11 @@ const createWindow = () => {
   //ui.webContents.openDevTools();
 
 
+  ui.webContents.on('did-finish-load', () => {
+    sendTabData();
+  });
+
+
 
 
 
@@ -53,15 +58,15 @@ const resize = () => {
   let bounds = mainWindow.contentView.getBounds()
 
 
-  ui.setBounds({ x: 0, y: 0, width: bounds.width, height: 50 })
+  ui.setBounds({ x: 0, y: 0, width: bounds.width, height: 25 })
 
 
   if (mainTab) {
     mainTab.setBounds({
       x: 0,
-      y: 40,
+      y: 25,
       width: bounds.width,
-      height: bounds.height - 40
+      height: bounds.height - 25
     });
   }
 }
