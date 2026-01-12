@@ -26,6 +26,25 @@ const renderTabs = (tabs) => {
         const tabE = document.createElement("div");
         tabE.className = `flex items-center px-4 cursor-pointer ${tab.isActive ? `bg-slate-600 hover:bg-slate-500` : `bg-slate-800 hover:bg-slate-700`} text-white `;
         tabE.textContent = tab.title || "New Tab";
+        tabE.draggable = true;
+
+        tabE.ondragstart = (e) => {
+            e.dataTransfer.setData("text/plain", index);
+        };
+
+        tabE.ondragover = (e) => {
+            e.preventDefault();
+        };
+
+        tabE.ondrop = (e) => {
+            e.preventDefault();
+
+            const startingIndex = parseInt(e.dataTransfer.getData("text/plain"));
+
+            if (startingIndex !== index) {
+                window.electronAPI.reorderTabs(startingIndex, index);
+            }
+        };
 
         const closeB = document.createElement("button");
 

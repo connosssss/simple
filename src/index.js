@@ -142,6 +142,20 @@ const sendTabData = () => {
   console.log("tab data sent");
 }
 
+const reorderTabs = (fromIndex, toIndex) => {
+  if (fromIndex < 0 || fromIndex >= tabs.length || toIndex < 0 || toIndex >= tabs.length) return;
+
+  const tabToMove = tabs[fromIndex];
+  tabs.splice(fromIndex, 1);
+  tabs.splice(toIndex, 0, tabToMove);
+
+  if (mainTab) {
+    currentIndex = tabs.indexOf(mainTab);
+  }
+
+  sendTabData();
+}
+
 const keybindSetup = () => {
   globalShortcut.register('CommandOrControl+T', () => {
     console.log("attempt");
@@ -167,6 +181,7 @@ const keybindSetup = () => {
 
   ipcMain.on("createTab", createTab)
   ipcMain.on("switchTab", (event, tabID) => switchTab(tabID));
+  ipcMain.on("reorderTabs", (event, startingIndex, endingIndex) => reorderTabs(startingIndex, endingIndex));
   ipcMain.on("closeTab", (event, tabID) => closeTab(tabID));
 
 
