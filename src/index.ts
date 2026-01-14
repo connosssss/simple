@@ -1,20 +1,26 @@
-const { app, BaseWindow, WebContentsView, globalShortcut, ipcMain, Menu } = require('electron');
-const { create } = require('node:domain');
-const path = require('node:path');
+import { app, BaseWindow, WebContentsView, globalShortcut, ipcMain, Menu } from 'electron';
+import path from 'node:path';
 
-
-
-let tabs = []
+let tabs: WebContentsView[] = []
 let tabsh = {};
-let mainWindow = null;
-let mainTab = null;
-let ui = null;
+let mainWindow: BaseWindow | null = null;
+let mainTab: WebContentsView | null = null;
+let ui: WebContentsView | null = null;
 let currentIndex = -1;
 
 // Keybind relevant
-let lastOpenedTabs = []
+let lastOpenedTabs: WebContentsView[] = []
 
 
+
+interface Tab {
+  contentView: WebContentsView;
+  title: String;
+  address: String;
+  isActive: Boolean;
+  isStacked: Boolean;
+  stackIndex: Number;
+}
 
 
 // Handle creating/removing shortcuts on Windows when installing/uninstalling.
@@ -68,11 +74,13 @@ const createWindow = () => {
 };
 
 const resize = () => {
+  if (!mainWindow) return;
+  
   let bounds = mainWindow.contentView.getBounds()
   const isFullscreen = mainWindow.isFullScreen();
 
   if (isFullscreen) {
-    ui.setBounds({ x: 0, y: 0, width: bounds.width, height: 0 })
+    ui?.setBounds({ x: 0, y: 0, width: bounds.width, height: 0 })
   
 
   if (mainTab) {
@@ -86,7 +94,7 @@ const resize = () => {
   }
 
   else{
-    ui.setBounds({ x: 0, y: 0, width: bounds.width, height: 30 })
+    ui?.setBounds({ x: 0, y: 0, width: bounds.width, height: 30 })
   
 
   if (mainTab) {
@@ -123,7 +131,9 @@ const createTab = () => {
 
 }
 
-const switchTab = (tabID) => {
+const switchTab = (tabID: number) => {
+  if (!mainWindow) return;
+  
   if (tabID < tabs.length) {
 
     if (mainTab) {
@@ -140,7 +150,9 @@ const switchTab = (tabID) => {
   }
 }
 
-const closeTab = (tabID) => {
+const closeTab = (tabID: number) => {
+  if (!mainWindow) return;
+  
   // HARD LOCKS USERS INTO ALWAYS HAVING AT LEAST A SINGLE TAB OPEN
   if (tabID < tabs.length && tabs.length > 1) {
     let tabToClose = tabs[tabID];
@@ -181,11 +193,11 @@ const sendTabData = () => {
   }));
 
 
-  ui.webContents.send("updateTabs", tabData)
+  ui?.webContents.send("updateTabs", tabData)
   console.log("tab data sent");
 }
 
-const reorderTabs = (fromIndex, toIndex) => {
+const reorderTabs = (fromIndex: number, toIndex: number) => {
   if (fromIndex < 0 || fromIndex >= tabs.length || toIndex < 0 || toIndex >= tabs.length) return;
 
   const tabToMove = tabs[fromIndex];
@@ -213,7 +225,7 @@ const keybindSetup = () => {
 
 
   globalShortcut.register("Control+W", () => {
-    closeTab(tabs.indexOf(lastOpenedTabs.pop()));
+    closeTab(tabs.indexOf(lastOpenedTabs.pop()!));
 
   })
   
