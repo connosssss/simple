@@ -5,10 +5,14 @@ const path = require('node:path');
 
 
 let tabs = []
+let tabsh = {};
 let mainWindow = null;
 let mainTab = null;
 let ui = null;
 let currentIndex = -1;
+
+// Keybind relevant
+let lastOpenedTabs = []
 
 
 
@@ -23,6 +27,7 @@ const createWindow = () => {
   mainWindow = new BaseWindow({
     width: 800,
     height: 600,
+    autoHideMenuBar: true
 
   });
 
@@ -52,23 +57,48 @@ const createWindow = () => {
   mainWindow.on('resize', () => {
     resize();
   });
+
+  mainWindow.on('enter-full-screen', () => {
+    resize();
+  });
+  
+  mainWindow.on('leave-full-screen', () => {
+    resize();
+  });
 };
 
 const resize = () => {
   let bounds = mainWindow.contentView.getBounds()
+  const isFullscreen = mainWindow.isFullScreen();
 
-
-  ui.setBounds({ x: 0, y: 0, width: bounds.width, height: 25 })
-
+  if (isFullscreen) {
+    ui.setBounds({ x: 0, y: 0, width: bounds.width, height: 0 })
+  
 
   if (mainTab) {
     mainTab.setBounds({
       x: 0,
-      y: 25,
+      y: 0,
       width: bounds.width,
-      height: bounds.height - 25
+      height: bounds.height 
     });
   }
+  }
+
+  else{
+    ui.setBounds({ x: 0, y: 0, width: bounds.width, height: 30 })
+  
+
+  if (mainTab) {
+    mainTab.setBounds({
+      x: 0,
+      y: 30,
+      width: bounds.width,
+      height: bounds.height - 30
+    });
+  }
+  }
+  
 }
 
 const createTab = () => {
@@ -77,9 +107,18 @@ const createTab = () => {
   tabs.push(newTab);
   newTab.webContents.loadURL('https://google.com');
 
+  newTab.webContents.on('page-title-updated', () => {
+    sendTabData();
+  });
+
+  
+
   mainTab = newTab;
   switchTab(tabs.length - 1);
+  lastOpenedTabs.push(mainTab);
+  
 
+  
   resize();
 
 }
@@ -102,7 +141,8 @@ const switchTab = (tabID) => {
 }
 
 const closeTab = (tabID) => {
-  if (tabID < tabs.length) {
+  // HARD LOCKS USERS INTO ALWAYS HAVING AT LEAST A SINGLE TAB OPEN
+  if (tabID < tabs.length && tabs.length > 1) {
     let tabToClose = tabs[tabID];
 
     tabs.splice(tabID, 1);
@@ -126,6 +166,9 @@ const closeTab = (tabID) => {
 
 
     sendTabData();
+  }
+  else if (tabs.length == 1){
+    app.quit()
   }
 
 }
@@ -157,10 +200,11 @@ const reorderTabs = (fromIndex, toIndex) => {
 }
 
 const keybindSetup = () => {
+  //TABS
   globalShortcut.register('CommandOrControl+T', () => {
-    console.log("attempt");
+   // console.log("attempt");
     createTab();
-    console.log(tabs);
+    //console.log(tabs);
   })
 
   globalShortcut.register('Shift+Control+1', () => { switchTab(0); })
@@ -168,8 +212,19 @@ const keybindSetup = () => {
   globalShortcut.register('Shift+Control+3', () => { switchTab(2); })
 
 
+  globalShortcut.register("Control+W", () => {
+    closeTab(tabs.indexOf(lastOpenedTabs.pop()));
 
-
+  })
+  
+  
+  
+  // OTHER STUFF
+  globalShortcut.register("Control+Shift+I", () => {
+    if (mainTab && mainTab.webContents) {
+      mainTab.webContents.toggleDevTools();
+    }
+  })
 
 
 
@@ -183,14 +238,12 @@ const keybindSetup = () => {
   ipcMain.on("switchTab", (event, tabID) => switchTab(tabID));
   ipcMain.on("reorderTabs", (event, startingIndex, endingIndex) => reorderTabs(startingIndex, endingIndex));
   ipcMain.on("closeTab", (event, tabID) => closeTab(tabID));
-
-
-
-
-  mainTab?.webContents.on('page-title-updated', () => {
-    sendTabData();
-  });
 }
+
+
+
+
+
 
 // This method will be called when Electron has finished
 // initialization and is ready to create browser windows.
