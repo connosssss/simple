@@ -1,4 +1,4 @@
-const { app, BaseWindow, WebContentsView, globalShortcut, ipcMain, Menu } = require('electron');
+const { app, BaseWindow, WebContentsView, globalShortcut, ipcMain, Menu, NavigaitonHistory } = require('electron');
 const { create } = require('node:domain');
 const path = require('node:path');
 
@@ -119,6 +119,7 @@ const createTab = () => {
   newTab.contentView.webContents.on('page-title-updated', () => {
     newTab.title = newTab.contentView.webContents.getTitle();
     newTab.address = newTab.contentView.webContents.getURL();
+    
     sendTabData();
   });
 
@@ -289,6 +290,7 @@ const search = (address) => {
   else{
     mainTab.contentView.webContents.loadURL("https://www.google.com/search?q=" + address)
   }
+  //sendTabData();
 
 
 

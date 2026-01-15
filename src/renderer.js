@@ -11,14 +11,14 @@ document.getElementById("new-tab").onclick = () => {
 
 
 const tabsList = document.getElementById("tabs-list");
-
-
+const addressBar = document.getElementById("address-bar")
+let currentAddess = ""
 
 window.electronAPI.onUpdateTabs((tabs) => {
     renderTabs(tabs);
 });
 
-
+// RENDER TABS + ADDRESS BAR
 const renderTabs = (tabs) => {
     tabsList.innerHTML = "";
 
@@ -71,15 +71,49 @@ const renderTabs = (tabs) => {
         }
 
         tabsList.appendChild(tabE)
+
+
+
+
+        if (tab.isActive){
+            currentAddess = tab.address
+            //might be doing it 2x but it works ? 
+            addressBar.value = shortenAddress(tab.address);
+        }
     })
 }
 
 
-const addressBar = document.getElementById("address-bar")
+
 
 addressBar.addEventListener("keydown", (event) => {
     if (event.key == "Enter"){
         event.preventDefault();
+        currentAddess = addressBar.value;
         window.electronAPI.search(addressBar.value)
     }
 })
+
+addressBar.addEventListener("focus", () => {
+    if(currentAddess) {
+        addressBar.value = currentAddess;
+        
+        addressBar.select();
+    }
+});
+
+addressBar.addEventListener("blur", () => {
+    if(currentAddess) {
+        addressBar.value = shortenAddress(currentAddess);
+    }
+})
+
+const shortenAddress = (address) => {
+
+    let index = address.indexOf("?");
+
+    console.log("index: " + index + "address: " + address)
+
+    return index == -1 ? address: address.substring(0,index);
+
+}
