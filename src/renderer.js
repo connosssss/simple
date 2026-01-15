@@ -73,3 +73,13 @@ const renderTabs = (tabs) => {
         tabsList.appendChild(tabE)
     })
 }
+
+
+const addressBar = document.getElementById("address-bar")
+
+addressBar.addEventListener("keydown", (event) => {
+    if (event.key == "Enter"){
+        event.preventDefault();
+        window.electronAPI.search(addressBar.value)
+    }
+})

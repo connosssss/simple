@@ -86,15 +86,15 @@ const resize = () => {
   }
 
   else{
-    ui.setBounds({ x: 0, y: 0, width: bounds.width, height: 30 })
+    ui.setBounds({ x: 0, y: 0, width: bounds.width, height: 60 })
   
 
   if (mainTab) {
     mainTab.contentView.setBounds({
       x: 0,
-      y: 30,
+      y: 60,
       width: bounds.width,
-      height: bounds.height - 30
+      height: bounds.height - 60
     });
   }
   }
@@ -104,7 +104,7 @@ const resize = () => {
 const createTab = () => {
   let newTab = {
     contentView: new WebContentsView(),
-    address: "https://google.com",
+    address: "",
     title: "",
     isActive: true,
     isStacked: false, 
@@ -115,8 +115,10 @@ const createTab = () => {
   tabs.push(newTab);
   newTab.contentView.webContents.loadURL('https://google.com');
 
+
   newTab.contentView.webContents.on('page-title-updated', () => {
     newTab.title = newTab.contentView.webContents.getTitle();
+    newTab.address = newTab.contentView.webContents.getURL();
     sendTabData();
   });
 
@@ -251,7 +253,50 @@ const keybindSetup = () => {
   ipcMain.on("switchTab", (event, tabID) => switchTab(tabID));
   ipcMain.on("reorderTabs", (event, startingIndex, endingIndex) => reorderTabs(startingIndex, endingIndex));
   ipcMain.on("closeTab", (event, tabID) => closeTab(tabID));
+
+  ipcMain.on("search", (event, address) => search(address))
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+const search = (address) => {
+  
+
+  const urlPattern = /^(?:https?:\/\/)?(?:\w+:?\w*)?(?:\S+)(?::\d+)?(?:\/|\/(?:[\w#!:.?+=&%!\-\/]))?$/;
+
+  let temp = address;
+  
+  if(!address.startsWith("https://") && !address.startsWith("http://")){
+    temp = "https://" + address
+  }
+  console.log("temp: " + temp + "\n address: " + address + " \n test: " + !!urlPattern.test(temp))
+
+
+  if(urlPattern.test(temp)){
+      mainTab.contentView.webContents.loadURL(temp)
+  }
+  
+  else{
+    mainTab.contentView.webContents.loadURL("https://www.google.com/search?q=" + address)
+  }
+
+
+
+
+
+}
+
+
 
 
 
