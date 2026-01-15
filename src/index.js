@@ -76,7 +76,7 @@ const resize = () => {
   
 
   if (mainTab) {
-    mainTab.setBounds({
+    mainTab.contentView.setBounds({
       x: 0,
       y: 0,
       width: bounds.width,
@@ -90,7 +90,7 @@ const resize = () => {
   
 
   if (mainTab) {
-    mainTab.setBounds({
+    mainTab.contentView.setBounds({
       x: 0,
       y: 30,
       width: bounds.width,
@@ -102,12 +102,21 @@ const resize = () => {
 }
 
 const createTab = () => {
-  let newTab = new WebContentsView();
+  let newTab = {
+    contentView: new WebContentsView(),
+    address: "https://google.com",
+    title: "",
+    isActive: true,
+    isStacked: false, 
+    stackInd: -1
+  }
+
 
   tabs.push(newTab);
-  newTab.webContents.loadURL('https://google.com');
+  newTab.contentView.webContents.loadURL('https://google.com');
 
-  newTab.webContents.on('page-title-updated', () => {
+  newTab.contentView.webContents.on('page-title-updated', () => {
+    newTab.title = newTab.contentView.webContents.getTitle();
     sendTabData();
   });
 
@@ -127,12 +136,12 @@ const switchTab = (tabID) => {
   if (tabID < tabs.length) {
 
     if (mainTab) {
-      mainWindow.contentView.removeChildView(mainTab)
+      mainWindow.contentView.removeChildView(mainTab.contentView)
     }
 
     mainTab = tabs[tabID];
-    mainWindow.contentView.addChildView(mainTab);
-    currentIndex = tabID
+    mainWindow.contentView.addChildView(mainTab.contentView);
+    currentIndex = tabID;
 
     resize();
     sendTabData();
@@ -146,8 +155,8 @@ const closeTab = (tabID) => {
     let tabToClose = tabs[tabID];
 
     tabs.splice(tabID, 1);
-    mainWindow.contentView.removeChildView(tabToClose);
-    tabToClose.webContents.close();
+    mainWindow.contentView.removeChildView(tabToClose.contentView);
+    tabToClose.contentView.webContents.close();
 
     if (tabID === currentIndex) {
 
@@ -177,7 +186,11 @@ const sendTabData = () => {
   const tabData = tabs.map((tab, index) => ({
     index: index,
     isActive: index === currentIndex,
-    title: tab.webContents.getTitle()
+    title: tab.title || "",
+    address: tab.address,
+    isStacked: tab.isStacked,
+    stackInd: tab.stackInd,
+
   }));
 
 
@@ -221,8 +234,8 @@ const keybindSetup = () => {
   
   // OTHER STUFF
   globalShortcut.register("Control+Shift+I", () => {
-    if (mainTab && mainTab.webContents) {
-      mainTab.webContents.toggleDevTools();
+    if (mainTab && mainTab.contentView.webContents) {
+      mainTab.contentView.webContents.toggleDevTools();
     }
   })
 
