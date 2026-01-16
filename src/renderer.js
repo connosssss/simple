@@ -117,3 +117,23 @@ const shortenAddress = (address) => {
     return index == -1 ? address: address.substring(0,index);
 
 }
+
+
+const fButton = document.getElementById("forward")
+const bButton = document.getElementById("back")
+const rButton = document.getElementById("refresh")
+
+fButton.addEventListener("click", () => {
+    
+    window.electronAPI.toolbarAction("forward")
+})
+
+bButton.addEventListener("click", () => {
+
+    window.electronAPI.toolbarAction("back")
+})
+
+rButton.addEventListener("click", () => {
+
+    window.electronAPI.toolbarAction("refresh")
+})

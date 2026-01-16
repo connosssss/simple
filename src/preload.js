@@ -15,6 +15,7 @@ contextBridge.exposeInMainWorld("electronAPI", {
     closeTab: (index) => ipcRenderer.send("closeTab", index),
     reorderTabs: (fromIndex, toIndex) => ipcRenderer.send("reorderTabs", fromIndex, toIndex),
     
-    search: (address) => ipcRenderer.send("search", address)
+    search: (address) => ipcRenderer.send("search", address),
+    toolbarAction: (action) => ipcRenderer.send("tBAction", action)
 
 })

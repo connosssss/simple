@@ -255,7 +255,8 @@ const keybindSetup = () => {
   ipcMain.on("reorderTabs", (event, startingIndex, endingIndex) => reorderTabs(startingIndex, endingIndex));
   ipcMain.on("closeTab", (event, tabID) => closeTab(tabID));
 
-  ipcMain.on("search", (event, address) => search(address))
+  ipcMain.on("search", (event, address) => search(address));
+  ipcMain.on("tBAction", (event, action) => toolbarAction(action));
 }
 
 
@@ -273,7 +274,7 @@ const keybindSetup = () => {
 const search = (address) => {
   
 
-  const urlPattern = /^(?:https?:\/\/)?(?:\w+:?\w*)?(?:\S+)(?::\d+)?(?:\/|\/(?:[\w#!:.?+=&%!\-\/]))?$/;
+  const urlPattern = /(?:https?):\/\/(\w+:?\w*)?(\S+)(:\d+)?(\/|\/([\w#!:.?+=&%!\-\/]))?/;
 
   let temp = address;
   
@@ -282,8 +283,17 @@ const search = (address) => {
   }
   console.log("temp: " + temp + "\n address: " + address + " \n test: " + !!urlPattern.test(temp))
 
+  let valid = false;
+  
+  try{
+    const url = new URL(temp)
+    valid = url.hostname.includes(".") || url.hostname == "localhost";
+  }
+  catch (error) {
+    valid = false;
+  }
 
-  if(urlPattern.test(temp)){
+  if(valid){
       mainTab.contentView.webContents.loadURL(temp)
   }
   
@@ -298,6 +308,22 @@ const search = (address) => {
 
 }
 
+
+const toolbarAction = (input) => {
+ 
+    if(mainTab.contentView.webContents.navigationHistory.canGoBack() && input == "back"){
+      mainTab.contentView.webContents.navigationHistory.goBack();
+    }
+
+    if(input == "forward" && mainTab.contentView.webContents.navigationHistory.canGoForward()){
+      mainTab.contentView.webContents.navigationHistory.goForward();
+    }
+
+    if (input == "refresh"){
+      mainTab.contentView.webContents.reload();
+    }
+
+  }
 
 
 
