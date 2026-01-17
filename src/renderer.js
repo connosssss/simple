@@ -26,10 +26,11 @@ const renderTabs = (tabs) => {
 
     tabs.forEach((tab, index) => {
         const tabE = document.createElement("div");
-        tabE.className = `flex items-center px-4 cursor-pointer ${tab.isActive ? `bg-slate-600 hover:bg-slate-500` : `bg-slate-800 hover:bg-slate-700`} text-white flex-1 min-w-0`;
+        tabE.className = `flex items-center px-4 cursor-pointer ${tab.isActive ? `bg-slate-700 hover:bg-slate-600` : `bg-slate-800 hover:bg-slate-700`} text-white flex-1 min-w-0
+        mb-0 rounded-t-sm h-[24px] transition-all duration-100`;
 
         const titleSpan = document.createElement("span");
-        titleSpan.className = "truncate flex-1 overflow-hidden pointer-events-none";
+        titleSpan.className = "truncate flex-1 overflow-hidden pointer-events-none text-sm";
         titleSpan.textContent = tab.title || "New Tab";
         tabE.appendChild(titleSpan);
 
@@ -55,7 +56,7 @@ const renderTabs = (tabs) => {
 
         const closeB = document.createElement("button");
 
-        closeB.className = "bg-gray-700 hover:bg-gray-600 text-white rounded-sm text-md font-bold px-2 flex-shrink-0 ml-2";
+        closeB.className = `${tab.isActive ? `bg-slate-900 hover:bg-slate-800` : `bg-slate-900/80 hover:bg-slate-800`} transition-all duration-100 text-white rounded-sm text-xs font-bold  flex-shrink-0 ml-2 px-1`;
         closeB.textContent = "×";
 
         closeB.onclick = (e) => {
