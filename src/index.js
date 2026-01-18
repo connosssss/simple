@@ -264,6 +264,39 @@ const keybindSetup = () => {
 
   ipcMain.on("search", (event, address) => search(address));
   ipcMain.on("tBAction", (event, action) => toolbarAction(action));
+
+
+  ipcMain.on('showContextMenu', (event, vars) => {
+    const template = [
+      {
+        label: 'Close Tab',
+        click: () => {
+         
+          closeTab(vars.tabIndex);
+          
+        }
+      },
+      
+      {
+        label: 'Reload Tab',
+        click: () => {
+          if (vars.tabIndex !== undefined && tabs[vars.tabIndex]) {
+            tabs[vars.tabIndex].contentView.webContents.reload();
+          }
+        }
+      },
+      { type: 'separator' },
+      
+    ];
+  
+    const menu = Menu.buildFromTemplate(template);
+  
+    menu.popup({
+      window: mainWindow,
+      x: vars.x,
+      y: vars.y
+    });
+  });
 }
 
 

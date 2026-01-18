@@ -27,7 +27,7 @@ const renderTabs = (tabs) => {
     tabs.forEach((tab, index) => {
         const tabE = document.createElement("div");
         tabE.className = `flex items-center px-4 cursor-pointer ${tab.isActive ? `bg-slate-700 hover:bg-slate-600` : `bg-slate-800 hover:bg-slate-700`} text-white flex-1 min-w-0
-        mb-0 rounded-t-sm h-[24px] transition-all duration-100`;
+        mb-0 rounded-t-sm h-[29px] transition-all duration-100`;
 
         const titleSpan = document.createElement("span");
         titleSpan.className = "truncate flex-1 overflow-hidden pointer-events-none text-sm";
@@ -53,6 +53,17 @@ const renderTabs = (tabs) => {
                 window.electronAPI.reorderTabs(startingIndex, index);
             }
         };
+
+
+        tabE.addEventListener("contextmenu", (event) => {
+            event.preventDefault()
+            window.electronAPI.showContextMenu({
+                x: event.clientX,
+                y: event.clientY,
+                tabIndex: index
+            });
+        })
+
 
         const closeB = document.createElement("button");
 
