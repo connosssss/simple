@@ -27,7 +27,14 @@ const createWindow = () => {
   mainWindow = new BaseWindow({
     width: 800,
     height: 600,
-    autoHideMenuBar: true
+    autoHideMenuBar: true,
+    backgroundColor: '#020617',
+    titleBarStyle: 'hidden',
+    titleBarOverlay: {
+      color: '#020617',
+      symbolColor: '#ffffff',
+      height: 30
+    }
 
   });
 
@@ -86,15 +93,15 @@ const resize = () => {
   }
 
   else{
-    ui.setBounds({ x: 0, y: 0, width: bounds.width, height: 60 })
+    ui.setBounds({ x: 0, y: 0, width: bounds.width, height: 90 })
   
 
   if (mainTab) {
     mainTab.contentView.setBounds({
       x: 0,
-      y: 60,
+      y: 90,
       width: bounds.width,
-      height: bounds.height - 60
+      height: bounds.height - 90
     });
   }
   }
