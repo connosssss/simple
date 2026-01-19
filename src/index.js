@@ -17,6 +17,11 @@ let lastOpenedTabs = []
 
 
 
+
+
+
+
+
 // Handle creating/removing shortcuts on Windows when installing/uninstalling.
 if (require('electron-squirrel-startup')) {
   app.quit();
@@ -145,6 +150,10 @@ const createTab = () => {
 const switchTab = (tabID) => {
   if (tabID < tabs.length) {
 
+    if(tabs[tabID].contentView == null){
+      wake(tabID)
+    }
+
     if (mainTab) {
       mainWindow.contentView.removeChildView(mainTab.contentView)
     }
@@ -165,8 +174,11 @@ const closeTab = (tabID) => {
     let tabToClose = tabs[tabID];
 
     tabs.splice(tabID, 1);
-    mainWindow.contentView.removeChildView(tabToClose.contentView);
-    tabToClose.contentView.webContents.close();
+
+    if(tabToClose.contentView){
+      mainWindow.contentView.removeChildView(tabToClose.contentView);
+      tabToClose.contentView.webContents.close();
+    }
 
     if (tabID === currentIndex) {
 
@@ -192,14 +204,63 @@ const closeTab = (tabID) => {
 
 }
 
+const sleep = (index) => {
+  const tab = tabs[index];
+  tab.isActive = false;
+
+  if(index == currentIndex){
+    if(index == 0 ){
+
+      if (tabs.length == 0){
+        closeTab(0);
+      }
+      else{
+        switchTab(1);
+      }
+
+
+    }
+    else{
+      switchTab(0);
+    }
+
+  }
+
+
+  if (tab.contentView.webContents && !tab.contentView.webContents.isDestroyed()) {
+    tab.contentView.webContents.close();
+  }
+
+  tab.contentView = null;
+
+  sendTabData();
+
+  resize();
+}
+
+
+
+const wake = (index) => {
+  tab = tabs[index];
+  tab.contentView = new WebContentsView()
+
+  tab.contentView.webContents.loadURL(tab.address);
+
+
+}
+
+
+
 const sendTabData = () => {
   const tabData = tabs.map((tab, index) => ({
     index: index,
-    isActive: index === currentIndex,
+    isMainTab: index === currentIndex,
     title: tab.title || "",
     address: tab.address,
     isStacked: tab.isStacked,
     stackInd: tab.stackInd,
+    
+    isActive: tab.isActive,
 
   }));
 
@@ -221,6 +282,11 @@ const reorderTabs = (fromIndex, toIndex) => {
 
   sendTabData();
 }
+
+
+
+
+
 
 const keybindSetup = () => {
   //TABS
@@ -267,7 +333,8 @@ const keybindSetup = () => {
 
 
   ipcMain.on('showContextMenu', (event, vars) => {
-    const template = [
+    
+    const cmTemplate = [
       {
         label: 'Close Tab',
         click: () => {
@@ -286,10 +353,17 @@ const keybindSetup = () => {
         }
       },
       { type: 'separator' },
-      
+      {
+
+        label: 'Put Tab to Sleep',
+        
+        click: () => {
+          sleep(vars.tabIndex)
+        }
+      },
     ];
-  
-    const menu = Menu.buildFromTemplate(template);
+
+    const menu = Menu.buildFromTemplate(cmTemplate);
   
     menu.popup({
       window: mainWindow,

@@ -26,7 +26,8 @@ const renderTabs = (tabs) => {
 
     tabs.forEach((tab, index) => {
         const tabE = document.createElement("div");
-        tabE.className = `flex items-center px-4 cursor-pointer ${tab.isActive ? `bg-slate-700 hover:bg-slate-600` : `bg-slate-800 hover:bg-slate-700`} text-white flex-1 min-w-0
+        tabE.className = `flex items-center px-4 cursor-pointer ${tab.isMainTab ? `bg-slate-700 hover:bg-slate-600` : tab.isActive ? `bg-slate-800 hover:bg-slate-700` : `bg-slate-800/70 hover:bg-slate-700/70`} 
+        text-white flex-1 min-w-0
         mb-0 rounded-t-sm h-[29px] transition-all duration-100`;
 
         const titleSpan = document.createElement("span");
@@ -67,7 +68,7 @@ const renderTabs = (tabs) => {
 
         const closeB = document.createElement("button");
 
-        closeB.className = `${tab.isActive ? `bg-slate-900 hover:bg-slate-800` : `bg-slate-900/80 hover:bg-slate-800`} transition-all duration-100 text-white rounded-sm text-xs font-bold  flex-shrink-0 ml-2 px-1`;
+        closeB.className = `${tab.isMainTab ? `bg-slate-900 hover:bg-slate-800` : `bg-slate-900/80 hover:bg-slate-800`} transition-all duration-100 text-white rounded-sm text-xs font-bold  flex-shrink-0 ml-2 px-1`;
         closeB.textContent = "×";
 
         closeB.onclick = (e) => {
@@ -87,7 +88,7 @@ const renderTabs = (tabs) => {
 
 
 
-        if (tab.isActive){
+        if (tab.isMainTab){
             currentAddess = tab.address
             //might be doing it 2x but it works ? 
             addressBar.value = shortenAddress(tab.address);
