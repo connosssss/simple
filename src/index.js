@@ -206,7 +206,11 @@ const closeTab = (tabID) => {
 
 const sleep = (index) => {
   const tab = tabs[index];
+
+  if(!tab.isActive) return;
+
   tab.isActive = false;
+   sendTabData();
 
   if(index == currentIndex){
     if(index == 0 ){
@@ -242,9 +246,11 @@ const sleep = (index) => {
 
 const wake = (index) => {
   tab = tabs[index];
-  tab.contentView = new WebContentsView()
+  tab.contentView = new WebContentsView();
 
   tab.contentView.webContents.loadURL(tab.address);
+  tab.isActive = true;
+
 
 
 }
