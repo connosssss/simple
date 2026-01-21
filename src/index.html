@@ -23,15 +23,15 @@
 
     </div>
 
-    <div class="w-screen flex flex-row bg-slate-950 h-[30px] gap-1 items-center justify-start" id="address-bar-part">
+    <div class="w-screen flex flex-row bg-slate-950 h-[40px] gap-1 items-center justify-start " id="address-bar-part">
       <div class="flex flex-row gap-1 ml-1">
-        <button class="w-[1.5rem] h-[1.5rem] bg-slate-800 hover:bg-slate-700 text-white text-sm rounded-sm  transition-all duration-100" id="back"> <- </button>
-        <button class="w-[1.5rem] h-[1.5rem] bg-slate-800 hover:bg-slate-700 text-white text-sm rounded-sm  transition-all duration-100" id="forward"> -> </button>
-        <button class="w-[1.5rem] h-[1.5rem] bg-slate-800 hover:bg-slate-700 text-white text-sm rounded-sm  transition-all duration-100" id="refresh">⟳ </button>
+        <button class="w-[2.0rem] h-[2.0rem] bg-slate-800 hover:bg-slate-700 text-white text-sm rounded-sm  transition-all duration-100" id="back"> <- </button>
+        <button class="w-[2.0rem] h-[2.0rem] bg-slate-800 hover:bg-slate-700 text-white text-sm rounded-sm  transition-all duration-100" id="forward"> -> </button>
+        <button class="w-[2.0rem] h-[2.0rem] bg-slate-800 hover:bg-slate-700 text-white text-sm rounded-sm  transition-all duration-100" id="refresh">⟳ </button>
       </div>
       
 
-      <input class="w-full h-[80%] bg-slate-800 px-2 outline-none text-white text-sm mr-1 rounded-xs" id="address-bar"/>
+      <input class="w-full h-[80%] bg-slate-800 px-2 outline-none text-slate-100/80 text-sm mr-1 rounded-sm selection:bg-slate-700" id="address-bar" onfocus="this.select()"/>
 
     </div>
 

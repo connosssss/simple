@@ -98,15 +98,15 @@ const resize = () => {
   }
 
   else{
-    ui.setBounds({ x: 0, y: 0, width: bounds.width, height: 90 })
+    ui.setBounds({ x: 0, y: 0, width: bounds.width, height: 100 })
   
 
   if (mainTab) {
     mainTab.contentView.setBounds({
       x: 0,
-      y: 90,
+      y: 100 ,
       width: bounds.width,
-      height: bounds.height - 90
+      height: bounds.height - 100
     });
   }
   }
