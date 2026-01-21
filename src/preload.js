@@ -19,5 +19,6 @@ contextBridge.exposeInMainWorld("electronAPI", {
     toolbarAction: (action) => ipcRenderer.send("tBAction", action),
     
     showContextMenu: (vars) => ipcRenderer.send("showContextMenu", vars),
+    showSettingsMenu: (vars) => ipcRenderer.send("showSettingsMenu"),
 
 })

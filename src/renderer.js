@@ -152,3 +152,13 @@ rButton.addEventListener("click", () => {
     window.electronAPI.toolbarAction("refresh")
 })
 
+
+
+
+
+// SETTINGS
+const settingsButton = document.getElementById("settings");
+
+settingsButton.addEventListener("click", () => {
+    window.electronAPI.showSettingsMenu();
+})

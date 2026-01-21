@@ -367,6 +367,7 @@ const keybindSetup = () => {
           sleep(vars.tabIndex)
         }
       },
+      
     ];
 
     const menu = Menu.buildFromTemplate(cmTemplate);
