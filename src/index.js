@@ -378,6 +378,38 @@ const keybindSetup = () => {
       y: vars.y
     });
   });
+
+
+  ipcMain.on("showSettingsMenu", () => {
+    const settingsWindow = new BaseWindow({
+      width: 600,
+      height: 500,
+      parent: mainWindow,
+      modal: false,
+      autoHideMenuBar: true,
+      backgroundColor: '#020617',
+      webPreferences: {
+        nodeIntegration: false,
+        contextIsolation: true,
+      }
+    });
+
+
+    settingsUI = new WebContentsView({
+      webPreferences: {
+        preload: path.join(__dirname, 'preload.js'),
+      }
+    });
+
+
+
+  settingsWindow.contentView.addChildView(settingsUI);
+  settingsUI.webContents.loadFile(path.join(__dirname, 'settings.html'));
+
+
+  });
+
+
 }
 
 
