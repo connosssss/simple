@@ -9,6 +9,7 @@ let tabsh = {};
 let mainWindow = null;
 let mainTab = null;
 let ui = null;
+let settingsUI = null;
 let currentIndex = -1;
 
 // Keybind relevant
@@ -272,6 +273,11 @@ const sendTabData = () => {
 
 
   ui.webContents.send("updateTabs", tabData)
+
+  if (settingsUI && !settingsUI.webContents.isDestroyed()) {
+    settingsUI.webContents.send("updateTabs", tabData);
+  }
+
   console.log("tab data sent");
 }
 
@@ -367,11 +373,11 @@ const keybindSetup = () => {
           sleep(vars.tabIndex)
         }
       },
-      
+
     ];
 
     const menu = Menu.buildFromTemplate(cmTemplate);
-  
+
     menu.popup({
       window: mainWindow,
       x: vars.x,
@@ -406,7 +412,21 @@ const keybindSetup = () => {
   settingsWindow.contentView.addChildView(settingsUI);
   settingsUI.webContents.loadFile(path.join(__dirname, 'settings.html'));
 
+    settingsUI.webContents.on('did-finish-load', () => {
+      sendTabData();
+    });
 
+    settingsWindow.on('resize', () => {
+      let bounds = settingsWindow.contentView.getBounds();
+      settingsUI.setBounds({ x: 0, y: 0, width: bounds.width, height: bounds.height });
+    });
+
+    let bounds = settingsWindow.contentView.getBounds();
+    settingsUI.setBounds({ x: 0, y: 0, width: bounds.width, height: bounds.height });
+  });
+
+  ipcMain.on("hibernateTab", (event, tabIndex) => {
+    sleep(tabIndex);
   });
 
 

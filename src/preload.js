@@ -20,5 +20,6 @@ contextBridge.exposeInMainWorld("electronAPI", {
     
     showContextMenu: (vars) => ipcRenderer.send("showContextMenu", vars),
     showSettingsMenu: (vars) => ipcRenderer.send("showSettingsMenu"),
+    hibernateTab: (index) => ipcRenderer.send("hibernateTab", index),
 
 })
