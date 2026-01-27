@@ -121,7 +121,8 @@ const createTab = () => {
     title: "",
     isActive: true,
     isStacked: false, 
-    stackInd: -1
+    stackInd: -1,
+    lastActiveAt: Date.now()
   }
 
 
@@ -160,6 +161,7 @@ const switchTab = (tabID) => {
     }
 
     mainTab = tabs[tabID];
+    mainTab.lastActiveAt = Date.now(); 
     mainWindow.contentView.addChildView(mainTab.contentView);
     currentIndex = tabID;
 
@@ -268,6 +270,7 @@ const sendTabData = () => {
     stackInd: tab.stackInd,
     
     isActive: tab.isActive,
+    lastActiveAt: tab.lastActiveAt,
 
   }));
 

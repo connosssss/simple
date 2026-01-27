@@ -5,6 +5,20 @@ window.electronAPI.onUpdateTabs((tabs) => {
 });
 
 
+
+const getTimeTabActive = (lastActive) => {
+  if (!lastActive) return -1;
+
+  const now = Date.now();
+  const dur = now - lastActive;
+
+  const s = Math.floor(dur / 1000);
+  const m = Math.floor(s/60);
+
+  return m;
+
+}
+
 const renderTabs = (tabs) => {
 
   tabsList.innerHTML = "";
@@ -35,10 +49,14 @@ const renderTabs = (tabs) => {
     tabStatus.className = `text-sm min-h-full ${tab.isActive ? "text-slate-100" : "text-slate-500"} flex items-center justify-center `;
     tabStatus.textContent = tab.isActive ? "Active" : "Hibernated";
 
+    const tabDur = document.createElement("div");
+    tabDur.className = "text-xs text-slate-400 min-h-full flex items-center justify-center";
+    tabDur.textContent = getTimeTabActive(tab.lastActiveAt);
 
     tabInfo.appendChild(tIndex);
     tabInfo.appendChild(tabTitle);
     tabInfo.appendChild(tabStatus);
+    tabInfo.appendChild(tabDur);
 
     const hibernateBtn = document.createElement("button");
     hibernateBtn.className = ` rounded-md text-sm font-light ${tab.isActive ? `bg-red-700/40` : `bg-slate-700/40`} transition-all duration-100 px-4 py-1 text-white`;
