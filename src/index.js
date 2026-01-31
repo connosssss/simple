@@ -259,6 +259,11 @@ const wake = (index) => {
 }
 
 
+setTimeout(() => {
+ sendTabData();
+}, 2000);
+
+
 
 const sendTabData = () => {
   const tabData = tabs.map((tab, index) => ({
@@ -300,7 +305,44 @@ const reorderTabs = (fromIndex, toIndex) => {
 
 
 
+const openSettingsMenu = () => {
+  const settingsWindow = new BaseWindow({
+      width: 600,
+      height: 500,
+      parent: mainWindow,
+      modal: false,
+      autoHideMenuBar: true,
+      backgroundColor: '#020617',
+      webPreferences: {
+        nodeIntegration: false,
+        contextIsolation: true,
+      }
+    });
 
+
+    settingsUI = new WebContentsView({
+      webPreferences: {
+        preload: path.join(__dirname, 'preload.js'),
+      }
+    });
+
+
+
+  settingsWindow.contentView.addChildView(settingsUI);
+  settingsUI.webContents.loadFile(path.join(__dirname, 'settings.html'));
+
+    settingsUI.webContents.on('did-finish-load', () => {
+      sendTabData();
+    });
+
+    settingsWindow.on('resize', () => {
+      let bounds = settingsWindow.contentView.getBounds();
+      settingsUI.setBounds({ x: 0, y: 0, width: bounds.width, height: bounds.height });
+    });
+
+    let bounds = settingsWindow.contentView.getBounds();
+    settingsUI.setBounds({ x: 0, y: 0, width: bounds.width, height: bounds.height });
+}
 
 
 const keybindSetup = () => {
@@ -329,6 +371,7 @@ const keybindSetup = () => {
       mainTab.contentView.webContents.toggleDevTools();
     }
   })
+  globalShortcut.register("Control+O", () => {})
 
 
 
@@ -390,42 +433,7 @@ const keybindSetup = () => {
 
 
   ipcMain.on("showSettingsMenu", () => {
-    const settingsWindow = new BaseWindow({
-      width: 600,
-      height: 500,
-      parent: mainWindow,
-      modal: false,
-      autoHideMenuBar: true,
-      backgroundColor: '#020617',
-      webPreferences: {
-        nodeIntegration: false,
-        contextIsolation: true,
-      }
-    });
-
-
-    settingsUI = new WebContentsView({
-      webPreferences: {
-        preload: path.join(__dirname, 'preload.js'),
-      }
-    });
-
-
-
-  settingsWindow.contentView.addChildView(settingsUI);
-  settingsUI.webContents.loadFile(path.join(__dirname, 'settings.html'));
-
-    settingsUI.webContents.on('did-finish-load', () => {
-      sendTabData();
-    });
-
-    settingsWindow.on('resize', () => {
-      let bounds = settingsWindow.contentView.getBounds();
-      settingsUI.setBounds({ x: 0, y: 0, width: bounds.width, height: bounds.height });
-    });
-
-    let bounds = settingsWindow.contentView.getBounds();
-    settingsUI.setBounds({ x: 0, y: 0, width: bounds.width, height: bounds.height });
+    openSettingsMenu();
   });
 
   ipcMain.on("hibernateTab", (event, tabIndex) => {

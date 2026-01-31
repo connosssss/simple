@@ -1,7 +1,14 @@
 const tabsList = document.getElementById("tabs-list");
 
+
+// Need to use a prev state bacuse 
+let prevTabState = [];
+
 window.electronAPI.onUpdateTabs((tabs) => {
   renderTabs(tabs);
+  prevTabState = tabs;
+
+
 });
 
 
@@ -76,3 +83,9 @@ const renderTabs = (tabs) => {
 
   });
 };
+
+setInterval(() => {
+  renderTabs(prevTabState);
+}, 1000);
+
+
