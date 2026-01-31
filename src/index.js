@@ -48,23 +48,14 @@ const createWindow = () => {
 
   ui = new WebContentsView({
     webPreferences: {
-      preload: path.join(__dirname, '../preload/preload.js'),  
-      contextIsolation: true,
-      nodeIntegration: false,
+      preload: path.join(__dirname, 'preload.js'),
     }
   });
 
 
 
   mainWindow.contentView.addChildView(ui);
-  const isDev = !app.isPackaged;
-  if (isDev) {
-    ui.webContents.loadURL('http://localhost:3000');
-  } 
-  
-  else {
-    ui.webContents.loadFile(path.join(__dirname, '../../dist/index.html'));
-  }
+  ui.webContents.loadFile(path.join(__dirname, 'index.html'));
   //ui.webContents.openDevTools();
 
 
@@ -415,22 +406,14 @@ const keybindSetup = () => {
 
     settingsUI = new WebContentsView({
       webPreferences: {
-        preload: path.join(__dirname, '../preload/preload.js')
+        preload: path.join(__dirname, 'preload.js'),
       }
     });
 
 
 
   settingsWindow.contentView.addChildView(settingsUI);
-  
-  const isDev = !app.isPackaged;
-  if (isDev) {
-    settingsUI.webContents.loadURL('http://localhost:3000/settings.html');
-  } 
-  
-  else {
-    settingsUI.webContents.loadFile(path.join(__dirname, '../../dist/settings.html'));
-  }
+  settingsUI.webContents.loadFile(path.join(__dirname, 'settings.html'));
 
     settingsUI.webContents.on('did-finish-load', () => {
       sendTabData();

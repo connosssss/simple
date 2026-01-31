@@ -1,0 +1,46 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="UTF-8" />
+    <title>Hello World!</title>
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+  </head>
+
+
+  <body class=" overflow-hidden m-0 p-0">
+    <!-- temp way of making it look nices at top-->
+    <div class="w-screen flex flex-row bg-slate-950 h-[30px] items-center justify-center text-center" style="-webkit-app-region: drag;">
+      <div class=" text-slate-500 text-md"> simple</div>
+    </div>
+
+    <div class="w-screen flex flex-row bg-slate-950 h-[30px] items-center justify-start gap-2 border-b border-black">
+      <div id="tabs-list" class="flex flex-row overflow-x-hidden gap-1 h-full items-end ml-1"></div>
+
+
+      <button id="new-tab" class="min-w-[1.5rem] min-h-[1.5rem] bg-slate-800 text-white rounded-md hover:bg-slate-700 transition-all duration-100
+      mr-2">+</button>
+
+    </div>
+
+    <div class="w-screen flex flex-row bg-slate-950 h-[40px] gap-1 items-center justify-start " id="address-bar-part">
+      <div class="flex flex-row gap-1 ml-1">
+        <button class="w-[2.0rem] h-[2.0rem] bg-slate-800 hover:bg-slate-700 text-white text-sm rounded-sm  transition-all duration-100" id="back"> <- </button>
+        <button class="w-[2.0rem] h-[2.0rem] bg-slate-800 hover:bg-slate-700 text-white text-sm rounded-sm  transition-all duration-100" id="forward"> -> </button>
+        <button class="w-[2.0rem] h-[2.0rem] bg-slate-800 hover:bg-slate-700 text-white text-sm rounded-sm  transition-all duration-100" id="refresh">⟳ </button>
+      </div>
+      
+
+      <input class="w-full h-[80%] bg-slate-800 px-2 outline-none text-slate-100/80 text-sm rounded-sm selection:bg-slate-700" id="address-bar" onfocus="this.select()"/>
+      <button class="w-[2.0rem] h-[2.0rem] bg-slate-800 hover:bg-slate-700 text-white text-sm rounded-sm  transition-all duration-100 mr-1" id="settings">
+      O
+       </button>
+
+    </div>
+
+
+    <script src ="./renderer.js">
+
+    </script>
+  </body>
+</html>
