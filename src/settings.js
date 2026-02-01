@@ -3,6 +3,7 @@ const tabsList = document.getElementById("tabs-list");
 
 // Need to use a prev state bacuse 
 let prevTabState = [];
+let closeAfter = 10;
 
 window.electronAPI.onUpdateTabs((tabs) => {
   renderTabs(tabs);
@@ -58,7 +59,14 @@ const renderTabs = (tabs) => {
 
     const tabDur = document.createElement("div");
     tabDur.className = "text-xs text-slate-400 min-h-full flex items-center justify-center";
-    tabDur.textContent = getTimeTabActive(tab.lastActiveAt);
+
+
+    tabDuration = getTimeTabActive(tab.lastActiveAt);
+    tabDur.textContent = tabDuration;
+    if(tabDuration > closeAfter && tab.isActive){
+      window.electronAPI.hibernateTab(index);
+
+    }
 
     tabInfo.appendChild(tIndex);
     tabInfo.appendChild(tabTitle);
