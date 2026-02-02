@@ -3,7 +3,7 @@ const tabsList = document.getElementById("tabs-list");
 
 // Need to use a prev state bacuse 
 let prevTabState = [];
-let closeAfter = 10;
+let closeAfter = parseInt(localStorage.getItem("closeAfter")) || 10;
 
 window.electronAPI.onUpdateTabs((tabs) => {
   renderTabs(tabs);
@@ -11,6 +11,20 @@ window.electronAPI.onUpdateTabs((tabs) => {
 
 
 });
+
+
+
+const closeAfterSelect = document.getElementById("close-after-select");
+if (closeAfterSelect) {
+  closeAfterSelect.value = closeAfter;
+  
+  closeAfterSelect.addEventListener("change", (e) => {
+    closeAfter = parseInt(e.target.value);
+    localStorage.setItem("closeAfter", closeAfter);
+    renderTabs(prevTabState);
+    console.log(closeAfter);
+  });
+}
 
 
 
@@ -46,7 +60,7 @@ const renderTabs = (tabs) => {
 
     const tIndex = document.createElement("div");
     tIndex.className = "text-white font-light text-sm min-h-full flex items-center justify-center border-r border-slate-600 max-w-10 min-w-10 py-2";
-    tIndex.textContent =  index;
+    tIndex.textContent =  index + 1;
 
 
     const tabTitle = document.createElement("div");
@@ -58,12 +72,12 @@ const renderTabs = (tabs) => {
     tabStatus.textContent = tab.isActive ? "Active" : "Hibernated";
 
     const tabDur = document.createElement("div");
-    tabDur.className = "text-xs text-slate-400 min-h-full flex items-center justify-center";
+    tabDur.className = "text-sm font-light text-slate-400/80 min-h-full flex items-center justify-center ";
 
-
+    //CLOSING TABS AFTER OPEN TOO LONG
     tabDuration = getTimeTabActive(tab.lastActiveAt);
     tabDur.textContent = tabDuration;
-    if(tabDuration > closeAfter && tab.isActive){
+    if(tabDuration > closeAfter && closeAfter != -1 && tab.isActive){
       window.electronAPI.hibernateTab(index);
 
     }
