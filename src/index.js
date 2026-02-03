@@ -164,6 +164,7 @@ const switchTab = (tabID) => {
     mainTab.lastActiveAt = Date.now(); 
     mainWindow.contentView.addChildView(mainTab.contentView);
     currentIndex = tabID;
+    tabs[tabID].lastActiveAt = Date.now();
 
     resize();
     sendTabData();
