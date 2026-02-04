@@ -122,7 +122,8 @@ const createTab = () => {
     isActive: true,
     isStacked: false, 
     stackInd: -1,
-    lastActiveAt: Date.now()
+    lastActiveAt: Date.now(),
+    keepActive: false
   }
 
 
@@ -277,6 +278,7 @@ const sendTabData = () => {
     
     isActive: tab.isActive,
     lastActiveAt: tab.lastActiveAt,
+    keepActive: tab.keepActive
 
   }));
 
@@ -392,6 +394,8 @@ const keybindSetup = () => {
 
 
   ipcMain.on('showContextMenu', (event, vars) => {
+
+    
     
     const cmTemplate = [
       {
@@ -418,6 +422,14 @@ const keybindSetup = () => {
         
         click: () => {
           sleep(vars.tabIndex)
+        }
+      },
+      {
+
+        label: tabs[vars.tabIndex].keepActive ? "Dont Keep Tab Active": "Keep Tab Active",
+        
+        click: () => {
+          changeKeepActive(vars.tabIndex)
         }
       },
 
@@ -447,7 +459,9 @@ const keybindSetup = () => {
 
 
 
-
+const changeKeepActive = (tabID) => {
+  tabs[tabID].keepActive = !tabs[tabID].keepActive;
+}
 
 
 

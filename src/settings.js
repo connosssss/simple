@@ -77,7 +77,7 @@ const renderTabs = (tabs) => {
     //CLOSING TABS AFTER OPEN TOO LONG
     tabDuration = getTimeTabActive(tab.lastActiveAt);
     tabDur.textContent = tabDuration;
-    if(tabDuration > closeAfter && closeAfter != -1 && tab.isActive){
+    if(tabDuration > closeAfter && closeAfter != -1 && tab.isActive && !tab.keepActive){
       window.electronAPI.hibernateTab(index);
 
     }
