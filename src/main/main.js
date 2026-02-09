@@ -2,6 +2,8 @@ const { app, BaseWindow, WebContentsView, globalShortcut, ipcMain, Menu } = requ
 const path = require('node:path');
 const WindowResizing = require("./WindowResizing")
 const TabManager = require('../tabs/TabManager');
+const Navigation = require('../addressBar/Navigation');
+const SettingsManager = require('../settings/SettingsManager');
 // const TabManager = require("./")
 
 
@@ -44,7 +46,7 @@ const createWindow = () => {
   });
 
   mainWindow.contentView.addChildView(ui);
-    ui.webContents.loadFile(path.join(__dirname, 'index.html'));
+    ui.webContents.loadFile(path.join(__dirname, '../index.html'));
     
     tabManager = new TabManager(mainWindow, ui);
 
@@ -52,26 +54,26 @@ const createWindow = () => {
   
   // EVENT LISTENERS
     ui.webContents.on('did-finish-load', () => {
-      sendTabData();
+      tabManager.sendTabData();
     });
 
     mainWindow.on('resize', () => {
-        resize();
+        WindowResizing.resize();
     });
 
   mainWindow.on('enter-full-screen', () => {
-        resize();
+        WindowResizing.resize();
     });
   
   mainWindow.on('leave-full-screen', () => {
-        resize();
+        WindowResizing.resize();
   });
 
 
   // REST OF SETUP
   keybindSetup();
 
-
+  tabManager.createTab();
 };
 
 
@@ -80,28 +82,46 @@ const keybindSetup = () => {
   //TABS
   globalShortcut.register('CommandOrControl+T', () => {
    // console.log("attempt");
-    createTab();
+    tabManager.createTab();
     //console.log(tabs);
   })
 
-  globalShortcut.register('Shift+Control+1', () => { switchTab(0); })
-  globalShortcut.register('Shift+Control+2', () => { switchTab(1); })
-  globalShortcut.register('Shift+Control+3', () => { switchTab(2); })
+  globalShortcut.register('Shift+Control+1', () => { tabManager.switchTab(0); })
+  globalShortcut.register('Shift+Control+2', () => { tabManager.switchTab(1); })
+  globalShortcut.register('Shift+Control+3', () => { tabManager.switchTab(2); })
 
 
   globalShortcut.register("Control+W", () => {
-    closeTab(tabs.indexOf(lastOpenedTabs.pop()));
-
-  })
+    if (tabManager.closeLastOpened) {
+       tabManager.closeLastOpened();
+    } 
+    
+    else {
+       tabManager.closeTab(tabManager.currentIndex); 
+    }
+  });
   
   
   
   // OTHER STUFF
-  globalShortcut.register("Control+Shift+I", () => {
-    if (mainTab && mainTab.contentView.webContents) {
+ globalShortcut.register("Control+W", () => {
+   if (tabManager.closeLastOpened) {
+       tabManager.closeLastOpened();
+   } 
+   
+   else {
+       tabManager.closeTab(tabManager.currentIndex); 
+   }
+});
+
+globalShortcut.register("Control+Shift+I", () => {
+    const mainTab = tabManager.getMainTab();
+    if (mainTab && mainTab.contentView && mainTab.contentView.webContents) {
       mainTab.contentView.webContents.toggleDevTools();
     }
   })
+
+
   globalShortcut.register("Control+O", () => {})
 
 
@@ -119,6 +139,25 @@ const keybindSetup = () => {
   ipcMain.on("hibernateTab", (event, tabID) => tabManager.sleep(tabID));
 
 
+  // Navigation
+  ipcMain.on("search", (event, address) => {
+    Navigation.search(address, tabManager.getMainTab());
+  });
+  
+  ipcMain.on("tBAction", (event, action) => {
+    Navigation.toolbarAction(action, tabManager.getMainTab());
+  });
+
+  // Settings
+  ipcMain.on("showSettingsMenu", () => {
+    const settingsView = SettingsManager.openSettingsMenu(mainWindow);
+    tabManager.setSettingsUI(settingsView);
+    
+    settingsView.webContents.once('did-finish-load', () => {
+        tabManager.sendTabData();
+    });
+  });
+  
   ipcMain.on('showContextMenu', (event, vars) => {
 
     
@@ -152,11 +191,9 @@ const keybindSetup = () => {
       },
       {
 
-        label: tabs[vars.tabIndex].keepActive ? "Dont Keep Tab Active": "Keep Tab Active",
+        label: targetTab.keepActive ? "Dont Keep Tab Active": "Keep Tab Active",
         
-        click: () => {
-          changeKeepActive(vars.tabIndex)
-        }
+        click: () => { tabManager.toggleKeepActive(vars.tabIndex); }
       },
 
     ];
@@ -170,14 +207,6 @@ const keybindSetup = () => {
     });
   });
 
-
-  ipcMain.on("showSettingsMenu", () => {
-    openSettingsMenu();
-  });
-
-  ipcMain.on("hibernateTab", (event, tabIndex) => {
-    sleep(tabIndex);
-  });
 
 
 }

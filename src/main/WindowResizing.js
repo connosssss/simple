@@ -25,7 +25,7 @@ module.exports = {
     } 
     
     else {
-      ui.setBounds({ x: 0, y: 0, width: bounds.width, height: 100 }); // 100px for top bar
+      ui.setBounds({ x: 0, y: 0, width: bounds.width, height: 100 }); // 100px for top bar (for now)
       
       if (mainTab) {
         mainTab.contentView.setBounds({

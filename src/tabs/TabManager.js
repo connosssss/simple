@@ -1,5 +1,5 @@
 const { WebContentsView, app } = require('electron');
-const WindowUtils = require('../main/WindowUtils');
+const WindowResizing = require('../main/WindowResizing');
 
 class TabManager {
     constructor(mainWindow, ui) {
@@ -41,7 +41,7 @@ class TabManager {
         this.switchTab(this.tabs.length - 1);
         this.lastOpenedTabs.push(this.mainTab);
         
-        WindowUtils.resize();
+        WindowResizing.resize();
     }
 
     switchTab(tabID) {
@@ -61,7 +61,7 @@ class TabManager {
         this.currentIndex = tabID;
         this.tabs[tabID].lastActiveAt = Date.now();
 
-        WindowUtils.resize();
+        WindowResizing.resize();
         this.sendTabData();
     }
 
@@ -116,7 +116,7 @@ class TabManager {
         }
         tab.contentView = null;
         this.sendTabData();
-        WindowUtils.resize();
+        WindowResizing.resize();
     }
 
     wake(index) {

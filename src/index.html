@@ -39,8 +39,27 @@
     </div>
 
 
-    <script src ="./renderer.js">
+    <script type="module">
+        import { renderTabs } from './tabs/TabUI.js';
+        import { setupSearchListeners, updateAddressBar } from './addressBar/SearchUI.js';
 
+        
+        document.getElementById("new-tab").onclick = () => window.electronAPI.createTab();
+        document.getElementById("settings").addEventListener("click", () => window.electronAPI.showSettingsMenu());
+
+        setupSearchListeners();
+
+        window.electronAPI.onUpdateTabs((tabs) => {
+            renderTabs(tabs);
+            
+            const mainTab = tabs.find(t => t.isMainTab);
+            if (mainTab) {
+                updateAddressBar(mainTab.address);
+            }
+        });
     </script>
   </body>
 </html>
+
+
+
