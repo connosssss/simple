@@ -1,6 +1,7 @@
 const { app, BaseWindow, WebContentsView, globalShortcut, ipcMain, Menu } = require('electron');
 const path = require('node:path');
 const WindowResizing = require("./WindowResizing")
+const TabManager = require('../tabs/TabManager');
 // const TabManager = require("./")
 
 
@@ -45,6 +46,9 @@ const createWindow = () => {
   mainWindow.contentView.addChildView(ui);
     ui.webContents.loadFile(path.join(__dirname, 'index.html'));
     
+    tabManager = new TabManager(mainWindow, ui);
+
+    WindowResizing.init(mainWindow, ui, tabManager);
   
   // EVENT LISTENERS
     ui.webContents.on('did-finish-load', () => {
@@ -108,13 +112,11 @@ const keybindSetup = () => {
 
   /// IPC SETUP + OTHER 
 
-  ipcMain.on("createTab", createTab)
-  ipcMain.on("switchTab", (event, tabID) => switchTab(tabID));
-  ipcMain.on("reorderTabs", (event, startingIndex, endingIndex) => reorderTabs(startingIndex, endingIndex));
-  ipcMain.on("closeTab", (event, tabID) => closeTab(tabID));
-
-  ipcMain.on("search", (event, address) => search(address));
-  ipcMain.on("tBAction", (event, action) => toolbarAction(action));
+  ipcMain.on("createTab", () => tabManager.createTab());
+  ipcMain.on("switchTab", (event, tabID) => tabManager.switchTab(tabID));
+  ipcMain.on("reorderTabs", (event, start, end) => tabManager.reorderTabs(start, end));
+  ipcMain.on("closeTab", (event, tabID) => tabManager.closeTab(tabID));
+  ipcMain.on("hibernateTab", (event, tabID) => tabManager.sleep(tabID));
 
 
   ipcMain.on('showContextMenu', (event, vars) => {

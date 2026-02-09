@@ -1,0 +1,37 @@
+let mainWindow, ui, tabManager = null;
+
+module.exports = {
+  init: (mw, u, tm) => {
+    mainWindow = mw;
+    ui = u;
+    tabManager = tm;
+  },
+
+  resize: () => {
+    if (!mainWindow || !ui) return;
+    
+    let bounds = mainWindow.contentView.getBounds();
+    const isFullscreen = mainWindow.isFullScreen();
+    const mainTab = tabManager.getMainTab();
+
+    if (isFullscreen) {
+      ui.setBounds({ x: 0, y: 0, width: bounds.width, height: 0 });
+      
+      if (mainTab) {
+        mainTab.contentView.setBounds({
+          x: 0, y: 0, width: bounds.width, height: bounds.height
+        });
+      }
+    } 
+    
+    else {
+      ui.setBounds({ x: 0, y: 0, width: bounds.width, height: 100 }); // 100px for top bar
+      
+      if (mainTab) {
+        mainTab.contentView.setBounds({
+          x: 0, y: 100, width: bounds.width, height: bounds.height - 100
+        });
+      }
+    }
+  }
+};
