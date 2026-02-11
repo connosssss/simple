@@ -161,14 +161,14 @@ globalShortcut.register("Control+Shift+I", () => {
   
   ipcMain.on('showContextMenu', (event, vars) => {
 
-    
+    const targetTab = tabManager.tabs[vars.tabIndex];
     
     const cmTemplate = [
       {
         label: 'Close Tab',
         click: () => {
          
-          closeTab(vars.tabIndex);
+          tabManager.closeTab(vars.tabIndex);
           
         }
       },
@@ -176,8 +176,8 @@ globalShortcut.register("Control+Shift+I", () => {
       {
         label: 'Reload Tab',
         click: () => {
-          if (vars.tabIndex !== undefined && tabs[vars.tabIndex]) {
-            tabs[vars.tabIndex].contentView.webContents.reload();
+          if (vars.tabIndex !== undefined && tabManager.tabs[vars.tabIndex]) {
+            tabManager.tabs[vars.tabIndex].contentView.webContents.reload();
           }
         }
       },
@@ -187,7 +187,7 @@ globalShortcut.register("Control+Shift+I", () => {
         label: 'Put Tab to Sleep',
         
         click: () => {
-          sleep(vars.tabIndex)
+          tabManager.sleep(vars.tabIndex)
         }
       },
       {

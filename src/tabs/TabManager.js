@@ -96,6 +96,9 @@ class TabManager {
     closeTab(tabID) {
         if (tabID < this.tabs.length && this.tabs.length > 1) {
             let tabToClose = this.tabs[tabID];
+
+            this.lastOpenedTabs = this.lastOpenedTabs.filter(t => t !== tabToClose);
+            
             this.tabs.splice(tabID, 1);
 
             if (tabToClose.contentView) {
