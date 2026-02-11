@@ -1,6 +1,7 @@
 const { WebContentsView, app } = require('electron');
 const WindowResizing = require('../main/WindowResizing');
-
+const fs = require('fs');
+const path = require('path');
 
 class TabManager {
 
@@ -15,10 +16,23 @@ class TabManager {
         this.lastOpenedTabs = [];
         this.settingsUI = null; 
         this.defaultSite = "https://google.com";
+        this.configPath = path.join(app.getPath('userData'), 'config.json');
+        this.loadConfig();
+
     }
 
     setSettingsUI(view) {
         this.settingsUI = view;
+
+        if (this.settingsUI && !this.settingsUI.webContents.isDestroyed()) {
+
+            this.settingsUI.webContents.once('did-finish-load', () => {
+                
+                this.settingsUI.webContents.send("initSettings", { defaultSite: this.defaultSite });
+                this.sendTabData();
+            });
+        }
+
     }
 
     createTab() {
@@ -186,6 +200,47 @@ class TabManager {
     }
     updateDefaultSite(site) {
         this.defaultSite = site;
+
+        this.saveConfig();
+        if (this.settingsUI && !this.settingsUI.webContents.isDestroyed()) {
+
+            this.settingsUI.webContents.send("initSettings", { defaultSite: this.defaultSite });
+
+        }}
+
+
+
+
+    loadConfig() {
+        try {
+            if (fs.existsSync(this.configPath)) {
+
+                const data = fs.readFileSync(this.configPath);
+                const config = JSON.parse(data);
+
+                if (config.defaultSite) {
+                    this.defaultSite = config.defaultSite;
+                }
+            }
+        } 
+        
+        catch (error) {
+            console.error("Error loading config:", error);
+        }
+    }
+
+    saveConfig() {
+        try {
+            const config = {
+                defaultSite: this.defaultSite
+            };
+
+            fs.writeFileSync(this.configPath, JSON.stringify(config));
+        } 
+        
+        catch (error) {
+            console.error("Error saving: ", error);
+        }
     }
 }
 

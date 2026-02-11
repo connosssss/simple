@@ -123,3 +123,9 @@ siteChoice.addEventListener("keydown", (event) => {
         }
     });
 
+window.electronAPI.onInitSettings((settings) => {
+  if (settings.defaultSite) {
+    defaultSite = settings.defaultSite;
+    document.getElementById("siteChoiceBar").value = defaultSite;
+  }
+});
