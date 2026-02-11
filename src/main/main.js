@@ -137,6 +137,7 @@ globalShortcut.register("Control+Shift+I", () => {
   ipcMain.on("reorderTabs", (event, start, end) => tabManager.reorderTabs(start, end));
   ipcMain.on("closeTab", (event, tabID) => tabManager.closeTab(tabID));
   ipcMain.on("hibernateTab", (event, tabID) => tabManager.sleep(tabID));
+  ipcMain.on("updateDefaultSite", (event, site) => tabManager.updateDefaultSite(site));
 
 
   // Navigation

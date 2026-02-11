@@ -4,6 +4,7 @@ const tabsList = document.getElementById("tabs-list");
 // Need to use a prev state bacuse 
 let prevTabState = [];
 let closeAfter = parseInt(localStorage.getItem("closeAfter")) || 10;
+let defaultSite = "https://google.com";
 
 window.electronAPI.onUpdateTabs((tabs) => {
   renderTabs(tabs);
@@ -110,4 +111,15 @@ setInterval(() => {
   renderTabs(prevTabState);
 }, 1000);
 
+
+const siteChoice = document.getElementById("siteChoiceBar");
+
+
+siteChoice.addEventListener("keydown", (event) => {
+        if (event.key == "Enter") {
+            event.preventDefault();
+            defaultSite = siteChoice.value;
+            window.electronAPI.updateDefaultSite(defaultSite);
+        }
+    });
 

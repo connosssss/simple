@@ -1,7 +1,11 @@
 const { WebContentsView, app } = require('electron');
 const WindowResizing = require('../main/WindowResizing');
 
+
 class TabManager {
+
+
+
     constructor(mainWindow, ui) {
         this.mainWindow = mainWindow;
         this.ui = ui; 
@@ -10,6 +14,7 @@ class TabManager {
         this.currentIndex = -1;
         this.lastOpenedTabs = [];
         this.settingsUI = null; 
+        this.defaultSite = "https://google.com";
     }
 
     setSettingsUI(view) {
@@ -29,7 +34,7 @@ class TabManager {
         };
 
         this.tabs.push(newTab);
-        newTab.contentView.webContents.loadURL('https://google.com');
+        newTab.contentView.webContents.loadURL(this.defaultSite); 
 
         newTab.contentView.webContents.on('page-title-updated', () => {
             newTab.title = newTab.contentView.webContents.getTitle();
@@ -40,7 +45,7 @@ class TabManager {
         this.mainTab = newTab;
         this.switchTab(this.tabs.length - 1);
         this.lastOpenedTabs.push(this.mainTab);
-        
+
         WindowResizing.resize();
     }
 
@@ -177,7 +182,10 @@ class TabManager {
     reloadTab(index) {
          if (this.tabs[index] && this.tabs[index].contentView) {
             this.tabs[index].contentView.webContents.reload();
-          }
+        } 
+    }
+    updateDefaultSite(site) {
+        this.defaultSite = site;
     }
 }
 
