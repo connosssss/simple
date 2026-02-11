@@ -35,7 +35,7 @@ class TabManager {
 
     }
 
-    createTab() {
+    createTab(newAddress = "") {
         let newTab = {
             contentView: new WebContentsView(),
             address: "",
@@ -48,13 +48,22 @@ class TabManager {
         };
 
         this.tabs.push(newTab);
-        newTab.contentView.webContents.loadURL(this.defaultSite); 
+        if (!newAddress){
+            newTab.contentView.webContents.loadURL(this.defaultSite); 
+        }
+        else{
+            newTab.contentView.webContents.loadURL(newAddress); 
+        }
 
         newTab.contentView.webContents.on('page-title-updated', () => {
             newTab.title = newTab.contentView.webContents.getTitle();
             newTab.address = newTab.contentView.webContents.getURL();
             this.sendTabData();
         });
+
+        newTab.contentView.webContents.setWindowOpenHandler(({url}) => {
+            this.createTab(url);
+        })
 
         this.mainTab = newTab;
         this.switchTab(this.tabs.length - 1);
