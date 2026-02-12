@@ -72,13 +72,18 @@ class TabManager {
 
         // Needs to be reworked when not switching tabs
         
-        newTab.title = newTab.contentView.webContents.getTitle();
+        
         
         if (switchTo){
             this.switchTab(this.tabs.length - 1);
+            this.mainTab = this.newTab;
         }
 
-        this.lastOpenedTabs.push(this.mainTab);
+        this.lastOpenedTabs.push(this.newTab);
+
+        
+        newTab.title = newTab.contentView.webContents.getTitle();
+        
 
         WindowResizing.resize();
         this.sendTabData();
