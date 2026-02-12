@@ -35,7 +35,7 @@ class TabManager {
 
     }
 
-    createTab(newAddress = "") {
+    createTab(newAddress = "", switchTo = true) {
         let newTab = {
             contentView: new WebContentsView(),
             address: "",
@@ -61,15 +61,27 @@ class TabManager {
             this.sendTabData();
         });
 
-        newTab.contentView.webContents.setWindowOpenHandler(({url}) => {
-            this.createTab(url);
+        newTab.contentView.webContents.setWindowOpenHandler((desc) => {
+            if (desc.features && (desc.features.includes("width") || desc.features.includes("height"))){
+                return {action: "allow"};
+            }
+
+            this.createTab(desc.url, false);
+            return {action: "deny"}
         })
 
-        this.mainTab = newTab;
-        this.switchTab(this.tabs.length - 1);
+        // Needs to be reworked when not switching tabs
+        
+        newTab.title = newTab.contentView.webContents.getTitle();
+        
+        if (switchTo){
+            this.switchTab(this.tabs.length - 1);
+        }
+
         this.lastOpenedTabs.push(this.mainTab);
 
         WindowResizing.resize();
+        this.sendTabData();
     }
 
     switchTab(tabID) {
@@ -102,8 +114,30 @@ class TabManager {
             this.tabs.splice(tabID, 1);
 
             if (tabToClose.contentView) {
-                this.mainWindow.contentView.removeChildView(tabToClose.contentView);
-                tabToClose.contentView.webContents.close();
+
+
+                try{
+                    this.mainWindow.contentView.removeChildView(tabToClose.contentView);
+
+                }
+
+                catch(e) {
+                    
+                }
+
+
+            try {
+                if (tabToClose.contentView.webContents && !tabToClose.contentView.webContents.isDestroyed()) {
+                    tabToClose.contentView.webContents.destroy();
+                }
+            } 
+            catch (e) {
+                console.log("Error in closing or already closed \n Message: " + e)
+            }
+
+                
+                tabToClose = null;
+                
             }
 
             if (tabID === this.currentIndex) {
