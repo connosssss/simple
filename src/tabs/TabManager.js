@@ -76,7 +76,7 @@ class TabManager {
         
         if (switchTo){
             this.switchTab(this.tabs.length - 1);
-            this.mainTab = this.newTab;
+            this.mainTab = newTab;
         }
 
         this.lastOpenedTabs.push(this.newTab);
@@ -85,7 +85,7 @@ class TabManager {
         newTab.title = newTab.contentView.webContents.getTitle();
         
 
-        WindowResizing.resize();
+        
         this.sendTabData();
     }
 
@@ -148,7 +148,8 @@ class TabManager {
             if (tabID === this.currentIndex) {
                 if (this.tabs.length > 0) {
                     this.switchTab(0);
-                } else {
+                } 
+                else {
                     this.mainTab = null;
                     this.currentIndex = -1;
                 }

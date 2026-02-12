@@ -14,6 +14,8 @@ module.exports = {
     const isFullscreen = mainWindow.isFullScreen();
     const mainTab = tabManager.getMainTab();
 
+  
+
     if (isFullscreen) {
       ui.setBounds({ x: 0, y: 0, width: bounds.width, height: 0 });
       
