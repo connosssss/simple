@@ -70,7 +70,6 @@ class TabManager {
             return {action: "deny"}
         })
 
-        // Needs to be reworked when not switching tabs
         
         
         
@@ -79,7 +78,7 @@ class TabManager {
             this.mainTab = newTab;
         }
 
-        this.lastOpenedTabs.push(this.newTab);
+        this.lastOpenedTabs.push(newTab);
 
         
         newTab.title = newTab.contentView.webContents.getTitle();

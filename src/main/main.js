@@ -46,27 +46,27 @@ const createWindow = () => {
   });
 
   mainWindow.contentView.addChildView(ui);
-    ui.webContents.loadFile(path.join(__dirname, '../index.html'));
-    
-    tabManager = new TabManager(mainWindow, ui);
+  ui.webContents.loadFile(path.join(__dirname, '../index.html'));
 
-    WindowResizing.init(mainWindow, ui, tabManager);
-  
+  tabManager = new TabManager(mainWindow, ui);
+
+  WindowResizing.init(mainWindow, ui, tabManager);
+
   // EVENT LISTENERS
-    ui.webContents.on('did-finish-load', () => {
-      tabManager.sendTabData();
-    });
+  ui.webContents.on('did-finish-load', () => {
+    tabManager.sendTabData();
+  });
 
-    mainWindow.on('resize', () => {
-        WindowResizing.resize();
-    });
+  mainWindow.on('resize', () => {
+    WindowResizing.resize();
+  });
 
   mainWindow.on('enter-full-screen', () => {
-        WindowResizing.resize();
-    });
-  
+    WindowResizing.resize();
+  });
+
   mainWindow.on('leave-full-screen', () => {
-        WindowResizing.resize();
+    WindowResizing.resize();
   });
 
 
@@ -81,7 +81,7 @@ const createWindow = () => {
 const keybindSetup = () => {
   //TABS
   globalShortcut.register('CommandOrControl+T', () => {
-   // console.log("attempt");
+    // console.log("attempt");
     tabManager.createTab();
     //console.log(tabs);
   })
@@ -93,28 +93,28 @@ const keybindSetup = () => {
 
   globalShortcut.register("Control+W", () => {
     if (tabManager.closeLastOpened) {
-       tabManager.closeLastOpened();
-    } 
-    
+      tabManager.closeLastOpened();
+    }
+
     else {
-       tabManager.closeTab(tabManager.currentIndex); 
+      tabManager.closeTab(tabManager.currentIndex);
     }
   });
-  
-  
-  
-  // OTHER STUFF
- globalShortcut.register("Control+W", () => {
-   if (tabManager.closeLastOpened) {
-       tabManager.closeLastOpened();
-   } 
-   
-   else {
-       tabManager.closeTab(tabManager.currentIndex); 
-   }
-});
 
-globalShortcut.register("Control+Shift+I", () => {
+
+
+  // OTHER STUFF
+  globalShortcut.register("Control+W", () => {
+    if (tabManager.closeLastOpened) {
+      tabManager.closeLastOpened();
+    }
+
+    else {
+      tabManager.closeTab(tabManager.currentIndex);
+    }
+  });
+
+  globalShortcut.register("Control+Shift+I", () => {
     const mainTab = tabManager.getMainTab();
     if (mainTab && mainTab.contentView && mainTab.contentView.webContents) {
       mainTab.contentView.webContents.toggleDevTools();
@@ -122,11 +122,43 @@ globalShortcut.register("Control+Shift+I", () => {
   })
 
 
-  globalShortcut.register("Control+O", () => {})
+  globalShortcut.register("Control+O", () => { })
 
 
 
 
+  globalShortcut.register('CommandOrControl+=', () => {
+    const mainTab = tabManager.getMainTab();
+
+    if (mainTab && mainTab.contentView && mainTab.contentView.webContents) {
+      mainTab.contentView.webContents.setZoomLevel(
+        mainTab.contentView.webContents.getZoomLevel() + 0.5
+      );
+
+    }
+  });
+
+
+  globalShortcut.register('CommandOrControl+-', () => {
+    const mainTab = tabManager.getMainTab();
+
+    if (mainTab && mainTab.contentView && mainTab.contentView.webContents) {
+      mainTab.contentView.webContents.setZoomLevel(
+        mainTab.contentView.webContents.getZoomLevel() - 0.5
+      );
+    }
+
+  });
+
+
+  globalShortcut.register('CommandOrControl+0', () => {
+    const mainTab = tabManager.getMainTab();
+
+    if (mainTab && mainTab.contentView && mainTab.contentView.webContents) {
+      mainTab.contentView.webContents.setZoomLevel(0);
+    }
+
+  });
 
 
 
@@ -144,7 +176,7 @@ globalShortcut.register("Control+Shift+I", () => {
   ipcMain.on("search", (event, address) => {
     Navigation.search(address, tabManager.getMainTab());
   });
-  
+
   ipcMain.on("tBAction", (event, action) => {
     Navigation.toolbarAction(action, tabManager.getMainTab());
   });
@@ -153,26 +185,26 @@ globalShortcut.register("Control+Shift+I", () => {
   ipcMain.on("showSettingsMenu", () => {
     const settingsView = SettingsManager.openSettingsMenu(mainWindow);
     tabManager.setSettingsUI(settingsView);
-    
+
     settingsView.webContents.once('did-finish-load', () => {
-        tabManager.sendTabData();
+      tabManager.sendTabData();
     });
   });
-  
+
   ipcMain.on('showContextMenu', (event, vars) => {
 
     const targetTab = tabManager.tabs[vars.tabIndex];
-    
+
     const cmTemplate = [
       {
         label: 'Close Tab',
         click: () => {
-         
+
           tabManager.closeTab(vars.tabIndex);
-          
+
         }
       },
-      
+
       {
         label: 'Reload Tab',
         click: () => {
@@ -185,15 +217,15 @@ globalShortcut.register("Control+Shift+I", () => {
       {
 
         label: 'Put Tab to Sleep',
-        
+
         click: () => {
           tabManager.sleep(vars.tabIndex)
         }
       },
       {
 
-        label: targetTab.keepActive ? "Dont Keep Tab Active": "Keep Tab Active",
-        
+        label: targetTab.keepActive ? "Dont Keep Tab Active" : "Keep Tab Active",
+
         click: () => { tabManager.toggleKeepActive(vars.tabIndex); }
       },
 
