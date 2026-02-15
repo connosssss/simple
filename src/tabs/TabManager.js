@@ -168,7 +168,10 @@ class TabManager {
 
     sleep(index) {
         const tab = this.tabs[index];
-        if (!tab.isActive) return;
+        if (!tab.isActive && tab != this.mainTab){
+            this.mainTab.lastActiveAt = new Date();
+            return;
+        }
 
         tab.isActive = false;
         

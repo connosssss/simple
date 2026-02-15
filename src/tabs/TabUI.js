@@ -9,7 +9,7 @@ export const renderTabs = (tabs) => {
     tabs.forEach((tab, index) => {
         const tabE = document.createElement("div");
         tabE.className = `flex items-center px-4 cursor-pointer text-white ${tab.isMainTab ? `bg-slate-700 hover:bg-slate-600` : tab.isActive ? `bg-slate-800 hover:bg-slate-700` : `bg-slate-800/50 hover:bg-slate-700/50 text-slate-600`} 
-         flex-1 min-w-0 mb-0 rounded-t-sm h-full transition-all duration-100`;
+         flex-1 min-w-0 max-w-[10rem] mb-0 rounded-t-sm h-full transition-all duration-100`;
         tabE.title = tab.title || "Tab"
 
         const titleSpan = document.createElement("span");
