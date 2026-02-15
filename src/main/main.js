@@ -160,6 +160,11 @@ const keybindSetup = () => {
 
   });
 
+  globalShortcut.register("CommandOrControl+F", () => {
+    ui.webContents.focus(); 
+    ui.webContents.send("toggleFindBar");
+  })
+
 
 
   /// IPC SETUP + OTHER 
@@ -179,6 +184,32 @@ const keybindSetup = () => {
 
   ipcMain.on("tBAction", (event, action) => {
     Navigation.toolbarAction(action, tabManager.getMainTab());
+  });
+
+
+      // in page
+      
+  ipcMain.on("searchInPage", (event, phrase) => {
+
+    const mainTab = tabManager.getMainTab();
+    if (mainTab && mainTab.contentView && mainTab.contentView.webContents) {
+
+      if (phrase) {
+        mainTab.contentView.webContents.findInPage(phrase);
+      } 
+    
+      else {
+        mainTab.contentView.webContents.stopFindInPage('clearSelection');
+      }
+    }
+  });
+
+  ipcMain.on("stopFindInPage", () => {
+  
+    const mainTab = tabManager.getMainTab();
+    if (mainTab && mainTab.contentView && mainTab.contentView.webContents) {
+      mainTab.contentView.webContents.stopFindInPage('clearSelection');
+    }
   });
 
   // Settings

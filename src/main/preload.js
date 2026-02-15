@@ -14,10 +14,16 @@ contextBridge.exposeInMainWorld("electronAPI", {
     onUpdateTabs: (callback) => ipcRenderer.on('updateTabs', (event, tabs) => callback(tabs)),
     closeTab: (index) => ipcRenderer.send("closeTab", index),
     reorderTabs: (fromIndex, toIndex) => ipcRenderer.send("reorderTabs", fromIndex, toIndex),
-    
+
     search: (address) => ipcRenderer.send("search", address),
     toolbarAction: (action) => ipcRenderer.send("tBAction", action),
-    
+
+
+
+    searchInPage: (phrase) => ipcRenderer.send("searchInPage", phrase),
+    onToggleFindBar: (callback) => ipcRenderer.on('toggleFindBar', callback),
+    stopFindInPage: () => ipcRenderer.send("stopFindInPage"),
+
     showContextMenu: (vars) => ipcRenderer.send("showContextMenu", vars),
     showSettingsMenu: (vars) => ipcRenderer.send("showSettingsMenu"),
     hibernateTab: (index) => ipcRenderer.send("hibernateTab", index),
