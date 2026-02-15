@@ -72,102 +72,15 @@ const createWindow = () => {
 
   // REST OF SETUP
   keybindSetup();
-
+  
+  ipcSetup();
   tabManager.createTab();
 };
 
 
 
-const keybindSetup = () => {
-  //TABS
-  globalShortcut.register('CommandOrControl+T', () => {
-    // console.log("attempt");
-    tabManager.createTab();
-    //console.log(tabs);
-  })
+const ipcSetup = () => {
 
-  globalShortcut.register('Shift+Control+1', () => { tabManager.switchTab(0); })
-  globalShortcut.register('Shift+Control+2', () => { tabManager.switchTab(1); })
-  globalShortcut.register('Shift+Control+3', () => { tabManager.switchTab(2); })
-
-
-  globalShortcut.register("Control+W", () => {
-    if (tabManager.closeLastOpened) {
-      tabManager.closeLastOpened();
-    }
-
-    else {
-      tabManager.closeTab(tabManager.currentIndex);
-    }
-  });
-
-
-
-  // OTHER STUFF
-  globalShortcut.register("Control+W", () => {
-    if (tabManager.closeLastOpened) {
-      tabManager.closeLastOpened();
-    }
-
-    else {
-      tabManager.closeTab(tabManager.currentIndex);
-    }
-  });
-
-  globalShortcut.register("Control+Shift+I", () => {
-    const mainTab = tabManager.getMainTab();
-    if (mainTab && mainTab.contentView && mainTab.contentView.webContents) {
-      mainTab.contentView.webContents.toggleDevTools();
-    }
-  })
-
-
-  globalShortcut.register("Control+O", () => { })
-
-
-
-
-  globalShortcut.register('CommandOrControl+=', () => {
-    const mainTab = tabManager.getMainTab();
-
-    if (mainTab && mainTab.contentView && mainTab.contentView.webContents) {
-      mainTab.contentView.webContents.setZoomLevel(
-        mainTab.contentView.webContents.getZoomLevel() + 0.5
-      );
-
-    }
-  });
-
-
-  globalShortcut.register('CommandOrControl+-', () => {
-    const mainTab = tabManager.getMainTab();
-
-    if (mainTab && mainTab.contentView && mainTab.contentView.webContents) {
-      mainTab.contentView.webContents.setZoomLevel(
-        mainTab.contentView.webContents.getZoomLevel() - 0.5
-      );
-    }
-
-  });
-
-
-  globalShortcut.register('CommandOrControl+0', () => {
-    const mainTab = tabManager.getMainTab();
-
-    if (mainTab && mainTab.contentView && mainTab.contentView.webContents) {
-      mainTab.contentView.webContents.setZoomLevel(0);
-    }
-
-  });
-
-  globalShortcut.register("CommandOrControl+F", () => {
-    ui.webContents.focus(); 
-    ui.webContents.send("toggleFindBar");
-  })
-
-
-
-  /// IPC SETUP + OTHER 
 
   ipcMain.on("createTab", () => tabManager.createTab());
   ipcMain.on("switchTab", (event, tabID) => tabManager.switchTab(tabID));
@@ -270,6 +183,103 @@ const keybindSetup = () => {
       y: vars.y
     });
   });
+}
+
+const keybindSetup = () => {
+ 
+  mainWindow.on("focus", () => {
+     //TABS
+  globalShortcut.register('CommandOrControl+T', () => {
+    // console.log("attempt");
+    tabManager.createTab();
+    //console.log(tabs);
+  })
+
+  globalShortcut.register('Shift+Control+1', () => { tabManager.switchTab(0); })
+  globalShortcut.register('Shift+Control+2', () => { tabManager.switchTab(1); })
+  globalShortcut.register('Shift+Control+3', () => { tabManager.switchTab(2); })
+
+
+  globalShortcut.register("Control+W", () => {
+    if (tabManager.closeLastOpened) {
+      tabManager.closeLastOpened();
+    }
+
+    else {
+      tabManager.closeTab(tabManager.currentIndex);
+    }
+  });
+
+
+
+  // OTHER STUFF
+  globalShortcut.register("Control+W", () => {
+    if (tabManager.closeLastOpened) {
+      tabManager.closeLastOpened();
+    }
+
+    else {
+      tabManager.closeTab(tabManager.currentIndex);
+    }
+  });
+
+  globalShortcut.register("Control+Shift+I", () => {
+    const mainTab = tabManager.getMainTab();
+    if (mainTab && mainTab.contentView && mainTab.contentView.webContents) {
+      mainTab.contentView.webContents.toggleDevTools();
+    }
+  })
+
+
+  globalShortcut.register("Control+O", () => { })
+
+
+
+
+  globalShortcut.register('CommandOrControl+=', () => {
+    const mainTab = tabManager.getMainTab();
+
+    if (mainTab && mainTab.contentView && mainTab.contentView.webContents) {
+      mainTab.contentView.webContents.setZoomLevel(
+        mainTab.contentView.webContents.getZoomLevel() + 0.5
+      );
+
+    }
+  });
+
+
+  globalShortcut.register('CommandOrControl+-', () => {
+    const mainTab = tabManager.getMainTab();
+
+    if (mainTab && mainTab.contentView && mainTab.contentView.webContents) {
+      mainTab.contentView.webContents.setZoomLevel(
+        mainTab.contentView.webContents.getZoomLevel() - 0.5
+      );
+    }
+
+  });
+
+
+  globalShortcut.register('CommandOrControl+0', () => {
+    const mainTab = tabManager.getMainTab();
+
+    if (mainTab && mainTab.contentView && mainTab.contentView.webContents) {
+      mainTab.contentView.webContents.setZoomLevel(0);
+    }
+
+  });
+
+  globalShortcut.register("CommandOrControl+F", () => {
+    ui.webContents.focus(); 
+    ui.webContents.send("toggleFindBar");
+  })
+  })
+
+  mainWindow.on("blur", () => {
+    globalShortcut.unregisterAll();
+  })
+
+
 
 
 
@@ -289,6 +299,9 @@ app.whenReady().then(() => {
 });
 
 app.on('window-all-closed', () => {
+
+  globalShortcut.unregisterAll();
+  
   if (process.platform !== 'darwin') {
     app.quit();
   }
