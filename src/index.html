@@ -60,13 +60,25 @@
 
         setupSearchListeners();
 
+        let previousTabCount = 0; 
+
         window.electronAPI.onUpdateTabs((tabs) => {
             renderTabs(tabs);
             
             const mainTab = tabs.find(t => t.isMainTab);
             if (mainTab) {
                 updateAddressBar(mainTab.address);
+                
+                window.electronAPI.focusUI();
+
+               
+                if (tabs.length > previousTabCount && mainTab.index === tabs.length - 1) {
+                    const addressBar = document.getElementById('address-bar');
+                    addressBar.focus();
+                    addressBar.select();
+                }
             }
+            previousTabCount = tabs.length; 
         });
 
         window.electronAPI.onToggleFindBar(() => {

@@ -23,6 +23,8 @@ contextBridge.exposeInMainWorld("electronAPI", {
     searchInPage: (phrase) => ipcRenderer.send("searchInPage", phrase),
     onToggleFindBar: (callback) => ipcRenderer.on('toggleFindBar', callback),
     stopFindInPage: () => ipcRenderer.send("stopFindInPage"),
+    focusUI: () => ipcRenderer.send("focusUI"),
+    
 
     showContextMenu: (vars) => ipcRenderer.send("showContextMenu", vars),
     showSettingsMenu: (vars) => ipcRenderer.send("showSettingsMenu"),

@@ -125,6 +125,12 @@ const ipcSetup = () => {
     }
   });
 
+   ipcMain.on("focusUI", () => {
+    if (ui && ui.webContents) {
+        ui.webContents.focus();
+    }
+  });
+
   // Settings
   ipcMain.on("showSettingsMenu", () => {
     const settingsView = SettingsManager.openSettingsMenu(mainWindow);
