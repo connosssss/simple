@@ -34,6 +34,13 @@ export const renderTabs = (tabs) => {
             }
         };
 
+        tabE.ondragend = (e) => {
+            if (e.screenX < window.screenX || e.screenX > window.screenX + window.outerWidth ||
+                e.screenY < window.screenY || e.screenY > window.screenY + window.outerHeight) {
+                window.electronAPI.tabPopOff(index);
+            }
+        };
+
 
 
         tabE.addEventListener("contextmenu", (event) => {

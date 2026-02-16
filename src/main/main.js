@@ -4,14 +4,8 @@ const WindowResizing = require("./WindowResizing")
 const TabManager = require('../tabs/TabManager');
 const Navigation = require('../addressBar/Navigation');
 const SettingsManager = require('../settings/SettingsManager');
+const WindowManager = require('./WindowManager');
 // const TabManager = require("./")
-
-
-
-let mainWindow = null;
-let ui = null;
-let tabManager = null;
-
 
 
 // Handle creating/removing shortcuts on Windows when installing/uninstalling.
@@ -21,99 +15,69 @@ if (require('electron-squirrel-startup')) {
 
 
 
-const createWindow = () => {
-  // Create the browser window.
-  mainWindow = new BaseWindow({
-    width: 800,
-    height: 600,
-    autoHideMenuBar: true,
-    backgroundColor: '#020617',
-    titleBarStyle: 'hidden',
-    titleBarOverlay: {
-      color: '#020617',
-      symbolColor: '#ffffff',
-      height: 30
-    }
-
-  });
-
-
-
-  ui = new WebContentsView({
-    webPreferences: {
-      preload: path.join(__dirname, 'preload.js'),
-    }
-  });
-
-  mainWindow.contentView.addChildView(ui);
-  ui.webContents.loadFile(path.join(__dirname, '../index.html'));
-
-  tabManager = new TabManager(mainWindow, ui);
-
-  WindowResizing.init(mainWindow, ui, tabManager);
-
-  // EVENT LISTENERS
-  ui.webContents.on('did-finish-load', () => {
-    tabManager.sendTabData();
-  });
-
-  mainWindow.on('resize', () => {
-    WindowResizing.resize();
-  });
-
-  mainWindow.on('enter-full-screen', () => {
-    WindowResizing.resize();
-  });
-
-  mainWindow.on('leave-full-screen', () => {
-    WindowResizing.resize();
-  });
-
-  session.defaultSession.on('will-download', (event, item, webContents) => {
-    console.log("Trying to download");
-  
-    const downloadsPath = app.getPath('downloads');
-    const newPath = path.join(downloadsPath, item.getFilename());
-
-    item.setSavePath(filePath);
-  });
-
-
-  // REST OF SETUP
-  keybindSetup();
-  
-  ipcSetup();
-  tabManager.createTab();
-};
-
 
 
 const ipcSetup = () => {
+  const getTabManager = (event) => {
+    const data = WindowManager.getManagerBySend(event.sender);
+    return data ? data.tabManager : null;
+  }
 
+  const getManager = (event) => {
+    return WindowManager.getManagerBySend(event.sender);
+  };
 
-  ipcMain.on("createTab", () => tabManager.createTab());
-  ipcMain.on("switchTab", (event, tabID) => tabManager.switchTab(tabID));
-  ipcMain.on("reorderTabs", (event, start, end) => tabManager.reorderTabs(start, end));
-  ipcMain.on("closeTab", (event, tabID) => tabManager.closeTab(tabID));
-  ipcMain.on("hibernateTab", (event, tabID) => tabManager.sleep(tabID));
-  ipcMain.on("updateDefaultSite", (event, site) => tabManager.updateDefaultSite(site));
+   ipcMain.on("createTab", (event) => {
+      const tm = getTabManager(event);
+      if (tm) tm.createTab();
+  });
+
+  ipcMain.on("switchTab", (event, tabID) => {
+      const tm = getTabManager(event);
+      if (tm) tm.switchTab(tabID);
+  });
+  
+  ipcMain.on("reorderTabs", (event, start, end) => {
+      const tm = getTabManager(event);
+      if (tm) tm.reorderTabs(start, end);
+  });
+
+  ipcMain.on("closeTab", (event, tabID) => {
+      const tm = getTabManager(event);
+      if (tm) tm.closeTab(tabID);
+  });
+
+  ipcMain.on("hibernateTab", (event, tabID) => {
+      const tm = getTabManager(event);
+      if (tm) tm.sleep(tabID);
+  });
+
+  ipcMain.on("updateDefaultSite", (event, site) => {
+      const tm = getTabManager(event);
+      if (tm) tm.updateDefaultSite(site);
+  });
+  
 
 
   // Navigation
   ipcMain.on("search", (event, address) => {
-    Navigation.search(address, tabManager.getMainTab());
+    const tm = getTabManager(event);
+    if (tm) Navigation.search(address, tm.getMainTab());
   });
 
   ipcMain.on("tBAction", (event, action) => {
-    Navigation.toolbarAction(action, tabManager.getMainTab());
+    const tm = getTabManager(event);
+    if (tm) Navigation.toolbarAction(action, tm.getMainTab());
   });
 
 
       // in page
       
   ipcMain.on("searchInPage", (event, phrase, options) => {
+    const tm = getTabManager(event);
+    if (!tm) return;
+    const mainTab = tm.getMainTab();
 
-    const mainTab = tabManager.getMainTab();
     if (mainTab && mainTab.contentView && mainTab.contentView.webContents) {
 
       if (phrase) {
@@ -121,37 +85,47 @@ const ipcSetup = () => {
         mainTab.contentView.webContents.findInPage(phrase, options || {});
     }
     
-      else {
+      else {1
         mainTab.contentView.webContents.stopFindInPage('clearSelection');
       }
     }
   });
 
-  ipcMain.on("stopFindInPage", () => {
-  
-    const mainTab = tabManager.getMainTab();
+  ipcMain.on("stopFindInPage", (event) => {
+    const tm = getTabManager(event);
+    if (!tm) return;
+    const mainTab = tm.getMainTab();
+
+
     if (mainTab && mainTab.contentView && mainTab.contentView.webContents) {
       mainTab.contentView.webContents.stopFindInPage('clearSelection');
     }
   });
 
-   ipcMain.on("focusUI", () => {
-    if (ui && ui.webContents) {
-        ui.webContents.focus();
+   ipcMain.on("focusUI", (event) => {
+    const data = getManager(event);
+    if (data && data.ui && data.ui.webContents) {
+        data.ui.webContents.focus();
     }
   });
 
   // Settings
-  ipcMain.on("showSettingsMenu", () => {
+  ipcMain.on("showSettingsMenu", (event) => {
+    const data = getManager(event);
+    if (!data) return;
     const settingsView = SettingsManager.openSettingsMenu(mainWindow);
-    tabManager.setSettingsUI(settingsView);
+    data.tabManager.setSettingsUI(settingsView);
+
 
     settingsView.webContents.once('did-finish-load', () => {
-      tabManager.sendTabData();
+      data.tabManager.sendTabData();
     });
   });
 
   ipcMain.on('showContextMenu', (event, vars) => {
+    const data = getManager(event);
+    if (!data) return;
+    const { tabManager, window } = data;
 
     const targetTab = tabManager.tabs[vars.tabIndex];
 
@@ -199,117 +173,35 @@ const ipcSetup = () => {
       y: vars.y
     });
   });
-}
 
-const keybindSetup = () => {
- 
-  mainWindow.on("focus", () => {
-     //TABS
-  globalShortcut.register('CommandOrControl+T', () => {
-    // console.log("attempt");
-    tabManager.createTab();
-    //console.log(tabs);
-  })
+  ipcMain.on('tabPopOff', (event, { tabIndex }) => {
+      const data = getManager(event);
+      if (!data) return;
 
-  globalShortcut.register('Shift+Control+1', () => { tabManager.switchTab(0); })
-  globalShortcut.register('Shift+Control+2', () => { tabManager.switchTab(1); })
-  globalShortcut.register('Shift+Control+3', () => { tabManager.switchTab(2); })
+      const { tabManager, window } = data;
+      const tab = tabManager.popTab(tabIndex);
 
-
-  globalShortcut.register("Control+W", () => {
-    if (tabManager.closeLastOpened) {
-      tabManager.closeLastOpened();
-    }
-
-    else {
-      tabManager.closeTab(tabManager.currentIndex);
-    }
+      if (tab) {
+          WindowManager.createWindow(tab);
+          
+          if (tabManager.tabs.length === 0) {
+              window.close();
+          }
+      }
   });
-
-
-
-  // OTHER STUFF
-  globalShortcut.register("Control+W", () => {
-    if (tabManager.closeLastOpened) {
-      tabManager.closeLastOpened();
-    }
-
-    else {
-      tabManager.closeTab(tabManager.currentIndex);
-    }
-  });
-
-  globalShortcut.register("Control+Shift+I", () => {
-    const mainTab = tabManager.getMainTab();
-    if (mainTab && mainTab.contentView && mainTab.contentView.webContents) {
-      mainTab.contentView.webContents.toggleDevTools();
-    }
-  })
-
-
-  globalShortcut.register("Control+O", () => { })
-
-
-
-
-  globalShortcut.register('CommandOrControl+=', () => {
-    const mainTab = tabManager.getMainTab();
-
-    if (mainTab && mainTab.contentView && mainTab.contentView.webContents) {
-      mainTab.contentView.webContents.setZoomLevel(
-        mainTab.contentView.webContents.getZoomLevel() + 0.5
-      );
-
-    }
-  });
-
-
-  globalShortcut.register('CommandOrControl+-', () => {
-    const mainTab = tabManager.getMainTab();
-
-    if (mainTab && mainTab.contentView && mainTab.contentView.webContents) {
-      mainTab.contentView.webContents.setZoomLevel(
-        mainTab.contentView.webContents.getZoomLevel() - 0.5
-      );
-    }
-
-  });
-
-
-  globalShortcut.register('CommandOrControl+0', () => {
-    const mainTab = tabManager.getMainTab();
-
-    if (mainTab && mainTab.contentView && mainTab.contentView.webContents) {
-      mainTab.contentView.webContents.setZoomLevel(0);
-    }
-
-  });
-
-  globalShortcut.register("CommandOrControl+F", () => {
-    ui.webContents.focus(); 
-    ui.webContents.send("toggleFindBar");
-  })
-  })
-
-  mainWindow.on("blur", () => {
-    globalShortcut.unregisterAll();
-  })
-
-
-
-
-
 }
 
 
 app.whenReady().then(() => {
 
-  createWindow();
+  ipcSetup();
+  WindowManager.createWindow();
+
   // On OS X it's common to re-create a window in the app when the
   // dock icon is clicked and there are no other windows open.
   app.on('activate', () => {
     if (BaseWindow.getAllWindows().length === 0) {
-      createWindow();
+      WindowManager.createWindow();
     }
   });
 });

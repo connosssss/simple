@@ -1,18 +1,13 @@
 let mainWindow, ui, tabManager = null;
 
 module.exports = {
-  init: (mw, u, tm) => {
-    mainWindow = mw;
-    ui = u;
-    tabManager = tm;
-  },
 
-  resize: () => {
+  resize: (mainWindow, ui, tabManager) => {
     if (!mainWindow || !ui) return;
     
     let bounds = mainWindow.contentView.getBounds();
     const isFullscreen = mainWindow.isFullScreen();
-    const mainTab = tabManager.getMainTab();
+    const mainTab = tabManager ?  tabManager.getMainTab() : null;
 
   
 

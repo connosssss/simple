@@ -30,5 +30,10 @@ contextBridge.exposeInMainWorld("electronAPI", {
     showSettingsMenu: (vars) => ipcRenderer.send("showSettingsMenu"),
     hibernateTab: (index) => ipcRenderer.send("hibernateTab", index),
     updateDefaultSite: (site) => ipcRenderer.send("updateDefaultSite", site),
-    onInitSettings: (callback) => ipcRenderer.on('initSettings', (event, settings) => callback(settings))
+    onInitSettings: (callback) => ipcRenderer.on('initSettings', (event, settings) => callback(settings)),
+
+
+    tabPopOff: (tabIndex) => ipcRenderer.send("tabPopOff", { tabIndex }),
+    
+
 })

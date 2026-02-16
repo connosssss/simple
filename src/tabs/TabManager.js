@@ -105,7 +105,8 @@ class TabManager {
         this.currentIndex = tabID;
         this.tabs[tabID].lastActiveAt = Date.now();
 
-        WindowResizing.resize();
+        WindowResizing.resize(this.mainWindow, this.ui, this);
+        
         this.sendTabData();
     }
 
@@ -189,7 +190,7 @@ class TabManager {
         }
         tab.contentView = null;
         this.sendTabData();
-        WindowResizing.resize();
+        WindowResizing.resize(this.mainWindow, this.ui, this);
     }
 
     wake(index) {
@@ -252,6 +253,88 @@ class TabManager {
             this.tabs[index].contentView.webContents.reload();
         } 
     }
+
+
+
+
+    popTab(index) {
+        if (index < 0 || index >= this.tabs.length) return null;
+        const tab = this.tabs[index];
+        this.tabs.splice(index, 1);
+        this.lastOpenedTabs = this.lastOpenedTabs.filter(t => t !== tab);
+
+
+        if (tab.contentView) {
+            try {
+                this.mainWindow.contentView.removeChildView(tab.contentView);
+            } 
+            
+            catch (e) {
+                console.log("tab not attached, should probably be ignored")
+            }
+        }
+
+        if (index === this.currentIndex) {
+            if (this.tabs.length > 0) {
+                 const newIndex = index > 0 ? index - 1 : 0;
+                 this.switchTab(newIndex);
+            }
+            
+            else {
+                this.mainTab = null;
+                this.currentIndex = -1;
+            }
+        } 
+        
+        
+        else if (index < this.currentIndex) {
+            this.currentIndex--;
+        }
+
+
+        this.sendTabData();
+        return tab;
+    }
+
+
+    stickTab(tab) {
+        this.tabs.push(tab);
+        
+        tab.contentView.webContents.removeAllListeners('page-title-updated');
+        tab.contentView.webContents.on('page-title-updated', () => {
+            tab.title = tab.contentView.webContents.getTitle();
+            tab.address = tab.contentView.webContents.getURL();
+            this.sendTabData();
+        });
+        
+        tab.contentView.webContents.setWindowOpenHandler((desc) => {
+             if (desc.features && (desc.features.includes("width") || desc.features.includes("height"))){
+                return {action: "allow"};
+            }
+            
+            this.createTab(desc.url, false);
+            return {action: "deny"}
+        });
+
+
+        this.switchTab(this.tabs.length - 1);
+        this.lastOpenedTabs.push(tab);
+        this.sendTabData();
+    }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
     updateDefaultSite(site) {
         this.defaultSite = site;
 
