@@ -1,4 +1,4 @@
-const { app, BaseWindow, WebContentsView, globalShortcut, ipcMain, Menu } = require('electron');
+const { app, BaseWindow, WebContentsView, globalShortcut, ipcMain, Menu, session  } = require('electron');
 const path = require('node:path');
 const WindowResizing = require("./WindowResizing")
 const TabManager = require('../tabs/TabManager');
@@ -69,6 +69,15 @@ const createWindow = () => {
     WindowResizing.resize();
   });
 
+  session.defaultSession.on('will-download', (event, item, webContents) => {
+    console.log("Trying to download");
+  
+    const downloadsPath = app.getPath('downloads');
+    const newPath = path.join(downloadsPath, item.getFilename());
+
+    item.setSavePath(filePath);
+  });
+
 
   // REST OF SETUP
   keybindSetup();
@@ -102,7 +111,7 @@ const ipcSetup = () => {
 
       // in page
       
-  ipcMain.on("searchInPage", (event, phrase) => {
+  ipcMain.on("searchInPage", (event, phrase, options) => {
 
     const mainTab = tabManager.getMainTab();
     if (mainTab && mainTab.contentView && mainTab.contentView.webContents) {

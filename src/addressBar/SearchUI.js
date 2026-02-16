@@ -21,8 +21,8 @@ export const setupSearchListeners = () => {
 
     addressBar.addEventListener("focus", () => {
         if (currentAddess) {
-            addressBar.value = currentAddess;
-            addressBar.select();
+           // addressBar.value = currentAddess;
+            //addressBar.select();
         }
     });
 
