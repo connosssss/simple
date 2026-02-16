@@ -20,7 +20,7 @@ contextBridge.exposeInMainWorld("electronAPI", {
 
 
 
-    searchInPage: (phrase) => ipcRenderer.send("searchInPage", phrase),
+    searchInPage: (phrase, options) => ipcRenderer.send("searchInPage", phrase, options),
     onToggleFindBar: (callback) => ipcRenderer.on('toggleFindBar', callback),
     stopFindInPage: () => ipcRenderer.send("stopFindInPage"),
     focusUI: () => ipcRenderer.send("focusUI"),

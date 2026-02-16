@@ -108,8 +108,9 @@ const ipcSetup = () => {
     if (mainTab && mainTab.contentView && mainTab.contentView.webContents) {
 
       if (phrase) {
-        mainTab.contentView.webContents.findInPage(phrase);
-      } 
+  
+        mainTab.contentView.webContents.findInPage(phrase, options || {});
+    }
     
       else {
         mainTab.contentView.webContents.stopFindInPage('clearSelection');

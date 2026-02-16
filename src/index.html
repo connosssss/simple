@@ -94,6 +94,25 @@
         }
       });
 
+    const findInput = document.getElementById('find-input');
+
+    findInput.addEventListener('input', (e) => {
+        window.electronAPI.searchInPage(e.target.value, { 
+            findNext: false
+        });
+    });
+
+    findInput.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') {
+            e.preventDefault(); 
+            
+            window.electronAPI.searchInPage(e.target.value, {
+                findNext: true,       
+                forward: !e.shiftKey  
+            });
+        }
+    });
+
 
       document.getElementById('find-input').addEventListener('input', (e) => {
         window.electronAPI.searchInPage(e.target.value);
