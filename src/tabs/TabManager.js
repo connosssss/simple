@@ -1,7 +1,8 @@
-const { WebContentsView, app } = require('electron');
+const { WebContentsView, app, Menu, clipboard} = require('electron');
 const WindowResizing = require('../main/WindowResizing');
 const fs = require('fs');
 const path = require('path');
+
 
 class TabManager {
 
@@ -48,12 +49,15 @@ class TabManager {
         };
 
         this.tabs.push(newTab);
-        if (!newAddress){
+      
+         if (!newAddress){
             newTab.contentView.webContents.loadURL(this.defaultSite); 
         }
+        
         else{
             newTab.contentView.webContents.loadURL(newAddress); 
         }
+       
 
         newTab.contentView.webContents.on('page-title-updated', () => {
             newTab.title = newTab.contentView.webContents.getTitle();
@@ -71,12 +75,13 @@ class TabManager {
         })
 
         
-        
+        this.attachContextMenu(newTab);
         
         if (switchTo){
             this.switchTab(this.tabs.length - 1);
             this.mainTab = newTab;
         }
+        
 
         this.lastOpenedTabs.push(newTab);
 
@@ -311,11 +316,12 @@ class TabManager {
              if (desc.features && (desc.features.includes("width") || desc.features.includes("height"))){
                 return {action: "allow"};
             }
-            
+
             this.createTab(desc.url, false);
             return {action: "deny"}
         });
 
+        this.attachContextMenu(newTab);
 
         this.switchTab(this.tabs.length - 1);
         this.lastOpenedTabs.push(tab);
@@ -328,7 +334,68 @@ class TabManager {
 
 
 
+    attachContextMenu(tab) {
+        
+        tab.contentView.webContents.on('context-menu', (event, params) => {
+            const menuTemplate = [];
 
+            if (params.linkURL) {
+
+                menuTemplate.push({
+                    label: 'Open Link in New Tab',
+                    click: () => this.createTab(params.linkURL, false)
+                });
+
+                menuTemplate.push({
+                    label: 'Copy Link Address',
+                    click: () => clipboard.writeText(params.linkURL)
+                });
+
+                menuTemplate.push({ type: 'separator' });
+            }
+
+            if (params.mediaType === 'image') {
+
+                menuTemplate.push({
+                    label: 'Open Image in New Tab',
+                    click: () => this.createTab(params.srcURL, false)
+                });
+
+                menuTemplate.push({
+                    label: 'Copy Image',
+                    click: () => tab.contentView.webContents.copyImageAt(params.x, params.y)
+                });
+
+                menuTemplate.push({
+                    label: 'Copy Image Address',
+                    click: () => clipboard.writeText(params.srcURL)
+                });
+
+                menuTemplate.push({ type: 'separator' });
+            }
+
+            if (params.selectionText) {
+                menuTemplate.push({ role: 'copy' });
+            }
+
+    
+        
+            menuTemplate.push({
+                label: 'Reload',
+                click: () => tab.contentView.webContents.reload()
+            });
+
+            menuTemplate.push({ type: 'separator' });
+
+            menuTemplate.push({
+                label: 'Inspect Element',
+                click: () => tab.contentView.webContents.inspectElement(params.x, params.y)
+            });
+
+            const menu = Menu.buildFromTemplate(menuTemplate);
+            menu.popup();
+        });
+    }
 
 
 

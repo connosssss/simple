@@ -60,7 +60,7 @@
 
         setupSearchListeners();
 
-        let previousTabCount = 0; 
+        let previousTabCount = null; 
 
         window.electronAPI.onUpdateTabs((tabs) => {
             renderTabs(tabs);
@@ -69,14 +69,18 @@
             if (mainTab) {
                 updateAddressBar(mainTab.address);
                 
-                window.electronAPI.focusUI();
+                //
 
                
-                if (tabs.length > previousTabCount && mainTab.index === tabs.length - 1) {
+                if (previousTabCount !== null && tabs.length > previousTabCount && mainTab.index === tabs.length - 1) {
                   console.log(tabs.length);
-                    const addressBar = document.getElementById('address-bar');
+                    setTimeout(() => {
+                      const addressBar = document.getElementById('address-bar');
+                    window.electronAPI.focusUI();
                     addressBar.focus();
                     addressBar.select();
+                }, 100);
+                  
                 }
             }
             previousTabCount = tabs.length; 

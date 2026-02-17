@@ -5,6 +5,7 @@ const TabManager = require('../tabs/TabManager');
 const Navigation = require('../addressBar/Navigation');
 const SettingsManager = require('../settings/SettingsManager');
 const WindowManager = require('./WindowManager');
+
 // const TabManager = require("./")
 
 
