@@ -75,7 +75,7 @@ class WindowManager {
             tabManager.stickTab(curTab);
         } 
         
-        else {
+        else if (tabManager.tabs.length == 0) {
             tabManager.createTab();
         }
 

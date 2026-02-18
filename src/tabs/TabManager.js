@@ -9,6 +9,7 @@ class TabManager {
 
 
     constructor(mainWindow, ui) {
+        this.isLoading = false;
         this.mainWindow = mainWindow;
         this.ui = ui; 
         this.tabs = [];
@@ -230,6 +231,7 @@ class TabManager {
         }));
 
         this.ui.webContents.send("updateTabs", tabData);
+        this.saveConfig();
 
         if (this.settingsUI && !this.settingsUI.webContents.isDestroyed()) {
             this.settingsUI.webContents.send("updateTabs", tabData);
@@ -416,27 +418,52 @@ class TabManager {
 
 
     loadConfig() {
+        
         try {
             if (fs.existsSync(this.configPath)) {
+                this.isLoading = true;
 
                 const data = fs.readFileSync(this.configPath);
                 const config = JSON.parse(data);
 
                 if (config.defaultSite) {
                     this.defaultSite = config.defaultSite;
+                    
                 }
+
+                if (config.tabs && Array.isArray(config.tabs)) {
+                    
+                    config.tabs.forEach(tabData => {
+                        this.createTab(tabData.address, false);
+                    });
+                    if (this.tabs.length > 0) {
+                        this.switchTab(this.tabs.length - 1);
+                    }
+                }
+
+                this.isLoading = false;
             }
         } 
         
         catch (error) {
             console.error("Error loading config:", error);
+            this.isLoading = false;
         }
     }
 
     saveConfig() {
+        if (this.isLoading) return;
+
+
         try {
+            const savedTabs = this.tabs.map(tab => ({
+                address: tab.address,
+                title: tab.title
+            }));
+
             const config = {
-                defaultSite: this.defaultSite
+                defaultSite: this.defaultSite,
+                tabs: savedTabs,
             };
 
             fs.writeFileSync(this.configPath, JSON.stringify(config));
@@ -449,3 +476,4 @@ class TabManager {
 }
 
 module.exports = TabManager;
+
