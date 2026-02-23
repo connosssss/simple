@@ -39,7 +39,11 @@ class TabManager {
 
     createTab(newAddress = "", switchTo = true) {
         let newTab = {
-            contentView: new WebContentsView(),
+            contentView: new WebContentsView({
+                webPreferences: {
+                    partition: "persist:main"
+                }
+            }),
             address: "",
             title: "",
             isActive: true,
@@ -48,7 +52,11 @@ class TabManager {
             lastActiveAt: Date.now(),
             keepActive: false
         };
+        const userAgent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/<major>.0.0.0 Safari/537.36";
 
+        newTab.contentView.webContents.setUserAgent(userAgent);
+
+        
         this.tabs.push(newTab);
       
          if (!newAddress){
