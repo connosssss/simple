@@ -114,7 +114,7 @@ const ipcSetup = () => {
   ipcMain.on("showSettingsMenu", (event) => {
     const data = getManager(event);
     if (!data) return;
-    const settingsView = SettingsManager.openSettingsMenu(mainWindow);
+    const settingsView = SettingsManager.openSettingsMenu(data.window);
     data.tabManager.setSettingsUI(settingsView);
 
 
@@ -169,7 +169,7 @@ const ipcSetup = () => {
     const menu = Menu.buildFromTemplate(cmTemplate);
 
     menu.popup({
-      window: mainWindow,
+      window: window,
       x: vars.x,
       y: vars.y
     });
