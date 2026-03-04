@@ -52,9 +52,9 @@ class TabManager {
             lastActiveAt: Date.now(),
             keepActive: false
         };
-        const userAgent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/<major>.0.0.0 Safari/537.36";
+        //const userAgent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36";
 
-        newTab.contentView.webContents.setUserAgent(userAgent);
+        //newTab.contentView.webContents.setUserAgent(userAgent);
 
         
         this.tabs.push(newTab);
