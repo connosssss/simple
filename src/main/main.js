@@ -190,6 +190,34 @@ const ipcSetup = () => {
           }
       }
   });
+
+  ipcMain.on('tabTransferOut', (event, { tabIndex, screenX, screenY }) => {
+    const data = getManager(event);
+    
+    if (!data) return;
+
+    const { tabManager, window } = data;
+    const sourceWindowId = window.id;
+
+    const targetData = WindowManager.getWindowAtPoint(screenX, screenY, sourceWindowId);
+    const tab = tabManager.popTab(tabIndex);
+    
+    if (!tab) return;
+
+    if (targetData) {
+        targetData.tabManager.stickTab(tab);
+        targetData.window.focus();
+    } 
+
+    else {
+        WindowManager.createWindow(tab);
+    }
+
+    if (tabManager.tabs.length === 0) {
+        window.close();
+    }
+  });
+
 }
 
 

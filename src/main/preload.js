@@ -34,6 +34,7 @@ contextBridge.exposeInMainWorld("electronAPI", {
 
 
     tabPopOff: (tabIndex) => ipcRenderer.send("tabPopOff", { tabIndex }),
+    tabTransfer: (tabIndex, screenX, screenY) => ipcRenderer.send("tabTransfer", {tabIndex, screenX, screenY })
     
 
 })

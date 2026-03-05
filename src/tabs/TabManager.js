@@ -331,7 +331,7 @@ class TabManager {
             return {action: "deny"}
         });
 
-        this.attachContextMenu(newTab);
+        this.attachContextMenu(tab);
 
         this.switchTab(this.tabs.length - 1);
         this.lastOpenedTabs.push(tab);

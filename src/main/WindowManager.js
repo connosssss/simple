@@ -194,6 +194,22 @@ class WindowManager {
     getAllWindows() {
         return Array.from(this.windows.values());
     }
+
+    getWindowAtPoint(screenX, screenY, excludeWindowId = null) {
+      for (const [windowId, data] of this.windows) {
+          if (windowId === excludeWindowId) continue;
+
+          const bounds = data.window.getBounds();
+
+          if (screenX >= bounds.x &&screenX <= bounds.x + bounds.width &&
+              screenY >= bounds.y && screenY <= bounds.y + bounds.height) {
+              return data;
+          }
+          
+      }
+
+      return null;
+    }
 }
 
 module.exports = new WindowManager();
