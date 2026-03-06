@@ -34,7 +34,7 @@ class WindowManager {
 
 
 
-        const tabManager = new TabManager(mainWindow, ui);
+        const tabManager = new TabManager(mainWindow, u, curTab != nulli);
         const windowId = mainWindow.id;
         const windowData = { window: mainWindow, ui, tabManager };
 
@@ -201,8 +201,8 @@ class WindowManager {
 
           const bounds = data.window.getBounds();
 
-          if (screenX >= bounds.x &&screenX <= bounds.x + bounds.width &&
-              screenY >= bounds.y && screenY <= bounds.y + bounds.height) {
+          if (screenX >= bounds.x &&screenX < bounds.x + bounds.width &&
+              screenY >= bounds.y && screenY < bounds.y + bounds.height) {
               return data;
           }
           

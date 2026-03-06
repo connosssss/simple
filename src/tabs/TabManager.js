@@ -8,7 +8,7 @@ class TabManager {
 
 
 
-    constructor(mainWindow, ui) {
+    constructor(mainWindow, ui, skipConfig = false) {
         this.isLoading = false;
         this.mainWindow = mainWindow;
         this.ui = ui; 
@@ -19,7 +19,9 @@ class TabManager {
         this.settingsUI = null; 
         this.defaultSite = "https://google.com";
         this.configPath = path.join(app.getPath('userData'), 'config.json');
-        this.loadConfig();
+        if (!skipConfig){
+            this.loadConfig();
+        }
 
     }
 
@@ -177,7 +179,7 @@ class TabManager {
         } 
         
         else if (this.tabs.length === 1) {
-            app.quit();
+            this.mainWindow.close();
         }
     }
 
