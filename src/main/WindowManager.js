@@ -34,7 +34,7 @@ class WindowManager {
 
 
 
-        const tabManager = new TabManager(mainWindow, u, curTab != nulli);
+        const tabManager = new TabManager(mainWindow, ui, curTab != null);
         const windowId = mainWindow.id;
         const windowData = { window: mainWindow, ui, tabManager };
 
