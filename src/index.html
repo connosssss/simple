@@ -77,9 +77,11 @@
                     setTimeout(() => {
                       const addressBar = document.getElementById('address-bar');
                     window.electronAPI.focusUI();
-                    addressBar.focus();
-                    addressBar.select();
-                }, 100);
+                    setTimeout(() => {
+                      addressBar.focus();
+                      addressBar.select();
+                    }, 150);
+                }, 200);
                   
                 }
             }
