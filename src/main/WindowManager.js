@@ -18,8 +18,7 @@ class WindowManager {
             titleBarStyle: 'hidden',
             titleBarOverlay: {
                 color: '#020617',
-                symbolColor: '#ffffff',
-                height: 30
+                symbolColor: '#ffffff', 
             }
         });
 
@@ -93,6 +92,15 @@ class WindowManager {
         return null;
     }
     
+    registerWebContents(webContentsId, windowId) {
+      this.webContentsIds.set(webContentsId, windowId);
+    }
+
+    unregisterWebContents(webContentsId) {
+       this.webContentsIds.delete(webContentsId);
+    }
+
+
     registerShortcuts(windowId) {
         const data = this.windows.get(windowId);
         if (!data) return;
@@ -120,7 +128,9 @@ class WindowManager {
               tabManager.closeTab(tabManager.currentIndex);
             }
           });
-        
+          
+          
+
         
         
           // OTHER STUFF

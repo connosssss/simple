@@ -118,6 +118,15 @@ const ipcSetup = () => {
     data.tabManager.setSettingsUI(settingsView);
 
 
+    
+    WindowManager.registerWebContents(settingsView.webContents.id, data.window.id);
+
+    settingsView.webContents.on('destroyed', () => {
+        WindowManager.unregisterWebContents(settingsView.webContents.id);
+    });
+    
+
+
     settingsView.webContents.once('did-finish-load', () => {
       data.tabManager.sendTabData();
     });
