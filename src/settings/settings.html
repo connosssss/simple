@@ -14,24 +14,17 @@
 
     <div class="text-2xl font-bold text-white mb-6">Settings</div>
 
-    <div class=" rounded-lg p-4">
-
+    <div class="rounded-lg p-4 mb-2">
       <div class="text-lg font-semibold text-white mb-4 border-b border-slate-600">Manually Hibernate Tabs</div>
-      <div id="tabs-list" class="space-y-2">
-
-      </div>
+      <div id="tabs-list" class="space-y-2"></div>
     </div>
-
 
     <div class="text-lg font-semibold text-white mb-4 border-b border-slate-600">Automatic Hibernation</div>
 
     <div class="flex flex-col gap-2 mb-6">
-
       <label for="close-after-select" class="text-slate-300 text-sm">Hibernate background tabs after:</label>
-
       <select id="close-after-select"
-        class="bg-slate-900 text-white  p-2 rounded-sm border border-slate-600 outline-none focus:outline-none ">
-
+        class="bg-slate-900 text-white p-2 rounded-sm border border-slate-600 outline-none focus:outline-none">
         <option value="5">5 Minutes</option>
         <option value="10">10 Minutes</option>
         <option value="30">30 Minutes</option>
@@ -41,16 +34,44 @@
         <option value="480">8 Hours</option>
         <option value="1440">1 Day</option>
         <option value="-1">Never</option>
-
-
       </select>
 
+      <label class="text-slate-300 text-sm mt-2">Default site on new tab:</label>
+      <input class="w-full bg-slate-800 p-2 outline-none text-slate-100/80 text-sm rounded-sm selection:bg-slate-700" id="siteChoiceBar" onfocus="this.select()"/>
+    </div>
 
-      <label for="close-after-select" class="text-slate-300 text-sm">Hibernate background tabs after:</label>
+    <div class="border-b border-slate-600 mb-3 pb-2">
+      <div class="flex items-center justify-between mb-2">
+        <div class="text-lg font-semibold text-white">Cookies</div>
+        <div class="flex gap-2 items-center flex-wrap justify-end">
 
-      <input class="w-full h-full bg-slate-800 p-2 outline-none text-slate-100/80 text-sm rounded-sm selection:bg-slate-700" id="siteChoiceBar" onfocus="this.select()"/>
+          <input id="cookie-search" placeholder="Filter by domain or name..."
+            class="bg-slate-800 text-white text-sm px-3 py-1 rounded-sm outline-none border border-slate-700 focus:border-slate-500 transition-colors w-48" />
 
-    
+  
+          <button id="clear-third-party"
+            class="bg-orange-900/50 hover:bg-orange-800/70 text-orange-200 text-sm px-3 py-1 rounded-sm transition-all duration-100">
+            Clear Trackers
+          </button>
+
+
+          <button id="clear-all-cookies"
+            class="bg-red-800/60 hover:bg-red-700/80 text-white text-sm px-3 py-1 rounded-sm transition-all duration-100">
+            Clear All Cookies
+          </button>
+
+
+        </div>
+      </div>
+      <label class="flex items-center gap-2 cursor-pointer select-none w-fit">
+        <input type="checkbox" id="toggle-third-party" class="accent-slate-400 w-3.5 h-3.5" />
+        <span class="text-slate-400 text-xs">Hide third-party tracker cookies</span>
+      </label>
+    </div>
+
+    <div id="cookie-count" class="text-slate-500 text-xs mb-3"></div>
+    <div id="cookies-list" class="space-y-1 mb-10">
+      <div class="text-slate-500 text-sm">Loading cookies...</div>
     </div>
 
   </div>

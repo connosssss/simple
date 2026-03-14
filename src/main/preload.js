@@ -34,7 +34,11 @@ contextBridge.exposeInMainWorld("electronAPI", {
 
 
     tabPopOff: (tabIndex) => ipcRenderer.send("tabPopOff", { tabIndex }),
-    tabTransfer: (tabIndex, screenX, screenY) => ipcRenderer.send("tabTransfer", {tabIndex, screenX, screenY })
-    
+    tabTransfer: (tabIndex, screenX, screenY) => ipcRenderer.send("tabTransfer", {tabIndex, screenX, screenY }),
 
+    getCookies: () => ipcRenderer.invoke("getCookies"),
+    deleteCookie: (url, name) => ipcRenderer.invoke("deleteCookie", url, name),
+    deleteCookiesByDomain: (domain) => ipcRenderer.invoke("deleteCookiesByDomain", domain),
+    clearAllCookies: () => ipcRenderer.invoke("clearAllCookies"),
+    clearThirdPartyCookies: () => ipcRenderer.invoke("clearThirdPartyCookies"),
 })
