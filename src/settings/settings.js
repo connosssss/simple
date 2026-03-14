@@ -89,7 +89,7 @@ const renderTabs = (tabs) => {
     tabInfo.appendChild(tabDur);
 
     const hibernateBtn = document.createElement("button");
-    hibernateBtn.className = ` rounded-md text-sm font-light ${tab.isActive ? `bg-red-700/40` : `bg-slate-700/40`} transition-all duration-100 px-4 py-1 text-white`;
+    hibernateBtn.className = ` rounded-sm text-sm font-light ${tab.isActive ? `bg-red-700/40` : `bg-slate-700/40`} transition-all duration-100 px-4 py-1 text-white`;
 
     hibernateBtn.textContent = tab.isActive ? "Hibernate" : "Hibernated";
     hibernateBtn.disabled = !tab.isActive;
@@ -194,7 +194,7 @@ const renderCookies = () => {
 
     const arrow = document.createElement("span");
     arrow.className = "text-slate-400 text-xs flex-shrink-0";
-    arrow.textContent = "▶";
+    arrow.textContent = "-";
 
     const domainText = document.createElement("span");
     domainText.className = "text-slate-200 text-sm font-medium truncate";
@@ -205,10 +205,9 @@ const renderCookies = () => {
     countBadge.textContent = `${cookies.length} cookie${cookies.length !== 1 ? "s" : ""}`;
 
     if (isThirdParty) {
-
       const trackerBadge = document.createElement("span");
       trackerBadge.className = "text-xs bg-orange-900/50 text-orange-300/80 px-1.5 py-0 rounded flex-shrink-0";
-      trackerBadge.title = "This domain was not directly visited — cookie set by a third-party script";
+      trackerBadge.title = "cookie set by a third-party";
       trackerBadge.textContent = "3rd party";
       domainLabel.appendChild(arrow);
       domainLabel.appendChild(domainText);
@@ -230,6 +229,11 @@ const renderCookies = () => {
       await window.electronAPI.deleteCookiesByDomain(domain);
       await loadCookies();
     };
+
+
+
+
+    // 
 
     domainRow.appendChild(domainLabel);
     domainRow.appendChild(deleteDomainBtn);
@@ -263,10 +267,11 @@ const renderCookies = () => {
       const meta = document.createElement("div");
       meta.className = "flex gap-3 flex-wrap";
 
-      const addMeta = (label, val, highlight = false) => {
+      const addMeta = (label, val=null, highlight = false) => {
         const el = document.createElement("span");
         el.className = `text-xs ${highlight ? "text-amber-400/80" : "text-slate-500"}`;
-        el.textContent = `${label}: ${val}`;
+        if (val) el.textContent = `${label}: ${val}`;
+        else el.textContent = `${label}`
         meta.appendChild(el);
       };
 
@@ -279,14 +284,15 @@ const renderCookies = () => {
       else {
         addMeta("expires", "session");
       }
-      if (cookie.secure) addMeta("secure", "✓", true);
-      if (cookie.httpOnly) addMeta("httpOnly", "✓", true);
+
+      if (cookie.secure) addMeta("secure", null, true);
+      if (cookie.httpOnly) addMeta("httpOnly",null,  true);
 
       info.appendChild(nameVal);
       info.appendChild(meta);
 
       const deleteBtn = document.createElement("button");
-      deleteBtn.className = "text-red-400/60 hover:text-red-300 text-xs flex-shrink-0 px-1.5 py-0.5 rounded hover:bg-red-900/30 transition-all duration-100 mt-0.5";
+      deleteBtn.className = "text-red-400/60 text-xs flex-shrink-0 px-1.5 py-0.5 rounded hover:bg-red-900/30 transition-all duration-100 mt-0.5";
       deleteBtn.textContent = "✕";
       deleteBtn.title = "Delete cookie";
       deleteBtn.onclick = async () => {
@@ -302,7 +308,7 @@ const renderCookies = () => {
     domainRow.onclick = () => {
       const collapsed = cookieContainer.classList.contains("hidden");
       cookieContainer.classList.toggle("hidden", !collapsed);
-      arrow.style.transform = collapsed ? "rotate(90deg)" : "";
+    
     };
 
     cookiesList.appendChild(domainRow);
