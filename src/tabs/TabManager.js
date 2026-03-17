@@ -54,9 +54,11 @@ class TabManager {
             lastActiveAt: Date.now(),
             keepActive: false
         };
-        //const userAgent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36";
-
-        //newTab.contentView.webContents.setUserAgent(userAgent);
+        
+        const ses = session.fromPartition('persist:main');
+        ses.setUserAgent(
+            'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36'
+        );
 
         
         this.tabs.push(newTab);
@@ -211,7 +213,11 @@ class TabManager {
 
     wake(index) {
         const tab = this.tabs[index];
-        tab.contentView = new WebContentsView();
+        tab.contentView = new WebContentsView({
+            webPreferences: {
+                partition: "persist:main"
+            }
+        });
         tab.contentView.webContents.loadURL(tab.address);
         tab.isActive = true;
     }

@@ -222,7 +222,7 @@ const renderCookies = () => {
     }
 
     const deleteDomainBtn = document.createElement("button");
-    deleteDomainBtn.className = "text-red-400/70 hover:text-red-300 text-xs px-2 py-0.5 rounded hover:bg-red-900/30 transition-all duration-100 flex-shrink-0 ml-2";
+    deleteDomainBtn.className = "text-red-400/70  text-xs px-2 py-0.5 rounded  transition-all duration-100 flex-shrink-0 ml-2";
     deleteDomainBtn.textContent = "Delete All";
     deleteDomainBtn.onclick = async (e) => {
       e.stopPropagation();
@@ -292,7 +292,7 @@ const renderCookies = () => {
       info.appendChild(meta);
 
       const deleteBtn = document.createElement("button");
-      deleteBtn.className = "text-red-400/60 text-xs flex-shrink-0 px-1.5 py-0.5 rounded hover:bg-red-900/30 transition-all duration-100 mt-0.5";
+      deleteBtn.className = "text-red-400/60 text-xs flex-shrink-0 px-1.5 py-0.5 rounded transition-all duration-100 mt-0.5";
       deleteBtn.textContent = "✕";
       deleteBtn.title = "Delete cookie";
       deleteBtn.onclick = async () => {
