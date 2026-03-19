@@ -41,4 +41,6 @@ contextBridge.exposeInMainWorld("electronAPI", {
     deleteCookiesByDomain: (domain) => ipcRenderer.invoke("deleteCookiesByDomain", domain),
     clearAllCookies: () => ipcRenderer.invoke("clearAllCookies"),
     clearThirdPartyCookies: () => ipcRenderer.invoke("clearThirdPartyCookies"),
+    setBlockTrackers: (enabled) => ipcRenderer.send("setBlockTrackers", enabled),
+
 })

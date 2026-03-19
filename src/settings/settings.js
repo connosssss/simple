@@ -360,4 +360,16 @@ document.getElementById("clear-all-cookies").addEventListener("click", async () 
   await loadCookies();
 });
 
+
+
+
+document.getElementById("block-trackers").addEventListener("change", (e) => {
+  window.electronAPI.setBlockTrackers(e.target.checked);
+});
+
+
+window.electronAPI.setBlockTrackers(true);
+
+
+
 loadCookies();

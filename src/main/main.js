@@ -364,6 +364,28 @@ const ipcSetup = () => {
     }
   });
 
+
+
+ let blockTrackers = true;
+
+  ipcMain.on("setBlockTrackers", (event, enabled) => {
+    blockTrackers = enabled;
+    const ses = session.fromPartition('persist:main');
+
+
+    // Simple ish list of trackers to block -> might expand
+    if (enabled) {
+      ses.webRequest.onBeforeRequest({ urls: ["*://*.doubleclick.net/*", "*://*.googlesyndication.com/*", "*://*.facebook.com/tr*", "*://*.google-analytics.com/*", "*://*.adservice.google.com/*"] }, (details, callback) => {
+        callback({ cancel: true });
+      });
+   } 
+   
+   else {
+      ses.webRequest.onBeforeRequest(null);
+    }
+  });
+
+
 }
 
 
@@ -388,6 +410,14 @@ app.whenReady().then(() => {
 
   ipcSetup();
   WindowManager.createWindow();
+
+  const ses = session.fromPartition('persist:main');
+  
+  ses.webRequest.onBeforeRequest({ urls: [
+    "*://*.doubleclick.net/*", "*://*.googlesyndication.com/*",
+    "*://*.facebook.com/tr*", "*://*.google-analytics.com/*",
+   "*://*.adservice.google.com/*"
+  ] }, (details, callback) => callback({ cancel: true }));
 
   // On OS X it's common to re-create a window in the app when the
   // dock icon is clicked and there are no other windows open.

@@ -1,4 +1,4 @@
-const { WebContentsView, app, Menu, clipboard} = require('electron');
+const { WebContentsView, app, Menu, clipboard, session} = require('electron');
 const WindowResizing = require('../main/WindowResizing');
 const fs = require('fs');
 const path = require('path');
