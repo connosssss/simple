@@ -8,6 +8,65 @@ const WindowManager = require('./WindowManager');
 
 // const TabManager = require("./")
 
+const TRACKERS = [
+
+  "*://*.doubleclick.net/*",
+  "*://*.googlesyndication.com/*",
+  "*://*.google-analytics.com/*",
+  "*://*.adservice.google.com/*",
+  "*://*.googletagmanager.com/*",
+  "*://*.googletagservices.com/*",
+  "*://*.googleadservices.com/*",
+  "*://*.pagead2.googlesyndication.com/*",
+
+  "*://*.facebook.com/tr*",
+  "*://*.facebook.net/signals/*",
+  "*://*.connect.facebook.net/*",
+  "*://*.pixel.facebook.com/*",
+
+  "*://*.hotjar.com/*",
+  "*://*.clarity.ms/*",
+  "*://*.fullstory.com/*",
+  "*://*.mixpanel.com/*",
+  "*://*.segment.io/*",
+  "*://*.segment.com/*",
+  "*://*.amplitude.com/*",
+  "*://*.heapanalytics.com/*",
+  "*://*.mouseflow.com/*",
+  "*://*.crazyegg.com/*",
+
+  "*://*.amazon-adsystem.com/*",
+  "*://*.adsrvr.org/*",
+  "*://*.adnxs.com/*",
+  "*://*.rubiconproject.com/*",
+  "*://*.criteo.com/*",
+  "*://*.criteo.net/*",
+  "*://*.outbrain.com/*",
+  "*://*.taboola.com/*",
+  "*://*.pubmatic.com/*",
+  "*://*.openx.net/*",
+  "*://*.casalemedia.com/*",
+  "*://*.moatads.com/*",
+  "*://*.serving-sys.com/*",
+
+  "*://*.ads-twitter.com/*",
+  "*://*.analytics.twitter.com/*",
+  "*://*.t.co/i/*",
+  "*://*.snap.licdn.com/*",
+  "*://*.linkedin.com/li/track*",
+  "*://*.ads.pinterest.com/*",
+  "*://*.analytics.tiktok.com/*",
+
+  "*://*.scorecardresearch.com/*",
+  "*://*.quantserve.com/*",
+  "*://*.bluekai.com/*",
+  "*://*.demdex.net/*",
+  "*://*.krxd.net/*",
+  "*://*.bidswitch.net/*",
+  "*://*.sharethis.com/*",
+  "*://*.addthis.com/*",
+];
+
 
 // Handle creating/removing shortcuts on Windows when installing/uninstalling.
 if (require('electron-squirrel-startup')) {
@@ -375,7 +434,8 @@ const ipcSetup = () => {
 
     // Simple ish list of trackers to block -> might expand
     if (enabled) {
-      ses.webRequest.onBeforeRequest({ urls: ["*://*.doubleclick.net/*", "*://*.googlesyndication.com/*", "*://*.facebook.com/tr*", "*://*.google-analytics.com/*", "*://*.adservice.google.com/*"] }, (details, callback) => {
+           ses.webRequest.onBeforeRequest({ urls: TRACKERS }, (details, callback) => {
+
         callback({ cancel: true });
       });
    } 
@@ -413,11 +473,7 @@ app.whenReady().then(() => {
 
   const ses = session.fromPartition('persist:main');
   
-  ses.webRequest.onBeforeRequest({ urls: [
-    "*://*.doubleclick.net/*", "*://*.googlesyndication.com/*",
-    "*://*.facebook.com/tr*", "*://*.google-analytics.com/*",
-   "*://*.adservice.google.com/*"
-  ] }, (details, callback) => callback({ cancel: true }));
+  ses.webRequest.onBeforeRequest({ urls: TRACKERS }, (details, callback) => callback({ cancel: true }));
 
   // On OS X it's common to re-create a window in the app when the
   // dock icon is clicked and there are no other windows open.
