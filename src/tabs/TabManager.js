@@ -425,6 +425,18 @@ class TabManager {
 
         tabIndices.forEach(index => {
             if (this.tabs[index]) {
+                const oldStackId = this.tabs[index].stackId;
+                if (oldStackId) {
+                    const remaining = this.tabs.filter(
+                        t => t.stackId === oldStackId && t !== this.tabs[index]
+                    );
+                    if (remaining.length < 2) {
+                        remaining.forEach(t => {
+                            t.isStacked = false;
+                            t.stackId = null;
+                        });
+                    }
+                }
                 this.tabs[index].isStacked = true;
                 this.tabs[index].stackId = stackId;
             }
@@ -437,6 +449,18 @@ class TabManager {
 
     updateStack(stackId, tabIndex) {
         if (this.tabs[tabIndex]){
+            const oldStackId = this.tabs[tabIndex].stackId;
+            if (oldStackId && oldStackId !== stackId) {
+                const remaining = this.tabs.filter(
+                    t => t.stackId === oldStackId && t !== this.tabs[tabIndex]
+                );
+                if (remaining.length < 2) {
+                    remaining.forEach(t => {
+                        t.isStacked = false;
+                        t.stackId = null;
+                    });
+                }
+            }
             this.tabs[tabIndex].stackId = stackId;
              this.tabs[tabIndex].isStacked = true;
         }

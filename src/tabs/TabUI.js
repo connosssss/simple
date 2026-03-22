@@ -1,6 +1,3 @@
-
-
-
 const tabsList = document.getElementById("tabs-list");
 
 
@@ -29,26 +26,41 @@ function getStackColor(stackId) {
 
 export const renderTabs = (tabs) => {
     tabsList.innerHTML = "";
-
-    const stacks = {};
-
-    tabs.forEach(tab => {
-
-        if (tab.isStacked) {
-            if (!stacks[tab.stackId]) {
-                stacks[tab.stackId] = [];
-            }
-            stacks[tab.stackId].push(tab);
-        }
-    });
-    
+    const renderedStacks = new Set();
 
     tabs.forEach((tab, index) => {
+
+        if (tab.isStacked && renderedStacks.has(tab.stackId)) return;
+
+        if (tab.isStacked) {
+            renderedStacks.add(tab.stackId);
+
+            const stackContainer = document.createElement("div");
+            const stackColor = getStackColor(tab.stackId);
+            stackContainer.className = `flex flex-row items-end h-full border-b-2 ${stackColor} rounded-t-sm overflow-hidden`;
+
+
+            const stackTabs = tabs
+                .map((t, i) => ({ tab: t, index: i }))
+                .filter(entry => entry.tab.stackId === tab.stackId);
+            stackTabs.forEach(({ tab: sTab, index: sIndex }) => {
+                stackContainer.appendChild(createTabElement(sTab, sIndex, true));
+            });
+
+            tabsList.appendChild(stackContainer);
+        } 
+        
+        else {
+            tabsList.appendChild(createTabElement(tab, index, false));
+        }
+    });
+};
+
+function createTabElement(tab, index, isInStack) {
         const tabE = document.createElement("div");
-        let stackColor = tab.isStacked ? getStackColor(tab.stackId) : "";
         tabE.className = `flex items-center px-4 cursor-pointer text-white ${tab.isMainTab ? `bg-slate-700 hover:bg-slate-600` : tab.isActive ? `bg-slate-800 hover:bg-slate-700` : `bg-slate-800/50 hover:bg-slate-700/50 text-slate-600`} 
-         flex-1 min-w-0 max-w-[10rem] mb-0 rounded-t-sm h-full transition-all duration-100
-         ${tab.isStacked ? `border-b-2 ${stackColor}` : ""}`;
+        
+         flex-1 min-w-0 max-w-[10rem] mb-0 rounded-t-sm h-full transition-all duration-100`;
         tabE.title = tab.title || "Tab";
 
 
@@ -95,8 +107,7 @@ export const renderTabs = (tabs) => {
 
             }
                 
-            }
-        });
+        };
 
         tabE.ondragend = (e) => {
             if (e.screenX < window.screenX || e.screenX > window.screenX + window.outerWidth ||
@@ -130,6 +141,5 @@ export const renderTabs = (tabs) => {
             window.electronAPI.switchTab(index);
         }
 
-        tabsList.appendChild(tabE);
-    });
+        return tabE;
 }
