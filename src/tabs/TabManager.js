@@ -3,6 +3,7 @@ const WindowResizing = require('../main/WindowResizing');
 const fs = require('fs');
 const path = require('path');
 
+const crypto = require('crypto');
 
 class TabManager {
 
@@ -39,7 +40,7 @@ class TabManager {
 
     }
 
-    createTab(newAddress = "", switchTo = true) {
+    createTab(newAddress = "", switchTo = true, isStacked = false, stackId = null) {
         let newTab = {
             contentView: new WebContentsView({
                 webPreferences: {
@@ -49,8 +50,8 @@ class TabManager {
             address: "",
             title: "",
             isActive: true,
-            isStacked: false,
-            stackInd: -1,
+            isStacked: isStacked,
+            stackId: stackId,
             lastActiveAt: Date.now(),
             keepActive: false
         };
@@ -243,7 +244,9 @@ class TabManager {
             address: tab.address,
             isActive: tab.isActive,
             lastActiveAt: tab.lastActiveAt,
-            keepActive: tab.keepActive
+            keepActive: tab.keepActive,
+            isStacked: tab.isStacked,
+            stackId: tab.stackId
         }));
 
         this.ui.webContents.send("updateTabs", tabData);
@@ -416,10 +419,54 @@ class TabManager {
     }
 
 
+    // tab stacking
+    createStack(tabIndices) {
+        const stackId = crypto.randomUUID();
+
+        tabIndices.forEach(index => {
+            if (this.tabs[index]) {
+                this.tabs[index].isStacked = true;
+                this.tabs[index].stackId = stackId;
+            }
+        });
+
+        this.sendTabData();
 
 
+    }
+
+    updateStack(stackId, tabIndex) {
+        if (this.tabs[tabIndex]){
+            this.tabs[tabIndex].stackId = stackId;
+             this.tabs[tabIndex].isStacked = true;
+        }
+
+        this.sendTabData();
+    }
+
+    removeFromStack(tabIndex) {
+        if(this.tabs[tabIndex]){
+            this.tabs[tabIndex].isStacked = false;
+            this.tabs[tabIndex].stackId = null;
+        }
+        this.sendTabData();
+    }
 
 
+    deleteStack(stackId) {
+        this.tabs.forEach(tab => {
+            if (tab.stackId === stackId) {
+                tab.isStacked = false;
+                tab.stackId = null;
+            }
+
+        });
+
+         this.sendTabData();
+
+    }
+
+    //settings and config
     updateDefaultSite(site) {
         this.defaultSite = site;
 
@@ -450,7 +497,10 @@ class TabManager {
                 if (config.tabs && Array.isArray(config.tabs)) {
                     
                     config.tabs.forEach(tabData => {
-                        this.createTab(tabData.address, false);
+                        this.createTab(tabData.address, false, 
+                            tabData.isStacked || false,
+                            tabData.stackId || null
+                        );
                     });
                     if (this.tabs.length > 0) {
                         this.switchTab(this.tabs.length - 1);
@@ -474,7 +524,9 @@ class TabManager {
         try {
             const savedTabs = this.tabs.map(tab => ({
                 address: tab.address,
-                title: tab.title
+                title: tab.title,
+                isStacked: tab.isStacked,
+                stackId: tab.stackId,
             }));
 
             const config = {

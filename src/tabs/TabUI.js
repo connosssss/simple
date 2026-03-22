@@ -3,14 +3,55 @@
 
 const tabsList = document.getElementById("tabs-list");
 
+
+const stackColors = [
+    'border-b-blue-500', 'border-b-red-500', 'border-b-green-500', 
+    'border-b-yellow-500', 'border-b-purple-500', 'border-b-pink-500', 
+    'border-b-teal-500', 'border-b-indigo-500'
+];
+
+  
+
+function getStackColor(stackId) {
+
+    if (!stackId) return "";
+    let hash = 0;
+
+    for (let i = 0; i < stackId.length; i++) {
+     hash = stackId.charCodeAt(i) + ((hash << 5) - hash);
+    }
+
+    const index = Math.abs(hash) % stackColors.length;
+    return stackColors[index];
+}
+
+
+
 export const renderTabs = (tabs) => {
     tabsList.innerHTML = "";
 
+    const stacks = {};
+
+    tabs.forEach(tab => {
+
+        if (tab.isStacked) {
+            if (!stacks[tab.stackId]) {
+                stacks[tab.stackId] = [];
+            }
+            stacks[tab.stackId].push(tab);
+        }
+    });
+    
+
     tabs.forEach((tab, index) => {
         const tabE = document.createElement("div");
+        let stackColor = tab.isStacked ? getStackColor(tab.stackId) : "";
         tabE.className = `flex items-center px-4 cursor-pointer text-white ${tab.isMainTab ? `bg-slate-700 hover:bg-slate-600` : tab.isActive ? `bg-slate-800 hover:bg-slate-700` : `bg-slate-800/50 hover:bg-slate-700/50 text-slate-600`} 
-         flex-1 min-w-0 max-w-[10rem] mb-0 rounded-t-sm h-full transition-all duration-100`;
-        tabE.title = tab.title || "Tab"
+         flex-1 min-w-0 max-w-[10rem] mb-0 rounded-t-sm h-full transition-all duration-100
+         ${tab.isStacked ? `border-b-2 ${stackColor}` : ""}`;
+        tabE.title = tab.title || "Tab";
+
+
 
         const titleSpan = document.createElement("span");
         titleSpan.className = "truncate flex-1 overflow-hidden pointer-events-none text-sm";
@@ -26,13 +67,36 @@ export const renderTabs = (tabs) => {
         };
 
         tabE.ondragover = (e) => { e.preventDefault(); };
+
+
         tabE.ondrop = (e) => {
             e.preventDefault();
             const startingIndex = parseInt(e.dataTransfer.getData("text/plain"));
+
+
             if (startingIndex !== index) {
-                window.electronAPI.reorderTabs(startingIndex, index);
+                const rect = tabE.getBoundingClientRect();
+                const x = e.clientX - rect.left;
+
+                if (x > rect.width * 0.25 && x < rect.width * 0.75) {
+                    
+                    if (tab.isStacked){
+                        window.electronAPI.updateStack(tab.stackId, startingIndex);
+                    }
+
+                    else{
+                        window.electronAPI.createStack([startingIndex, index]);
+                    }
+
+                }
+                else {
+                    window.electronAPI.reorderTabs(startingIndex, index);
+                }
+
             }
-        };
+                
+            }
+        });
 
         tabE.ondragend = (e) => {
             if (e.screenX < window.screenX || e.screenX > window.screenX + window.outerWidth ||

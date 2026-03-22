@@ -47,5 +47,6 @@ contextBridge.exposeInMainWorld("electronAPI", {
     createStack: (tabIndices) => ipcRenderer.send("createStack", tabIndices),
     updateStack: (stackId, tabIndex) => ipcRenderer.send("updateStack", stackId, tabIndex),
     deleteStack: (stackId) => ipcRenderer.send("deleteStack", stackId),
+    removeFromStack: (tabIndex) => ipcRenderer.send("removeFromStack", tabIndex),
 
 })

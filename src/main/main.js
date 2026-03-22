@@ -64,17 +64,22 @@ const ipcSetup = () => {
   // Tab stacking
   ipcMain.on("createStack", (event, tabIndices) => {
       const tm = getTabManager(event);
-    //  if (tm) tm.createStack(tabIndices);
+      if (tm) tm.createStack(tabIndices);
   });
 
   ipcMain.on("updateStack", (event, stackId, tabIndex) => {
       const tm = getTabManager(event);
-     // if (tm) tm.updateStack(stackId, tabIndex);
+      if (tm) tm.updateStack(stackId, tabIndex);
   });
 
   ipcMain.on("deleteStack", (event, stackId) => {
       const tm = getTabManager(event);
-      //if (tm) tm.deleteStack(stackId);
+      if (tm) tm.deleteStack(stackId);
+  });
+
+  ipcMain.on("removeFromStack", (event, tabIndex) => {
+      const tm = getTabManager(event);
+      if (tm) tm.removeFromStack(tabIndex);
   });
 
 
