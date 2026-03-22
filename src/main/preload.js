@@ -43,4 +43,9 @@ contextBridge.exposeInMainWorld("electronAPI", {
     clearThirdPartyCookies: () => ipcRenderer.invoke("clearThirdPartyCookies"),
     setBlockTrackers: (enabled) => ipcRenderer.send("setBlockTrackers", enabled),
 
+
+    createStack: (tabIndices) => ipcRenderer.send("createStack", tabIndices),
+    updateStack: (stackId, tabIndex) => ipcRenderer.send("updateStack", stackId, tabIndex),
+    deleteStack: (stackId) => ipcRenderer.send("deleteStack", stackId),
+
 })

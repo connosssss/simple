@@ -61,6 +61,22 @@ const ipcSetup = () => {
   });
   
 
+  // Tab stacking
+  ipcMain.on("createStack", (event, tabIndices) => {
+      const tm = getTabManager(event);
+    //  if (tm) tm.createStack(tabIndices);
+  });
+
+  ipcMain.on("updateStack", (event, stackId, tabIndex) => {
+      const tm = getTabManager(event);
+     // if (tm) tm.updateStack(stackId, tabIndex);
+  });
+
+  ipcMain.on("deleteStack", (event, stackId) => {
+      const tm = getTabManager(event);
+      //if (tm) tm.deleteStack(stackId);
+  });
+
 
   // Navigation
   ipcMain.on("search", (event, address) => {
