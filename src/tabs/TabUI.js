@@ -7,6 +7,8 @@ const stackColors = [
     'border-b-teal-500', 'border-b-indigo-500'
 ];
 
+const collapsedStacks = new Set();
+
   
 
 function getStackColor(stackId) {
@@ -37,15 +39,51 @@ export const renderTabs = (tabs) => {
 
             const stackContainer = document.createElement("div");
             const stackColor = getStackColor(tab.stackId);
+            const isCollapsed = collapsedStacks.has(tab.stackId);
             stackContainer.className = `flex flex-row items-end h-full border-b-2 ${stackColor} rounded-t-sm overflow-hidden`;
 
 
-            const stackTabs = tabs
-                .map((t, i) => ({ tab: t, index: i }))
-                .filter(entry => entry.tab.stackId === tab.stackId);
-            stackTabs.forEach(({ tab: sTab, index: sIndex }) => {
-                stackContainer.appendChild(createTabElement(sTab, sIndex, true));
-            });
+            const stackTabs = tabs.map((t, i) => ({ tab: t, index: i })).filter(entry => entry.tab.stackId === tab.stackId);
+
+            const toggleBtn = document.createElement("button");
+            toggleBtn.className = "flex items-center justify-center px-1 h-full bg-slate-800/50 hover:bg-slate-700/50 transition-all duration-100 text-xs flex-shrink-0";
+            toggleBtn.title = isCollapsed ? "Expand group" : "Collapse group";
+
+
+            toggleBtn.onclick = (e) => {
+                e.stopPropagation();
+
+                if (collapsedStacks.has(tab.stackId)) {
+                    collapsedStacks.delete(tab.stackId);
+                } 
+                
+                else {
+                    collapsedStacks.add(tab.stackId);
+                }
+                renderTabs(tabs);
+            };
+
+
+
+
+            stackContainer.appendChild(toggleBtn);
+
+            if (isCollapsed) {
+                const activeEntry = stackTabs.find(e => e.tab.isActive || e.tab.isMainTab) || stackTabs[0];
+                stackContainer.appendChild(createTabElement(activeEntry.tab, activeEntry.index, true));
+
+                
+                const badge = document.createElement("span");
+                badge.className = "flex items-center justify-center h-full bg-slate-800/50 flex-shrink-0 pointer-events-none";
+                stackContainer.appendChild(badge);
+
+            } 
+            
+            else {
+                stackTabs.forEach(({ tab: sTab, index: sIndex }) => {
+                    stackContainer.appendChild(createTabElement(sTab, sIndex, true));
+                });
+            }
 
             tabsList.appendChild(stackContainer);
         } 
