@@ -6,6 +6,7 @@ simple is an electron based browser focused around giving users more features ar
 #### Features List 
 ---
 The list is mainly just a way to track semi big features or updates as they come out, with it not covering things like bug fixes
+3.23 Now supports basic tab grouping/ stacking
 3.13 Browser now let's users see and delete cookies / trackers
 2.19.25 Tabs now save on close
 2.17.25: Users can now right click to show a context menu (an example being, right click an image and have the chance to open in new tab or copy it)
