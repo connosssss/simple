@@ -224,7 +224,10 @@ class TabManager {
     }
 
     reorderTabs(fromIndex, toIndex) {
-        if (fromIndex < 0 || fromIndex >= this.tabs.length || toIndex < 0 || toIndex >= this.tabs.length) return;
+        if (fromIndex < 0 || fromIndex >= this.tabs.length) return;
+        
+        if (toIndex < 0) toIndex = 0;
+        if (toIndex >= this.tabs.length) toIndex = this.tabs.length - 1;
 
         const tabToMove = this.tabs[fromIndex];
         this.tabs.splice(fromIndex, 1);

@@ -9,6 +9,17 @@ const stackColors = [
 
 const collapsedStacks = new Set();
 
+tabsList.ondragover = (e) => { e.preventDefault(); };
+
+tabsList.ondrop = (e) => {
+    e.preventDefault();
+    const startingIndex = parseInt(e.dataTransfer.getData("text/plain"));
+    if (!isNaN(startingIndex)) {
+        window.electronAPI.removeFromStack(startingIndex);
+        window.electronAPI.reorderTabs(startingIndex, 1000);
+    }
+};
+
   
 
 function getStackColor(stackId) {
@@ -70,7 +81,7 @@ export const renderTabs = (tabs) => {
 
             if (isCollapsed) {
                 const activeEntry = stackTabs.find(e => e.tab.isActive || e.tab.isMainTab) || stackTabs[0];
-                stackContainer.appendChild(createTabElement(activeEntry.tab, activeEntry.index, true));
+                stackContainer.appendChild(createTabElement(activeEntry.tab, activeEntry.index, true, tabs));
 
                 
                 const badge = document.createElement("span");
@@ -81,7 +92,7 @@ export const renderTabs = (tabs) => {
             
             else {
                 stackTabs.forEach(({ tab: sTab, index: sIndex }) => {
-                    stackContainer.appendChild(createTabElement(sTab, sIndex, true));
+                    stackContainer.appendChild(createTabElement(sTab, sIndex, true, tabs));
                 });
             }
 
@@ -89,12 +100,12 @@ export const renderTabs = (tabs) => {
         } 
         
         else {
-            tabsList.appendChild(createTabElement(tab, index, false));
+            tabsList.appendChild(createTabElement(tab, index, false, tabs));
         }
     });
 };
 
-function createTabElement(tab, index, isInStack) {
+function createTabElement(tab, index, isInStack, tabs) {
         const tabE = document.createElement("div");
         tabE.className = `flex items-center px-4 cursor-pointer text-white ${tab.isMainTab ? `bg-slate-700 hover:bg-slate-600` : tab.isActive ? `bg-slate-800 hover:bg-slate-700` : `bg-slate-800/50 hover:bg-slate-700/50 text-slate-600`} 
         
@@ -121,6 +132,7 @@ function createTabElement(tab, index, isInStack) {
 
         tabE.ondrop = (e) => {
             e.preventDefault();
+            e.stopPropagation();
             const startingIndex = parseInt(e.dataTransfer.getData("text/plain"));
 
 
@@ -140,6 +152,12 @@ function createTabElement(tab, index, isInStack) {
 
                 }
                 else {
+                    const startingTab = tabs && tabs[startingIndex] ? tabs[startingIndex] : null;
+
+                    if (startingTab && startingTab.isStacked && startingTab.stackId !== tab.stackId) {
+                        window.electronAPI.removeFromStack(startingIndex);
+                    }
+                    
                     window.electronAPI.reorderTabs(startingIndex, index);
                 }
 
