@@ -1,11 +1,11 @@
 const tabsList = document.getElementById("tabs-list");
 
-
+/*
 const stackColors = [
     'border-b-blue-500', 'border-b-red-500', 'border-b-green-500', 
     'border-b-yellow-500', 'border-b-purple-500', 'border-b-pink-500', 
     'border-b-teal-500', 'border-b-indigo-500'
-];
+]; */
 
 const collapsedStacks = new Set();
 
@@ -49,7 +49,7 @@ export const renderTabs = (tabs) => {
             renderedStacks.add(tab.stackId);
 
             const stackContainer = document.createElement("div");
-            const stackColor = getStackColor(tab.stackId);
+            const stackColor = "border-b-slate-600";
             const isCollapsed = collapsedStacks.has(tab.stackId);
             stackContainer.className = `flex flex-row items-end h-full border-b-2 ${stackColor} rounded-t-sm overflow-hidden`;
 
