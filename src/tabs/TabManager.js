@@ -132,10 +132,23 @@ class TabManager {
     closeTab(tabID) {
         if (tabID < this.tabs.length && this.tabs.length > 1) {
             let tabToClose = this.tabs[tabID];
+            const oldStackId = tabToClose.stackId;
 
             this.lastOpenedTabs = this.lastOpenedTabs.filter(t => t !== tabToClose);
             
             this.tabs.splice(tabID, 1);
+
+            if (oldStackId) {
+                const remaining = this.tabs.filter(t => t.stackId === oldStackId);
+
+                if (remaining.length < 2) {
+                    remaining.forEach(t => {
+                        t.isStacked = false;
+                        t.stackId = null;
+                    });
+
+                }
+            }
 
             if (tabToClose.contentView) {
 
@@ -288,10 +301,24 @@ class TabManager {
 
     popTab(index) {
         if (index < 0 || index >= this.tabs.length) return null;
+
         const tab = this.tabs[index];
+        const oldStackId = tab.stackId;
+
         this.tabs.splice(index, 1);
         this.lastOpenedTabs = this.lastOpenedTabs.filter(t => t !== tab);
 
+        if (oldStackId) {
+            const remaining = this.tabs.filter(t => t.stackId === oldStackId);
+
+            if (remaining.length < 2) {
+                remaining.forEach(t => {
+                    t.isStacked = false;
+                    t.stackId = null;
+                });
+
+            }
+        }
 
         if (tab.contentView) {
             try {
@@ -472,9 +499,24 @@ class TabManager {
     }
 
     removeFromStack(tabIndex) {
+
         if(this.tabs[tabIndex]){
+            const oldStackId = this.tabs[tabIndex].stackId;
+            
             this.tabs[tabIndex].isStacked = false;
             this.tabs[tabIndex].stackId = null;
+
+            if (oldStackId) {
+                const remaining = this.tabs.filter(t => t.stackId === oldStackId);
+                if (remaining.length < 2) {
+                    remaining.forEach(t => {
+                        t.isStacked = false;
+                        t.stackId = null;
+                    });
+                }
+            }
+
+            
         }
         this.sendTabData();
     }

@@ -57,8 +57,8 @@ export const renderTabs = (tabs) => {
             const stackTabs = tabs.map((t, i) => ({ tab: t, index: i })).filter(entry => entry.tab.stackId === tab.stackId);
 
             const toggleBtn = document.createElement("button");
-            toggleBtn.className = "flex items-center justify-center px-1 h-full bg-slate-800/50 hover:bg-slate-700/50 transition-all duration-100 text-xs flex-shrink-0";
-            toggleBtn.title = isCollapsed ? "Expand group" : "Collapse group";
+            toggleBtn.className = "flex items-center justify-center px-3 h-full bg-slate-800/50 hover:bg-slate-700/50 transition-all duration-100 text-xs flex-shrink-0";
+           // toggleBtn.title = isCollapsed ? "Expand group" : "Collapse group";
 
 
             toggleBtn.onclick = (e) => {
