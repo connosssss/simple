@@ -1,11 +1,5 @@
 const tabsList = document.getElementById("tabs-list");
 
-/*
-const stackColors = [
-    'border-b-blue-500', 'border-b-red-500', 'border-b-green-500', 
-    'border-b-yellow-500', 'border-b-purple-500', 'border-b-pink-500', 
-    'border-b-teal-500', 'border-b-indigo-500'
-]; */
 
 const collapsedStacks = new Set();
 
@@ -22,18 +16,6 @@ tabsList.ondrop = (e) => {
 
   
 
-function getStackColor(stackId) {
-
-    if (!stackId) return "";
-    let hash = 0;
-
-    for (let i = 0; i < stackId.length; i++) {
-     hash = stackId.charCodeAt(i) + ((hash << 5) - hash);
-    }
-
-    const index = Math.abs(hash) % stackColors.length;
-    return stackColors[index];
-}
 
 
 
@@ -81,14 +63,15 @@ export const renderTabs = (tabs) => {
 
             if (isCollapsed) {
                 const activeEntry = stackTabs.find(e => e.tab.isActive || e.tab.isMainTab) || stackTabs[0];
-                stackContainer.appendChild(createTabElement(activeEntry.tab, activeEntry.index, true, tabs));
+                stackContainer.appendChild(createTabElement(activeEntry.tab, activeEntry.index, true, tabs, true));
 
-                
-                const badge = document.createElement("span");
+                //might be a better way to do this directly
+                activeEntry.className = `flex items-center px-4 cursor-pointer text-white ${tab.isActive ? `bg-slate-800 hover:bg-slate-700` : `bg-slate-800/50 hover:bg-slate-700/50 text-slate-600`} bg-red-200`;
+               /* const badge = document.createElement("span");
                 badge.className = "flex items-center justify-center h-full bg-slate-800/50 flex-shrink-0 pointer-events-none";
-                stackContainer.appendChild(badge);
+                stackContainer.appendChild(badge); */
 
-            } 
+            }
             
             else {
                 stackTabs.forEach(({ tab: sTab, index: sIndex }) => {
@@ -105,11 +88,28 @@ export const renderTabs = (tabs) => {
     });
 };
 
-function createTabElement(tab, index, isInStack, tabs) {
+function createTabElement(tab, index, isInStack, tabs, isStackRep) {
         const tabE = document.createElement("div");
-        tabE.className = `flex items-center px-4 cursor-pointer text-white ${tab.isMainTab ? `bg-slate-700 hover:bg-slate-600` : tab.isActive ? `bg-slate-800 hover:bg-slate-700` : `bg-slate-800/50 hover:bg-slate-700/50 text-slate-600`} 
+        let bgClass = "bg-slate-800/50 hover:bg-slate-700/50 text-slate-400";
+
+
+        if (isStackRep) {
+            bgClass = "bg-slate-500/60 hover:bg-slate-600/60 text-slate-200"; 
+        }   
         
-         flex-1 min-w-0 max-w-[10rem] mb-0 rounded-t-sm h-full transition-all duration-100`;
+        else if (tab.isMainTab) {
+            bgClass = "bg-slate-700 hover:bg-slate-600 text-white";
+        } 
+        
+        else if (tab.isActive) {
+            bgClass = "bg-slate-800 hover:bg-slate-700 text-white";
+        } 
+        
+        else {
+            bgClass = "bg-slate-800/50 hover:bg-slate-700/50 text-slate-600";
+        }
+        tabE.className = `flex items-center px-4 cursor-pointer ${bgClass} flex-1 min-w-0 max-w-[10rem] mb-0 rounded-t-sm h-full transition-all duration-100`
+
         tabE.title = tab.title || "Tab";
 
 

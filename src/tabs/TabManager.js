@@ -535,7 +535,12 @@ class TabManager {
 
     }
 
+
+
     //settings and config
+
+
+
     updateDefaultSite(site) {
         this.defaultSite = site;
 
@@ -611,6 +616,8 @@ class TabManager {
         }
     }
 }
+
+
 
 module.exports = TabManager;
 
