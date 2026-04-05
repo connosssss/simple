@@ -14,12 +14,52 @@ tabsList.ondrop = (e) => {
     }
 };
 
-  
+let latestTabs = null;
+
+window.electronAPI.onPromptStackName((data) => {
+    const { stackId, currentName } = data;
+
+    const toggleBtn = document.querySelector(`[data-stack-id="${stackId}"]`);
+    if (!toggleBtn) return;
+
+    toggleBtn.innerHTML = "";
 
 
+    const input = document.createElement("input");
+    input.type = "text";
+    input.value = currentName || "";
+    input.placeholder = "Stack name...";
+    input.className = "bg-slate-700 text-white text-xs px-1 outline-none w-20 min-w-[60px] max-w-[100px]";
+
+ 
+    const commit = () => {
+        window.electronAPI.renameStack(stackId, input.value);
+    };
+
+    input.addEventListener("keydown", (e) => {
+        e.stopPropagation();
+        if (e.key === "Enter") {
+            commit();
+            input.blur();
+        } 
+        
+        else if (e.key === "Escape") {
+            if (latestTabs) renderTabs(latestTabs);
+        }
+    });
+
+    input.addEventListener("blur", () => {
+        commit();
+    });
+
+    toggleBtn.appendChild(input);
+    input.focus();
+    input.select();
+});
 
 
 export const renderTabs = (tabs) => {
+    latestTabs = tabs;
     tabsList.innerHTML = "";
     const renderedStacks = new Set();
 
@@ -40,8 +80,17 @@ export const renderTabs = (tabs) => {
 
             const toggleBtn = document.createElement("button");
             toggleBtn.className = "flex items-center justify-center px-3 h-full bg-slate-800/50 hover:bg-slate-700/50 transition-all duration-100 text-xs flex-shrink-0";
-           // toggleBtn.title = isCollapsed ? "Expand group" : "Collapse group";
+            toggleBtn.setAttribute("data-stack-id", tab.stackId);
 
+            const stackName = tab.stackName;
+            if (stackName) {
+
+                const div = document.createElement("div");
+
+                div.className = "text-slate-300 text-xs truncate max-w-[80px] pointer-events-none";
+                div.textContent = stackName;
+                toggleBtn.appendChild(div);
+            }
 
             toggleBtn.onclick = (e) => {
                 e.stopPropagation();
@@ -56,6 +105,17 @@ export const renderTabs = (tabs) => {
                 renderTabs(tabs);
             };
 
+            toggleBtn.addEventListener("contextmenu", (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+
+                window.electronAPI.showStackContextMenu({
+                    x: e.clientX,
+                    y: e.clientY,
+                    stackId: tab.stackId
+                });
+
+            });
 
 
 

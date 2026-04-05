@@ -19,6 +19,7 @@ class TabManager {
         this.lastOpenedTabs = [];
         this.settingsUI = null; 
         this.defaultSite = "https://google.com";
+        this.stackNames = {}; // { stackId: "name" }
         this.configPath = path.join(app.getPath('userData'), 'config.json');
         if (!skipConfig){
             this.loadConfig();
@@ -146,7 +147,7 @@ class TabManager {
                         t.isStacked = false;
                         t.stackId = null;
                     });
-
+                    delete this.stackNames[oldStackId];
                 }
             }
 
@@ -262,7 +263,8 @@ class TabManager {
             lastActiveAt: tab.lastActiveAt,
             keepActive: tab.keepActive,
             isStacked: tab.isStacked,
-            stackId: tab.stackId
+            stackId: tab.stackId,
+            stackName: tab.stackId ? (this.stackNames[tab.stackId] || null) : null
         }));
 
         this.ui.webContents.send("updateTabs", tabData);
@@ -316,7 +318,7 @@ class TabManager {
                     t.isStacked = false;
                     t.stackId = null;
                 });
-
+                delete this.stackNames[oldStackId];
             }
         }
 
@@ -465,6 +467,7 @@ class TabManager {
                             t.isStacked = false;
                             t.stackId = null;
                         });
+                        delete this.stackNames[oldStackId];
                     }
                 }
                 this.tabs[index].isStacked = true;
@@ -489,6 +492,7 @@ class TabManager {
                         t.isStacked = false;
                         t.stackId = null;
                     });
+                    delete this.stackNames[oldStackId];
                 }
             }
             this.tabs[tabIndex].stackId = stackId;
@@ -513,6 +517,7 @@ class TabManager {
                         t.isStacked = false;
                         t.stackId = null;
                     });
+                    delete this.stackNames[oldStackId];
                 }
             }
 
@@ -531,8 +536,18 @@ class TabManager {
 
         });
 
-         this.sendTabData();
+        delete this.stackNames[stackId];
+        this.sendTabData();
 
+    }
+
+    renameStack(stackId, name) {
+        if (name && name.trim()) {
+            this.stackNames[stackId] = name.trim();
+        } else {
+            delete this.stackNames[stackId];
+        }
+        this.sendTabData();
     }
 
 
@@ -566,6 +581,10 @@ class TabManager {
                 if (config.defaultSite) {
                     this.defaultSite = config.defaultSite;
                     
+                }
+
+                if (config.stackNames) {
+                    this.stackNames = config.stackNames;
                 }
 
                 if (config.tabs && Array.isArray(config.tabs)) {
@@ -606,6 +625,7 @@ class TabManager {
             const config = {
                 defaultSite: this.defaultSite,
                 tabs: savedTabs,
+                stackNames: this.stackNames,
             };
 
             fs.writeFileSync(this.configPath, JSON.stringify(config));

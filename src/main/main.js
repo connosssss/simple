@@ -82,6 +82,46 @@ const ipcSetup = () => {
       if (tm) tm.removeFromStack(tabIndex);
   });
 
+  ipcMain.on("renameStack", (event, stackId, name) => {
+      const tm = getTabManager(event);
+      if (tm) tm.renameStack(stackId, name);
+  });
+
+  ipcMain.on("showStackContextMenu", (event, vars) => {
+  const data = getManager(event);
+    if (!data) return;
+    const { tabManager, window: win } = data;
+
+
+    const currentName = tabManager.stackNames[vars.stackId] || "";
+
+    const cmTemplate = [
+      {
+        label: currentName ? `Rename Stack "${currentName}"` : 'Name Stack',
+        click: () => {
+            data.ui.webContents.send("promptStackName", {
+            stackId: vars.stackId,
+            currentName: currentName
+          });
+        }
+      },
+      { type: 'separator' },
+      {
+        label: 'Ungroup Stack',
+        click: () => {
+          tabManager.deleteStack(vars.stackId);
+        }
+      }
+    ];
+
+    const menu = Menu.buildFromTemplate(cmTemplate);
+    menu.popup({
+      window: win,
+      x: vars.x,
+      y: vars.y
+    });
+  });
+
 
   // Navigation
   ipcMain.on("search", (event, address) => {
