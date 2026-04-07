@@ -82,13 +82,16 @@ export const renderTabs = (tabs) => {
             toggleBtn.className = "flex items-center justify-center px-3 h-full bg-slate-800/50 hover:bg-slate-700/50 transition-all duration-100 text-xs flex-shrink-0";
             toggleBtn.setAttribute("data-stack-id", tab.stackId);
 
+            const toggleIcon = document.createElement("div");
+            toggleIcon.className = isCollapsed ? "text-slate-400 font-bold pointer-events-none" : "text-slate-400 font-bold mr-1 pointer-events-none";
+            toggleIcon.textContent = isCollapsed ? "+" : "-";
+            toggleBtn.appendChild(toggleIcon);
+
             const stackName = tab.stackName;
-            if (stackName) {
-
+            if (!isCollapsed) {
                 const div = document.createElement("div");
-
                 div.className = "text-slate-300 text-xs truncate max-w-[80px] pointer-events-none";
-                div.textContent = stackName;
+                div.textContent = stackName || "Group";
                 toggleBtn.appendChild(div);
             }
 
@@ -119,21 +122,15 @@ export const renderTabs = (tabs) => {
 
 
 
-            stackContainer.appendChild(toggleBtn);
-
             if (isCollapsed) {
                 const activeEntry = stackTabs.find(e => e.tab.isActive || e.tab.isMainTab) || stackTabs[0];
-                stackContainer.appendChild(createTabElement(activeEntry.tab, activeEntry.index, true, tabs, true));
-
-                //might be a better way to do this directly
-                activeEntry.className = `flex items-center px-4 cursor-pointer text-white ${tab.isActive ? `bg-slate-800 hover:bg-slate-700` : `bg-slate-800/50 hover:bg-slate-700/50 text-slate-600`} bg-red-200`;
-               /* const badge = document.createElement("span");
-                badge.className = "flex items-center justify-center h-full bg-slate-800/50 flex-shrink-0 pointer-events-none";
-                stackContainer.appendChild(badge); */
-
+                const stackRep = createTabElement(activeEntry.tab, activeEntry.index, true, tabs, true);
+                stackRep.setAttribute("data-stack-id", tab.stackId);
+                stackContainer.appendChild(stackRep);
             }
-            
+          
             else {
+                stackContainer.appendChild(toggleBtn);
                 stackTabs.forEach(({ tab: sTab, index: sIndex }) => {
                     stackContainer.appendChild(createTabElement(sTab, sIndex, true, tabs));
                 });
@@ -154,7 +151,7 @@ function createTabElement(tab, index, isInStack, tabs, isStackRep) {
 
 
         if (isStackRep) {
-            bgClass = "bg-slate-500/60 hover:bg-slate-600/60 text-slate-200"; 
+            bgClass = "bg-slate-800/50 hover:bg-slate-700/50 text-slate-400"; 
         }   
         
         else if (tab.isMainTab) {
@@ -176,7 +173,13 @@ function createTabElement(tab, index, isInStack, tabs, isStackRep) {
 
         const titleSpan = document.createElement("span");
         titleSpan.className = "truncate flex-1 overflow-hidden pointer-events-none text-sm";
-        titleSpan.textContent = tab.title || "New Tab";
+        if (isStackRep) {
+            titleSpan.innerHTML = `<span class="text-slate-400 font-bold mr-1">+</span>${tab.stackName || "Group"}`;
+        }
+        
+        else {
+            titleSpan.textContent = tab.title || "New Tab";
+        }
         tabE.appendChild(titleSpan);
 
 
@@ -236,25 +239,47 @@ function createTabElement(tab, index, isInStack, tabs, isStackRep) {
 
         tabE.addEventListener("contextmenu", (event) => {
             event.preventDefault()
-            window.electronAPI.showContextMenu({
-                x: event.clientX,
-                y: event.clientY,
-                tabIndex: index
-            });
+            if (isStackRep) {
+                window.electronAPI.showStackContextMenu({
+                    x: event.clientX,
+                    y: event.clientY,
+                    stackId: tab.stackId
+                });
+            }
+            
+            else {
+                window.electronAPI.showContextMenu({
+                    x: event.clientX,
+                    y: event.clientY,
+                    tabIndex: index
+                });
+            }
         })
 
-        const closeB = document.createElement("button");
-        closeB.className = `${tab.isMainTab ? `bg-slate-900 hover:bg-slate-800` : `bg-slate-900/80 hover:bg-slate-800`} transition-all duration-100 text-white rounded-sm text-xs font-bold  flex-shrink-0 ml-2 px-1`;
-        closeB.textContent = "×";
-        closeB.onclick = (e) => {
-            e.stopPropagation();
-            window.electronAPI.closeTab(index);
+        if (!isStackRep) {
+            const closeB = document.createElement("button");
+            closeB.className = `${tab.isMainTab ? `bg-slate-900 hover:bg-slate-800` : `bg-slate-900/80 hover:bg-slate-800`} transition-all duration-100 text-white rounded-sm text-xs font-bold  flex-shrink-0 ml-2 px-1`;
+            closeB.textContent = "×";
+            closeB.onclick = (e) => {
+                e.stopPropagation();
+                window.electronAPI.closeTab(index);
+            }
+          
+            tabE.appendChild(closeB);
         }
 
-        tabE.appendChild(closeB);
-
-        tabE.onclick = () => {
-            window.electronAPI.switchTab(index);
+        tabE.onclick = (e) => {
+            if (isStackRep) {
+                e.stopPropagation();
+                if (collapsedStacks.has(tab.stackId)) {
+                    collapsedStacks.delete(tab.stackId);
+                } else {
+                    collapsedStacks.add(tab.stackId);
+                }
+                renderTabs(tabs);
+            } else {
+                window.electronAPI.switchTab(index);
+            }
         }
 
         return tabE;
