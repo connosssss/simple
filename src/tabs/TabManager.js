@@ -1,9 +1,10 @@
-const { WebContentsView, app, Menu, clipboard, session} = require('electron');
+const { WebContentsView, app, session} = require('electron');
 const WindowResizing = require('../main/WindowResizing');
-const fs = require('fs');
 const path = require('path');
 
-const crypto = require('crypto');
+const TabStacking = require('./TabStacking');
+const TabContextMenu = require('./TabContextMenu');
+const TabConfig = require('./TabConfig');
 
 class TabManager {
 
@@ -23,20 +24,6 @@ class TabManager {
         this.configPath = path.join(app.getPath('userData'), 'config.json');
         if (!skipConfig){
             this.loadConfig();
-        }
-
-    }
-
-    setSettingsUI(view) {
-        this.settingsUI = view;
-
-        if (this.settingsUI && !this.settingsUI.webContents.isDestroyed()) {
-
-            this.settingsUI.webContents.once('did-finish-load', () => {
-                
-                this.settingsUI.webContents.send("initSettings", { defaultSite: this.defaultSite });
-                this.sendTabData();
-            });
         }
 
     }
@@ -381,263 +368,12 @@ class TabManager {
         this.sendTabData();
     }
 
-
-
-
-
-
-
-    attachContextMenu(tab) {
-        
-        tab.contentView.webContents.on('context-menu', (event, params) => {
-            const menuTemplate = [];
-
-            if (params.linkURL) {
-
-                menuTemplate.push({
-                    label: 'Open Link in New Tab',
-                    click: () => this.createTab(params.linkURL, false)
-                });
-
-                menuTemplate.push({
-                    label: 'Copy Link Address',
-                    click: () => clipboard.writeText(params.linkURL)
-                });
-
-                menuTemplate.push({ type: 'separator' });
-            }
-
-            if (params.mediaType === 'image') {
-
-                menuTemplate.push({
-                    label: 'Open Image in New Tab',
-                    click: () => this.createTab(params.srcURL, false)
-                });
-
-                menuTemplate.push({
-                    label: 'Copy Image',
-                    click: () => tab.contentView.webContents.copyImageAt(params.x, params.y)
-                });
-
-                menuTemplate.push({
-                    label: 'Copy Image Address',
-                    click: () => clipboard.writeText(params.srcURL)
-                });
-
-                menuTemplate.push({ type: 'separator' });
-            }
-
-            if (params.selectionText) {
-                menuTemplate.push({ role: 'copy' });
-            }
-
-    
-        
-            menuTemplate.push({
-                label: 'Reload',
-                click: () => tab.contentView.webContents.reload()
-            });
-
-            menuTemplate.push({ type: 'separator' });
-
-            menuTemplate.push({
-                label: 'Inspect Element',
-                click: () => tab.contentView.webContents.inspectElement(params.x, params.y)
-            });
-
-            const menu = Menu.buildFromTemplate(menuTemplate);
-            menu.popup();
-        });
-    }
-
-
-    // tab stacking
-    createStack(tabIndices) {
-        const stackId = crypto.randomUUID();
-
-        tabIndices.forEach(index => {
-            if (this.tabs[index]) {
-                const oldStackId = this.tabs[index].stackId;
-                if (oldStackId) {
-                    const remaining = this.tabs.filter(
-                        t => t.stackId === oldStackId && t !== this.tabs[index]
-                    );
-                    if (remaining.length < 2) {
-                        remaining.forEach(t => {
-                            t.isStacked = false;
-                            t.stackId = null;
-                        });
-                        delete this.stackNames[oldStackId];
-                    }
-                }
-                this.tabs[index].isStacked = true;
-                this.tabs[index].stackId = stackId;
-            }
-        });
-
-        this.sendTabData();
-
-
-    }
-
-    updateStack(stackId, tabIndex) {
-        if (this.tabs[tabIndex]){
-            const oldStackId = this.tabs[tabIndex].stackId;
-            if (oldStackId && oldStackId !== stackId) {
-                const remaining = this.tabs.filter(
-                    t => t.stackId === oldStackId && t !== this.tabs[tabIndex]
-                );
-                if (remaining.length < 2) {
-                    remaining.forEach(t => {
-                        t.isStacked = false;
-                        t.stackId = null;
-                    });
-                    delete this.stackNames[oldStackId];
-                }
-            }
-            this.tabs[tabIndex].stackId = stackId;
-             this.tabs[tabIndex].isStacked = true;
-        }
-
-        this.sendTabData();
-    }
-
-    removeFromStack(tabIndex) {
-
-        if(this.tabs[tabIndex]){
-            const oldStackId = this.tabs[tabIndex].stackId;
-            
-            this.tabs[tabIndex].isStacked = false;
-            this.tabs[tabIndex].stackId = null;
-
-            if (oldStackId) {
-                const remaining = this.tabs.filter(t => t.stackId === oldStackId);
-                if (remaining.length < 2) {
-                    remaining.forEach(t => {
-                        t.isStacked = false;
-                        t.stackId = null;
-                    });
-                    delete this.stackNames[oldStackId];
-                }
-            }
-
-            
-        }
-        this.sendTabData();
-    }
-
-
-    deleteStack(stackId) {
-        this.tabs.forEach(tab => {
-            if (tab.stackId === stackId) {
-                tab.isStacked = false;
-                tab.stackId = null;
-            }
-
-        });
-
-        delete this.stackNames[stackId];
-        this.sendTabData();
-
-    }
-
-    renameStack(stackId, name) {
-        if (name && name.trim()) {
-            this.stackNames[stackId] = name.trim();
-        } else {
-            delete this.stackNames[stackId];
-        }
-        this.sendTabData();
-    }
-
-
-
-    //settings and config
-
-
-
-    updateDefaultSite(site) {
-        this.defaultSite = site;
-
-        this.saveConfig();
-        if (this.settingsUI && !this.settingsUI.webContents.isDestroyed()) {
-
-            this.settingsUI.webContents.send("initSettings", { defaultSite: this.defaultSite });
-
-        }}
-
-
-
-
-    loadConfig() {
-        
-        try {
-            if (fs.existsSync(this.configPath)) {
-                this.isLoading = true;
-
-                const data = fs.readFileSync(this.configPath);
-                const config = JSON.parse(data);
-
-                if (config.defaultSite) {
-                    this.defaultSite = config.defaultSite;
-                    
-                }
-
-                if (config.stackNames) {
-                    this.stackNames = config.stackNames;
-                }
-
-                if (config.tabs && Array.isArray(config.tabs)) {
-                    
-                    config.tabs.forEach(tabData => {
-                        this.createTab(tabData.address, false, 
-                            tabData.isStacked || false,
-                            tabData.stackId || null
-                        );
-                    });
-                    if (this.tabs.length > 0) {
-                        this.switchTab(this.tabs.length - 1);
-                    }
-                }
-
-                this.isLoading = false;
-            }
-        } 
-        
-        catch (error) {
-            console.error("Error loading config:", error);
-            this.isLoading = false;
-        }
-    }
-
-    saveConfig() {
-        if (this.isLoading) return;
-
-
-        try {
-            const savedTabs = this.tabs.map(tab => ({
-                address: tab.address,
-                title: tab.title,
-                isStacked: tab.isStacked,
-                stackId: tab.stackId,
-            }));
-
-            const config = {
-                defaultSite: this.defaultSite,
-                tabs: savedTabs,
-                stackNames: this.stackNames,
-            };
-
-            fs.writeFileSync(this.configPath, JSON.stringify(config));
-        } 
-        
-        catch (error) {
-            console.error("Error saving: ", error);
-        }
-    }
 }
+
+Object.assign(TabManager.prototype, TabStacking);
+Object.assign(TabManager.prototype, TabContextMenu);
+Object.assign(TabManager.prototype, TabConfig);
 
 
 
 module.exports = TabManager;
-
