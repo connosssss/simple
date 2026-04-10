@@ -84,7 +84,7 @@ export const renderTabs = (tabs) => {
 
             const toggleIcon = document.createElement("div");
             toggleIcon.className = isCollapsed ? "text-slate-400 font-bold pointer-events-none" : "text-slate-400 font-bold mr-1 pointer-events-none";
-            toggleIcon.textContent = isCollapsed ? "+" : "-";
+           // toggleIcon.textContent = isCollapsed ? "+" : "-";
             toggleBtn.appendChild(toggleIcon);
 
             const stackName = tab.stackName;
@@ -174,7 +174,7 @@ function createTabElement(tab, index, isInStack, tabs, isStackRep) {
         const titleSpan = document.createElement("span");
         titleSpan.className = "truncate flex-1 overflow-hidden pointer-events-none text-sm";
         if (isStackRep) {
-            titleSpan.innerHTML = `<span class="text-slate-400 font-bold mr-1">+</span>${tab.stackName || "Group"}`;
+            titleSpan.innerHTML = tab.stackName || "Group";
         }
         
         else {
