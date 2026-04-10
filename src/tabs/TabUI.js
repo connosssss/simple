@@ -31,7 +31,7 @@ window.electronAPI.onPromptStackName((data) => {
     input.placeholder = "Stack name...";
     input.className = "bg-slate-700 text-white text-xs px-1 outline-none w-20 min-w-[60px] max-w-[100px]";
 
- 
+
     const commit = () => {
         window.electronAPI.renameStack(stackId, input.value);
     };
@@ -41,8 +41,8 @@ window.electronAPI.onPromptStackName((data) => {
         if (e.key === "Enter") {
             commit();
             input.blur();
-        } 
-        
+        }
+
         else if (e.key === "Escape") {
             if (latestTabs) renderTabs(latestTabs);
         }
@@ -100,8 +100,8 @@ export const renderTabs = (tabs) => {
 
                 if (collapsedStacks.has(tab.stackId)) {
                     collapsedStacks.delete(tab.stackId);
-                } 
-                
+                }
+
                 else {
                     collapsedStacks.add(tab.stackId);
                 }
@@ -128,7 +128,7 @@ export const renderTabs = (tabs) => {
                 stackRep.setAttribute("data-stack-id", tab.stackId);
                 stackContainer.appendChild(stackRep);
             }
-          
+
             else {
                 stackContainer.appendChild(toggleBtn);
                 stackTabs.forEach(({ tab: sTab, index: sIndex }) => {
@@ -137,31 +137,31 @@ export const renderTabs = (tabs) => {
             }
 
             tabsList.appendChild(stackContainer);
-        } 
-        
+        }
+
         else {
             tabsList.appendChild(createTabElement(tab, index, false, tabs));
         }
     });
 };
 
-function createTabElement(tab, index, isInStack, tabs, isStackRep) {
+function createTabElement(tab, index, isInStack, tabs, groupTab) {
         const tabE = document.createElement("div");
         let bgClass = "bg-slate-800/50 hover:bg-slate-700/50 text-slate-400";
 
 
-        if (isStackRep) {
-            bgClass = "bg-slate-800/50 hover:bg-slate-700/50 text-slate-400"; 
-        }   
-        
+        if (groupTab) {
+            bgClass = "bg-slate-800/50 hover:bg-slate-700/50 text-slate-400";
+        }
+
         else if (tab.isMainTab) {
             bgClass = "bg-slate-700 hover:bg-slate-600 text-white";
-        } 
-        
+        }
+
         else if (tab.isActive) {
             bgClass = "bg-slate-800 hover:bg-slate-700 text-white";
-        } 
-        
+        }
+
         else {
             bgClass = "bg-slate-800/50 hover:bg-slate-700/50 text-slate-600";
         }
@@ -173,10 +173,10 @@ function createTabElement(tab, index, isInStack, tabs, isStackRep) {
 
         const titleSpan = document.createElement("span");
         titleSpan.className = "truncate flex-1 overflow-hidden pointer-events-none text-sm";
-        if (isStackRep) {
+        if (groupTab) {
             titleSpan.innerHTML = tab.stackName || "Group";
         }
-        
+
         else {
             titleSpan.textContent = tab.title || "New Tab";
         }
@@ -184,7 +184,11 @@ function createTabElement(tab, index, isInStack, tabs, isStackRep) {
 
 
 
-
+        /*
+        
+       TAB DRAGGING
+      
+       */
         tabE.draggable = true;
         tabE.ondragstart = (e) => {
             e.dataTransfer.setData("text/plain", index);
@@ -204,7 +208,7 @@ function createTabElement(tab, index, isInStack, tabs, isStackRep) {
                 const x = e.clientX - rect.left;
 
                 if (x > rect.width * 0.25 && x < rect.width * 0.75) {
-                    
+
                     if (tab.isStacked){
                         window.electronAPI.updateStack(tab.stackId, startingIndex);
                     }
@@ -220,14 +224,15 @@ function createTabElement(tab, index, isInStack, tabs, isStackRep) {
                     if (startingTab && startingTab.isStacked && startingTab.stackId !== tab.stackId) {
                         window.electronAPI.removeFromStack(startingIndex);
                     }
-                    
+
                     window.electronAPI.reorderTabs(startingIndex, index);
                 }
 
             }
-                
+
         };
 
+        //specifcially for worrying about dragging between windows and out of windows
         tabE.ondragend = (e) => {
             if (e.screenX < window.screenX || e.screenX > window.screenX + window.outerWidth ||
                 e.screenY < window.screenY || e.screenY > window.screenY + window.outerHeight) {
@@ -236,17 +241,20 @@ function createTabElement(tab, index, isInStack, tabs, isStackRep) {
         };
 
 
+  
+  
+  
 
         tabE.addEventListener("contextmenu", (event) => {
             event.preventDefault()
-            if (isStackRep) {
+            if (groupTab) {
                 window.electronAPI.showStackContextMenu({
                     x: event.clientX,
                     y: event.clientY,
                     stackId: tab.stackId
                 });
             }
-            
+
             else {
                 window.electronAPI.showContextMenu({
                     x: event.clientX,
@@ -256,7 +264,11 @@ function createTabElement(tab, index, isInStack, tabs, isStackRep) {
             }
         })
 
-        if (!isStackRep) {
+  
+  
+  
+        //displaying tabs
+        if (!groupTab) {
             const closeB = document.createElement("button");
             closeB.className = `${tab.isMainTab ? `bg-slate-900 hover:bg-slate-800` : `bg-slate-900/80 hover:bg-slate-800`} transition-all duration-100 text-white rounded-sm text-xs font-bold  flex-shrink-0 ml-2 px-1`;
             closeB.textContent = "×";
@@ -264,20 +276,25 @@ function createTabElement(tab, index, isInStack, tabs, isStackRep) {
                 e.stopPropagation();
                 window.electronAPI.closeTab(index);
             }
-          
+
             tabE.appendChild(closeB);
         }
 
+        //
         tabE.onclick = (e) => {
-            if (isStackRep) {
+            if (groupTab) {
                 e.stopPropagation();
                 if (collapsedStacks.has(tab.stackId)) {
                     collapsedStacks.delete(tab.stackId);
-                } else {
+                }
+
+                else {
                     collapsedStacks.add(tab.stackId);
                 }
                 renderTabs(tabs);
-            } else {
+            }
+
+            else {
                 window.electronAPI.switchTab(index);
             }
         }
