@@ -2,23 +2,42 @@
 
 module.exports = {
 
-    search: (address, mainTab) => {
+    search: (address, mainTab, searchSite) => {
         if (!mainTab || !mainTab.contentView) return;
 
-        const urlPattern = /(?:https?):\/\/(\w+:?\w*)?(\S+)(:\d+)?(\/|\/([\w#!:.?+=&%!\-\/]))?/;
-        let temp = address;
+        address = address.trim();
+        if (!address) return;
 
-        if (!address.startsWith("https://") && !address.startsWith("http://")) {
-            temp = "https://" + address;
+        const knownProtocols = /^(https?|file|ftp|data|chrome|about|javascript):/i;
+        if (knownProtocols.test(address)) {
+            mainTab.contentView.webContents.loadURL(address);
+            return;
         }
 
+        let temp = "https://" + address;
         let valid = false;
-        
+
+    
+    
         try {
             const url = new URL(temp);
-            valid = url.hostname.includes(".") || url.hostname === "localhost";
-        } 
-        
+            const host = url.hostname;
+          const isIP = /^(\d{1,3}\.){3}\d{1,3}$/.test(host);
+          //thanks 32h and 33
+          const isNumericOnly = /^\d+$/.test(host);
+
+          
+
+          
+            const isLocalhost = host === "localhost"
+                || host.endsWith(".localhost");
+
+            const hasDot = host.includes(".");
+            const hasNoSpaces = !address.includes(" ");
+
+            valid = hasNoSpaces && !isNumericOnly && (isIP || isLocalhost || hasDot);
+        }
+
         catch (error) {
             valid = false;
         }
@@ -28,7 +47,8 @@ module.exports = {
         } 
         
         else {
-            mainTab.contentView.webContents.loadURL("https://www.google.com/search?q=" + address);
+          const searchUrl = (searchSite || "https://www.google.com") + "/search?q=" + encodeURIComponent(address);
+          mainTab.contentView.webContents.loadURL(searchUrl);
         }
     },
 

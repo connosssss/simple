@@ -126,7 +126,7 @@ const ipcSetup = () => {
   // Navigation
   ipcMain.on("search", (event, address) => {
     const tm = getTabManager(event);
-    if (tm) Navigation.search(address, tm.getMainTab());
+    if (tm) Navigation.search(address, tm.getMainTab(), tm.defaultSite);
   });
 
   ipcMain.on("tBAction", (event, action) => {
@@ -288,6 +288,7 @@ app.on('certificate-error', (event, webContents, url, error, certificate, callba
 app.whenReady().then(() => {
 
   ipcSetup();
+  registerCookieAndTrackerIPC();
   WindowManager.createWindow();
 
 
