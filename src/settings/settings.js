@@ -128,6 +128,14 @@ window.electronAPI.onInitSettings((settings) => {
     defaultSite = settings.defaultSite;
     document.getElementById("siteChoiceBar").value = defaultSite;
   }
+  if (settings.searchEngine) {
+    document.getElementById("search-engine-select").value = settings.searchEngine;
+  }
+});
+
+const searchEngineSelect = document.getElementById("search-engine-select");
+searchEngineSelect.addEventListener("change", (e) => {
+  window.electronAPI.updateSearchEngine(e.target.value);
 });
 
 

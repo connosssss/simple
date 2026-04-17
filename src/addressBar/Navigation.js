@@ -47,7 +47,7 @@ module.exports = {
         } 
         
         else {
-          const searchUrl = (searchSite || "https://www.google.com") + "/search?q=" + encodeURIComponent(address);
+          const searchUrl = (searchSite || "https://www.google.com/search?q=") + encodeURIComponent(address);
           mainTab.contentView.webContents.loadURL(searchUrl);
         }
     },

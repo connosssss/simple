@@ -9,7 +9,7 @@ module.exports = {
 
             this.settingsUI.webContents.once('did-finish-load', () => {
                 
-                this.settingsUI.webContents.send("initSettings", { defaultSite: this.defaultSite });
+                this.settingsUI.webContents.send("initSettings", { defaultSite: this.defaultSite, searchEngine: this.searchEngine });
                 this.sendTabData();
             });
         }
@@ -22,8 +22,15 @@ module.exports = {
         this.saveConfig();
         if (this.settingsUI && !this.settingsUI.webContents.isDestroyed()) {
 
-            this.settingsUI.webContents.send("initSettings", { defaultSite: this.defaultSite });
+            this.settingsUI.webContents.send("initSettings", { defaultSite: this.defaultSite, searchEngine: this.searchEngine });
 
+        }},
+
+    updateSearchEngine(engine) {
+        this.searchEngine = engine;
+        this.saveConfig();
+        if (this.settingsUI && !this.settingsUI.webContents.isDestroyed()) {
+            this.settingsUI.webContents.send("initSettings", { defaultSite: this.defaultSite, searchEngine: this.searchEngine });
         }},
 
 
@@ -39,7 +46,10 @@ module.exports = {
 
                 if (config.defaultSite) {
                     this.defaultSite = config.defaultSite;
-                    
+                }
+
+                if (config.searchEngine) {
+                    this.searchEngine = config.searchEngine;
                 }
 
                 if (config.stackNames) {
@@ -83,6 +93,7 @@ module.exports = {
 
             const config = {
                 defaultSite: this.defaultSite,
+                searchEngine: this.searchEngine,
                 tabs: savedTabs,
                 stackNames: this.stackNames,
             };

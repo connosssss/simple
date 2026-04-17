@@ -38,6 +38,17 @@
 
       <label class="text-slate-300 text-sm mt-2">Default site on new tab:</label>
       <input class="w-full bg-slate-800 p-2 outline-none text-slate-100/80 text-sm rounded-sm selection:bg-slate-700" id="siteChoiceBar" onfocus="this.select()"/>
+
+      <label class="text-slate-300 text-sm mt-2">Search engine:</label>
+      <select id="search-engine-select"
+        class="bg-slate-900 text-white p-2 rounded-sm border border-slate-600 outline-none focus:outline-none">
+        <option value="https://www.google.com/search?q=">Google</option>
+        <option value="https://search.brave.com/search?q=">Brave</option>
+        <option value="https://duckduckgo.com/?q=">DuckDuckGo</option>
+        <option value="https://www.bing.com/search?q=">Bing</option>
+        <option value="https://search.yahoo.com/search?p=">Yahoo</option>
+        
+      </select>
     </div>
 
     <div class="border-b border-slate-600 mb-3 pb-2">
@@ -54,9 +65,9 @@
             Clear Trackers
           </button>
 
-          <label class="">
+          <label class="flex flex-row gap-1">
             <input type="checkbox" id="block-trackers" hecked />
-            <div class="">Block trackers</div>
+            <div class="text-white">Block trackers</div>
           </label>
 
 

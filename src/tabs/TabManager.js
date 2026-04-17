@@ -20,7 +20,8 @@ class TabManager {
         this.lastOpenedTabs = [];
         this.settingsUI = null; 
         this.defaultSite = "https://google.com";
-        this.stackNames = {}; // { stackId: "name" }
+        this.searchEngine = "https://www.google.com/search?q=";
+        this.stackNames = {};
         this.configPath = path.join(app.getPath('userData'), 'config.json');
         if (!skipConfig){
             this.loadConfig();

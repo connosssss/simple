@@ -59,6 +59,11 @@ const ipcSetup = () => {
       const tm = getTabManager(event);
       if (tm) tm.updateDefaultSite(site);
   });
+
+  ipcMain.on("updateSearchEngine", (event, engine) => {
+      const tm = getTabManager(event);
+      if (tm) tm.updateSearchEngine(engine);
+  });
   
 
   // Tab stacking
@@ -126,7 +131,7 @@ const ipcSetup = () => {
   // Navigation
   ipcMain.on("search", (event, address) => {
     const tm = getTabManager(event);
-    if (tm) Navigation.search(address, tm.getMainTab(), tm.defaultSite);
+    if (tm) Navigation.search(address, tm.getMainTab(), tm.searchEngine);
   });
 
   ipcMain.on("tBAction", (event, action) => {
