@@ -273,21 +273,8 @@ const ipcSetup = () => {
 }
 
 
-const ALWAYS_VERIFY = new Set(); 
 
-app.on('certificate-error', (event, webContents, url, error, certificate, callback) => {
-  let hostname = '';
-  try { hostname = new URL(url).hostname; } catch {}
 
-  if (ALWAYS_VERIFY.has(hostname)) {
-    callback(false); 
-    return;
-  }
-
-  console.warn(`[SSL] Ignoring cert error ${error} for ${hostname}`);
-  event.preventDefault();
-  callback(true);
-});
 
 
 app.whenReady().then(() => {
