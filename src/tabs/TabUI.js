@@ -7,6 +7,13 @@ tabsList.ondragover = (e) => { e.preventDefault(); };
 
 tabsList.ondrop = (e) => {
     e.preventDefault();
+  const dragStackId = e.dataTransfer.getData("application/stack-id");
+  
+    if (dragStackId) {
+        window.electronAPI.reorderStack(dragStackId, 1000);
+        return;
+    }
+
     const startingIndex = parseInt(e.dataTransfer.getData("text/plain"));
     if (!isNaN(startingIndex)) {
         window.electronAPI.removeFromStack(startingIndex);
@@ -75,6 +82,37 @@ export const renderTabs = (tabs) => {
             const isCollapsed = collapsedStacks.has(tab.stackId);
             stackContainer.className = `flex flex-row items-end h-full border-b-2 ${stackColor} rounded-t-sm overflow-hidden`;
 
+            stackContainer.draggable = true;
+            stackContainer.ondragstart = (e) => {
+                e.dataTransfer.setData("application/stack-id", tab.stackId);
+            };
+            
+            stackContainer.ondragover = (e) => { e.preventDefault(); };
+            
+            stackContainer.ondrop = (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+
+              const dragStackId = e.dataTransfer.getData("application/stack-id");
+              
+                if (dragStackId) {
+                    if (dragStackId !== tab.stackId) {
+                         window.electronAPI.reorderStack(dragStackId, index);
+                    }
+                  
+                    return;
+                }
+
+                const startingIndex = parseInt(e.dataTransfer.getData("text/plain"));
+                if (!isNaN(startingIndex)) {
+                     const startingTab = tabs && tabs[startingIndex] ? tabs[startingIndex] : null;
+
+                     if (startingTab && startingTab.stackId !== tab.stackId) {
+                         window.electronAPI.updateStack(tab.stackId, startingIndex);
+                     }
+                  
+                }
+            };
 
             const stackTabs = tabs.map((t, i) => ({ tab: t, index: i })).filter(entry => entry.tab.stackId === tab.stackId);
 
@@ -91,7 +129,7 @@ export const renderTabs = (tabs) => {
             if (!isCollapsed) {
                 const div = document.createElement("div");
                 div.className = "text-slate-300 text-xs truncate max-w-[80px] pointer-events-none";
-                div.textContent = stackName || "Group";
+                div.textContent = stackName || "Stack";
                 toggleBtn.appendChild(div);
             }
 
@@ -174,7 +212,7 @@ function createTabElement(tab, index, isInStack, tabs, groupTab) {
         const titleSpan = document.createElement("span");
         titleSpan.className = "truncate flex-1 overflow-hidden pointer-events-none text-sm";
         if (groupTab) {
-            titleSpan.innerHTML = tab.stackName || "Group";
+            titleSpan.innerHTML = tab.stackName || "Stack";
         }
 
         else {
@@ -200,8 +238,14 @@ function createTabElement(tab, index, isInStack, tabs, groupTab) {
         tabE.ondrop = (e) => {
             e.preventDefault();
             e.stopPropagation();
-            const startingIndex = parseInt(e.dataTransfer.getData("text/plain"));
 
+            const dragStackId = e.dataTransfer.getData("application/stack-id");
+            if (dragStackId) {
+                window.electronAPI.reorderStack(dragStackId, index);
+                return;
+            }
+
+            const startingIndex = parseInt(e.dataTransfer.getData("text/plain"));
 
             if (startingIndex !== index) {
                 const rect = tabE.getBoundingClientRect();

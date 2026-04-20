@@ -22,6 +22,7 @@ class TabManager {
         this.defaultSite = "https://google.com";
         this.searchEngine = "https://www.google.com/search?q=";
         this.stackNames = {};
+        this.nextStackNumber = 1;
         this.configPath = path.join(app.getPath('userData'), 'config.json');
         if (!skipConfig){
             this.loadConfig();
@@ -134,6 +135,7 @@ class TabManager {
                         t.stackId = null;
                     });
                     delete this.stackNames[oldStackId];
+                    this.recalculateStackNumber();
                 }
             }
 
@@ -239,6 +241,24 @@ class TabManager {
         this.sendTabData();
     }
 
+    reorderStack(stackId, toIndex) {
+        const stackTabs = this.tabs.filter(t => t.stackId === stackId);
+        if (stackTabs.length === 0) return;
+
+        const nonStackTabs = this.tabs.filter(t => t.stackId !== stackId);
+
+        if (toIndex < 0) toIndex = 0;
+        if (toIndex > nonStackTabs.length) toIndex = nonStackTabs.length;
+
+        nonStackTabs.splice(toIndex, 0, ...stackTabs);
+        this.tabs = nonStackTabs;
+
+        if (this.mainTab) {
+            this.currentIndex = this.tabs.indexOf(this.mainTab);
+        }
+        this.sendTabData();
+    }
+
     sendTabData() {
         const tabData = this.tabs.map((tab, index) => ({
             index: index,
@@ -305,6 +325,7 @@ class TabManager {
                     t.stackId = null;
                 });
                 delete this.stackNames[oldStackId];
+                this.recalculateStackNumber();
             }
         }
 

@@ -56,6 +56,10 @@ module.exports = {
                     this.stackNames = config.stackNames;
                 }
 
+                if (config.nextStackNumber) {
+                    this.nextStackNumber = config.nextStackNumber;
+                }
+
                 if (config.tabs && Array.isArray(config.tabs)) {
                     
                     config.tabs.forEach(tabData => {
@@ -96,6 +100,7 @@ module.exports = {
                 searchEngine: this.searchEngine,
                 tabs: savedTabs,
                 stackNames: this.stackNames,
+                nextStackNumber: this.nextStackNumber,
             };
 
             fs.writeFileSync(this.configPath, JSON.stringify(config));

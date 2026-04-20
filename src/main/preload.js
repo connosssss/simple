@@ -51,6 +51,7 @@ contextBridge.exposeInMainWorld("electronAPI", {
     removeFromStack: (tabIndex) => ipcRenderer.send("removeFromStack", tabIndex),
     showStackContextMenu: (vars) => ipcRenderer.send("showStackContextMenu", vars),
     renameStack: (stackId, name) => ipcRenderer.send("renameStack", stackId, name),
+    reorderStack: (stackId, toIndex) => ipcRenderer.send("reorderStack", stackId, toIndex),
     onPromptStackName: (callback) => ipcRenderer.on('promptStackName', (event, data) => callback(data)),
 
 })

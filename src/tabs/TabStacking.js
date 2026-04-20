@@ -2,6 +2,25 @@ const crypto = require('crypto');
 
 module.exports = {
 
+    recalculateStackNumber() {
+    let max = 0;
+    
+    for (const name of Object.values(this.stackNames)) {
+          
+            if (name) {
+              const match = name.match(/^Stack (\d+)$/);
+              
+                if (match) {
+                  const num = parseInt(match[1]);
+                  
+                    if (num > max) max = num;
+                }
+            }
+    }
+    
+        this.nextStackNumber = max + 1;
+    },
+
     createStack(tabIndices) {
         const stackId = crypto.randomUUID();
 
@@ -18,12 +37,16 @@ module.exports = {
                             t.stackId = null;
                         });
                         delete this.stackNames[oldStackId];
+                        this.recalculateStackNumber();
                     }
                 }
                 this.tabs[index].isStacked = true;
                 this.tabs[index].stackId = stackId;
             }
         });
+
+        this.stackNames[stackId] = `Stack ${this.nextStackNumber}`;
+        this.nextStackNumber++;
 
         this.sendTabData();
 
@@ -43,6 +66,7 @@ module.exports = {
                         t.stackId = null;
                     });
                     delete this.stackNames[oldStackId];
+                    this.recalculateStackNumber();
                 }
             }
             this.tabs[tabIndex].stackId = stackId;
@@ -68,6 +92,7 @@ module.exports = {
                         t.stackId = null;
                     });
                     delete this.stackNames[oldStackId];
+                    this.recalculateStackNumber();
                 }
             }
 
@@ -87,6 +112,7 @@ module.exports = {
         });
 
         delete this.stackNames[stackId];
+        this.recalculateStackNumber();
         this.sendTabData();
 
     },
@@ -96,6 +122,7 @@ module.exports = {
             this.stackNames[stackId] = name.trim();
         } else {
             delete this.stackNames[stackId];
+            this.recalculateStackNumber();
         }
         this.sendTabData();
     },

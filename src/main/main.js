@@ -92,6 +92,11 @@ const ipcSetup = () => {
       if (tm) tm.renameStack(stackId, name);
   });
 
+  ipcMain.on("reorderStack", (event, stackId, toIndex) => {
+      const tm = getTabManager(event);
+      if (tm) tm.reorderStack(stackId, toIndex);
+  });
+
   ipcMain.on("showStackContextMenu", (event, vars) => {
   const data = getManager(event);
     if (!data) return;
