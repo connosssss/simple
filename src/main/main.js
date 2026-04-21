@@ -97,6 +97,13 @@ const ipcSetup = () => {
       if (tm) tm.reorderStack(stackId, toIndex);
   });
 
+  ipcMain.on("stackBarVisible", (event, visible) => {
+      const data = getManager(event);
+      if (!data) return;
+      data.stackBarVisible = visible;
+      WindowResizing.resize(data.window, data.ui, data.tabManager, visible);
+  });
+
   ipcMain.on("showStackContextMenu", (event, vars) => {
   const data = getManager(event);
     if (!data) return;

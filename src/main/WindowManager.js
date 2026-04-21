@@ -50,7 +50,7 @@ class WindowManager {
         });
 
         const handleResize = () => {
-             WindowResizing.resize(mainWindow, ui, tabManager);
+             WindowResizing.resize(mainWindow, ui, tabManager, windowData.stackBarVisible);
         };
 
         mainWindow.on('resize', handleResize);

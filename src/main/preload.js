@@ -53,5 +53,6 @@ contextBridge.exposeInMainWorld("electronAPI", {
     renameStack: (stackId, name) => ipcRenderer.send("renameStack", stackId, name),
     reorderStack: (stackId, toIndex) => ipcRenderer.send("reorderStack", stackId, toIndex),
     onPromptStackName: (callback) => ipcRenderer.on('promptStackName', (event, data) => callback(data)),
+    stackBarVisible: (visible) => ipcRenderer.send("stackBarVisible", visible),
 
 })

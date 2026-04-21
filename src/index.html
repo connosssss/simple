@@ -25,7 +25,11 @@
 
     </div>
 
-    <div class="w-screen flex flex-row bg-slate-950 h-[40px] gap-1 items-center justify-start " id="address-bar-part">
+    <div id="stack-tabs-bar" class="w-screen hidden flex-col bg-slate-900 pt-1 h-[32px] items-start justify-end gap-1 border-b border-black/50">
+      <div id="stack-tabs-list" class="flex flex-row overflow-x-hidden gap-1 h-[26px] items-end ml-1 flex-1 w-full"></div>
+    </div>
+
+    <div class="w-screen flex flex-row bg-slate-900 h-[40px] gap-1 items-center justify-start " id="address-bar-part">
       <div class="flex flex-row gap-1 ml-1">
         <button class="w-[2.0rem] h-[2.0rem] bg-slate-800 hover:bg-slate-700 text-white text-sm rounded-sm  transition-all duration-100" id="back"> <- </button>
         <button class="w-[2.0rem] h-[2.0rem] bg-slate-800 hover:bg-slate-700 text-white text-sm rounded-sm  transition-all duration-100" id="forward"> -> </button>

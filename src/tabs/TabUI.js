@@ -1,7 +1,8 @@
 const tabsList = document.getElementById("tabs-list");
+const stackTabsBar = document.getElementById("stack-tabs-bar");
+const stackTabsList = document.getElementById("stack-tabs-list");
 
-
-const collapsedStacks = new Set();
+let activeStackId = null;
 
 tabsList.ondragover = (e) => { e.preventDefault(); };
 
@@ -68,7 +69,20 @@ window.electronAPI.onPromptStackName((data) => {
 export const renderTabs = (tabs) => {
     latestTabs = tabs;
     tabsList.innerHTML = "";
+    stackTabsList.innerHTML = "";
+
     const renderedStacks = new Set();
+
+    const mainTab = tabs.find(t => t.isMainTab);
+    const currentStackId = mainTab && mainTab.isStacked ? mainTab.stackId : null;
+
+    if (currentStackId) {
+        activeStackId = currentStackId;
+    }
+    
+    else {
+        activeStackId = null;
+    }
 
     tabs.forEach((tab, index) => {
 
@@ -77,18 +91,35 @@ export const renderTabs = (tabs) => {
         if (tab.isStacked) {
             renderedStacks.add(tab.stackId);
 
+            const stackTabs = tabs.map((t, i) => ({ tab: t, index: i })).filter(entry => entry.tab.stackId === tab.stackId);
+            const isActiveStack = tab.stackId === activeStackId;
+
             const stackContainer = document.createElement("div");
-            const stackColor = "border-b-slate-600";
-            const isCollapsed = collapsedStacks.has(tab.stackId);
-            stackContainer.className = `flex flex-row items-end h-full border-b-2 ${stackColor} rounded-t-sm overflow-hidden`;
+            const bgClass = isActiveStack
+                ? "bg-slate-700 hover:bg-slate-600 text-white"
+                : "bg-slate-800/50 hover:bg-slate-700/50 text-slate-400";
+
+            stackContainer.className = `flex items-center px-3 cursor-pointer ${bgClass} min-w-0 max-w-[10rem] mb-0 rounded-t-sm h-full transition-all duration-100 gap-1 flex-shrink-0`;
+            stackContainer.setAttribute("data-stack-id", tab.stackId);
+
+
+            const nameSpan = document.createElement("span");
+            nameSpan.className = "truncate flex-1 overflow-hidden pointer-events-none text-sm";
+            nameSpan.textContent = tab.stackName || "Stack";
+            stackContainer.appendChild(nameSpan);
+
+            const countBadge = document.createElement("span");
+            countBadge.className = "text-[10px] opacity-50 flex-shrink-0 pointer-events-none";
+            countBadge.textContent = stackTabs.length;
+            stackContainer.appendChild(countBadge);
 
             stackContainer.draggable = true;
             stackContainer.ondragstart = (e) => {
                 e.dataTransfer.setData("application/stack-id", tab.stackId);
             };
-            
+
             stackContainer.ondragover = (e) => { e.preventDefault(); };
-            
+
             stackContainer.ondrop = (e) => {
                 e.preventDefault();
                 e.stopPropagation();
@@ -114,39 +145,20 @@ export const renderTabs = (tabs) => {
                 }
             };
 
-            const stackTabs = tabs.map((t, i) => ({ tab: t, index: i })).filter(entry => entry.tab.stackId === tab.stackId);
-
-            const toggleBtn = document.createElement("button");
-            toggleBtn.className = "flex items-center justify-center px-3 h-full bg-slate-800/50 hover:bg-slate-700/50 transition-all duration-100 text-xs flex-shrink-0";
-            toggleBtn.setAttribute("data-stack-id", tab.stackId);
-
-            const toggleIcon = document.createElement("div");
-            toggleIcon.className = isCollapsed ? "text-slate-400 font-bold pointer-events-none" : "text-slate-400 font-bold mr-1 pointer-events-none";
-           // toggleIcon.textContent = isCollapsed ? "+" : "-";
-            toggleBtn.appendChild(toggleIcon);
-
-            const stackName = tab.stackName;
-            if (!isCollapsed) {
-                const div = document.createElement("div");
-                div.className = "text-slate-300 text-xs truncate max-w-[80px] pointer-events-none";
-                div.textContent = stackName || "Stack";
-                toggleBtn.appendChild(div);
-            }
-
-            toggleBtn.onclick = (e) => {
+            stackContainer.onclick = (e) => {
                 e.stopPropagation();
-
-                if (collapsedStacks.has(tab.stackId)) {
-                    collapsedStacks.delete(tab.stackId);
+                if (activeStackId === tab.stackId) {
+                    activeStackId = null;
+                    renderTabs(tabs);
+                } else {
+                    const firstTab = stackTabs[0];
+                    if (firstTab) {
+                        window.electronAPI.switchTab(firstTab.index);
+                    }
                 }
-
-                else {
-                    collapsedStacks.add(tab.stackId);
-                }
-                renderTabs(tabs);
             };
 
-            toggleBtn.addEventListener("contextmenu", (e) => {
+            stackContainer.addEventListener("contextmenu", (e) => {
                 e.preventDefault();
                 e.stopPropagation();
 
@@ -158,41 +170,46 @@ export const renderTabs = (tabs) => {
 
             });
 
-
-
-            if (isCollapsed) {
-                const activeEntry = stackTabs.find(e => e.tab.isActive || e.tab.isMainTab) || stackTabs[0];
-                const stackRep = createTabElement(activeEntry.tab, activeEntry.index, true, tabs, true);
-                stackRep.setAttribute("data-stack-id", tab.stackId);
-                stackContainer.appendChild(stackRep);
-            }
-
-            else {
-                stackContainer.appendChild(toggleBtn);
-                stackTabs.forEach(({ tab: sTab, index: sIndex }) => {
-                    stackContainer.appendChild(createTabElement(sTab, sIndex, true, tabs));
-                });
-            }
-
             tabsList.appendChild(stackContainer);
+
+            if (isActiveStack) {
+                renderStackTabsBar(stackTabs, tabs);
+            }
         }
 
         else {
             tabsList.appendChild(createTabElement(tab, index, false, tabs));
         }
     });
+
+    if (activeStackId) {
+        stackTabsBar.classList.remove("hidden");
+        stackTabsBar.classList.add("flex");
+        window.electronAPI.stackBarVisible(true);
+    } else {
+        stackTabsBar.classList.add("hidden");
+        stackTabsBar.classList.remove("flex");
+        window.electronAPI.stackBarVisible(false);
+    }
 };
 
-function createTabElement(tab, index, isInStack, tabs, groupTab) {
+
+function renderStackTabsBar(stackTabs, allTabs) {
+    stackTabsList.innerHTML = "";
+
+    stackTabs.forEach(({ tab, index }) => {
+        const tabE = createTabElement(tab, index, true, allTabs);
+        stackTabsList.appendChild(tabE);
+    });
+}
+
+
+function createTabElement(tab, index, isInStack, tabs) {
         const tabE = document.createElement("div");
         let bgClass = "bg-slate-800/50 hover:bg-slate-700/50 text-slate-400";
 
 
-        if (groupTab) {
-            bgClass = "bg-slate-800/50 hover:bg-slate-700/50 text-slate-400";
-        }
-
-        else if (tab.isMainTab) {
+        if (tab.isMainTab) {
             bgClass = "bg-slate-700 hover:bg-slate-600 text-white";
         }
 
@@ -211,13 +228,7 @@ function createTabElement(tab, index, isInStack, tabs, groupTab) {
 
         const titleSpan = document.createElement("span");
         titleSpan.className = "truncate flex-1 overflow-hidden pointer-events-none text-sm";
-        if (groupTab) {
-            titleSpan.innerHTML = tab.stackName || "Stack";
-        }
-
-        else {
-            titleSpan.textContent = tab.title || "New Tab";
-        }
+        titleSpan.textContent = tab.title || "New Tab";
         tabE.appendChild(titleSpan);
 
 
@@ -291,56 +302,30 @@ function createTabElement(tab, index, isInStack, tabs, groupTab) {
 
         tabE.addEventListener("contextmenu", (event) => {
             event.preventDefault()
-            if (groupTab) {
-                window.electronAPI.showStackContextMenu({
-                    x: event.clientX,
-                    y: event.clientY,
-                    stackId: tab.stackId
-                });
-            }
-
-            else {
-                window.electronAPI.showContextMenu({
-                    x: event.clientX,
-                    y: event.clientY,
-                    tabIndex: index
-                });
-            }
+            window.electronAPI.showContextMenu({
+                x: event.clientX,
+                y: event.clientY,
+                tabIndex: index
+            });
         })
 
   
   
   
         //displaying tabs
-        if (!groupTab) {
-            const closeB = document.createElement("button");
-            closeB.className = `${tab.isMainTab ? `bg-slate-900 hover:bg-slate-800` : `bg-slate-900/80 hover:bg-slate-800`} transition-all duration-100 text-white rounded-sm text-xs font-bold  flex-shrink-0 ml-2 px-1`;
-            closeB.textContent = "×";
-            closeB.onclick = (e) => {
-                e.stopPropagation();
-                window.electronAPI.closeTab(index);
-            }
-
-            tabE.appendChild(closeB);
+        const closeB = document.createElement("button");
+        closeB.className = `${tab.isMainTab ? `bg-slate-900 hover:bg-slate-800` : `bg-slate-900/80 hover:bg-slate-800`} transition-all duration-100 text-white rounded-sm text-xs font-bold  flex-shrink-0 ml-2 px-1`;
+        closeB.textContent = "×";
+        closeB.onclick = (e) => {
+            e.stopPropagation();
+            window.electronAPI.closeTab(index);
         }
+
+        tabE.appendChild(closeB);
 
         //
         tabE.onclick = (e) => {
-            if (groupTab) {
-                e.stopPropagation();
-                if (collapsedStacks.has(tab.stackId)) {
-                    collapsedStacks.delete(tab.stackId);
-                }
-
-                else {
-                    collapsedStacks.add(tab.stackId);
-                }
-                renderTabs(tabs);
-            }
-
-            else {
-                window.electronAPI.switchTab(index);
-            }
+            window.electronAPI.switchTab(index);
         }
 
         return tabE;
