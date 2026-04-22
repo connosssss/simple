@@ -113,6 +113,15 @@ export const renderTabs = (tabs) => {
             countBadge.textContent = stackTabs.length;
             stackContainer.appendChild(countBadge);
 
+            const closeB = document.createElement("button");
+            closeB.className = `bg-slate-900/80 hover:bg-slate-800 transition-all duration-100 text-white rounded-sm text-xs font-bold flex-shrink-0 ml-2 px-1`;
+            closeB.textContent = "×";
+            closeB.onclick = (e) => {
+                e.stopPropagation();
+                window.electronAPI.closeStack(tab.stackId);
+            };
+            stackContainer.appendChild(closeB);
+
             stackContainer.draggable = true;
             stackContainer.ondragstart = (e) => {
                 e.dataTransfer.setData("application/stack-id", tab.stackId);

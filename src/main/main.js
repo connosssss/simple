@@ -82,6 +82,11 @@ const ipcSetup = () => {
       if (tm) tm.deleteStack(stackId);
   });
 
+  ipcMain.on("closeStack", (event, stackId) => {
+      const tm = getTabManager(event);
+      if (tm) tm.closeStack(stackId);
+  });
+
   ipcMain.on("removeFromStack", (event, tabIndex) => {
       const tm = getTabManager(event);
       if (tm) tm.removeFromStack(tabIndex);
