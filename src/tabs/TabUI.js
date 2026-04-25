@@ -6,6 +6,29 @@ let activeStackId = null;
 
 tabsList.ondragover = (e) => { e.preventDefault(); };
 
+
+stackTabsBar.ondragover = (e) => {
+    if (activeStackId) e.preventDefault();
+};
+
+stackTabsBar.ondrop = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (!activeStackId) return;
+
+    const dragStackId = e.dataTransfer.getData("application/stack-id");
+    
+    if (dragStackId) return; 
+
+    const startingIndex = parseInt(e.dataTransfer.getData("text/plain"));
+    if (!startingIndex && latestTabs) {
+        const startingTab = latestTabs[startingIndex];
+        if (startingTab && startingTab.stackId !== activeStackId) {
+            window.electronAPI.updateStack(activeStackId, startingIndex);
+        }
+    }
+};
+
 tabsList.ondrop = (e) => {
     e.preventDefault();
   const dragStackId = e.dataTransfer.getData("application/stack-id");
@@ -260,6 +283,8 @@ function createTabElement(tab, index, isInStack, tabs) {
             e.stopPropagation();
 
             const dragStackId = e.dataTransfer.getData("application/stack-id");
+            
+          
             if (dragStackId) {
                 window.electronAPI.reorderStack(dragStackId, index);
                 return;
@@ -268,10 +293,11 @@ function createTabElement(tab, index, isInStack, tabs) {
             const startingIndex = parseInt(e.dataTransfer.getData("text/plain"));
 
             if (startingIndex !== index) {
-                const rect = tabE.getBoundingClientRect();
-                const x = e.clientX - rect.left;
+              const rect = tabE.getBoundingClientRect();
+              const x = e.clientX - rect.left;
+              const y = e.clientY - rect.top;
 
-                if (x > rect.width * 0.25 && x < rect.width * 0.75) {
+              if (x > rect.width * 0.25 && x < rect.width * 0.75) {
 
                     if (tab.isStacked){
                         window.electronAPI.updateStack(tab.stackId, startingIndex);
@@ -296,11 +322,28 @@ function createTabElement(tab, index, isInStack, tabs) {
 
         };
 
-        //specifcially for worrying about dragging between windows and out of windows
+        
         tabE.ondragend = (e) => {
             if (e.screenX < window.screenX || e.screenX > window.screenX + window.outerWidth ||
                 e.screenY < window.screenY || e.screenY > window.screenY + window.outerHeight) {
                 window.electronAPI.tabTransfer(index, e.screenX, e.screenY);
+                return;
+            }
+
+          if (activeStackId && !isInStack) {
+              
+              const stackBarRect = stackTabsBar.getBoundingClientRect();
+            const clientY = e.clientY;
+            
+              if (clientY >= stackBarRect.top && clientY <= stackBarRect.bottom &&
+                e.clientX >= stackBarRect.left && e.clientX <= stackBarRect.right) {
+                
+                const tab = latestTabs && latestTabs[index];
+                
+                if (tab && tab.stackId !== activeStackId) {
+                  window.electronAPI.updateStack(activeStackId, index);
+                 }
+                }
             }
         };
 

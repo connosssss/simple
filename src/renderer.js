@@ -109,6 +109,10 @@ addressBar.addEventListener("blur", () => {
     }
 })
 
+
+
+
+// might want to move at some point
 const shortenAddress = (address) => {
 
     let index = address.indexOf("?");
@@ -120,6 +124,8 @@ const shortenAddress = (address) => {
 }
 
 
+
+// ALL OF THE BUTTONS + LOGIC
 const fButton = document.getElementById("forward")
 const bButton = document.getElementById("back")
 const rButton = document.getElementById("refresh")
