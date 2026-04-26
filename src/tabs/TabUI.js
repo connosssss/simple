@@ -242,15 +242,15 @@ function createTabElement(tab, index, isInStack, tabs) {
 
 
         if (tab.isMainTab) {
-            bgClass = "bg-slate-700 hover:bg-slate-600 text-white";
+            bgClass = "bg-slate-700/50 hover:bg-slate-600 text-white";
         }
 
         else if (tab.isActive) {
-            bgClass = "bg-slate-800 hover:bg-slate-700 text-white";
+            bgClass = "bg-slate-800/50 hover:bg-slate-700 text-white";
         }
 
         else {
-            bgClass = "bg-slate-800/50 hover:bg-slate-700/50 text-slate-600";
+            bgClass = "bg-slate-800/25 hover:bg-slate-700/50 text-slate-600";
         }
         tabE.className = `flex items-center px-4 cursor-pointer ${bgClass} flex-1 min-w-0 max-w-[10rem] mb-0 rounded-t-sm h-full transition-all duration-100`
 

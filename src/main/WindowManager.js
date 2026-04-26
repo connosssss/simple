@@ -14,10 +14,12 @@ class WindowManager {
             width: 800,
             height: 600,
             autoHideMenuBar: true,
-            backgroundColor: '#020617',
+            backgroundColor: '#00000000',
+            backgroundMaterial: 'acrylic',
+            vibrancy: 'fullscreen-ui',
             titleBarStyle: 'hidden',
-            titleBarOverlay: {
-                color: '#020617',
+            titleBarOverlay: {  
+                color: '#00000000',
                 symbolColor: '#ffffff', 
             }
         });
@@ -27,6 +29,7 @@ class WindowManager {
                 preload: path.join(__dirname, 'preload.js'),
             }
         });
+        ui.setBackgroundColor('#00000000');
 
         mainWindow.contentView.addChildView(ui);
         ui.webContents.loadFile(path.join(__dirname, '../index.html'));
