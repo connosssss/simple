@@ -124,6 +124,7 @@ export const renderTabs = (tabs) => {
 
             stackContainer.className = `flex items-center px-3 cursor-pointer ${bgClass} min-w-0 max-w-[10rem] mb-0 rounded-t-sm h-full transition-all duration-100 gap-1 flex-shrink-0`;
             stackContainer.setAttribute("data-stack-id", tab.stackId);
+            stackContainer.dataset.themeState = isActiveStack ? "active" : "idle";
 
 
             const nameSpan = document.createElement("span");
@@ -253,6 +254,7 @@ function createTabElement(tab, index, isInStack, tabs) {
             bgClass = "bg-slate-800/25 hover:bg-slate-700/50 text-slate-600";
         }
         tabE.className = `flex items-center px-4 cursor-pointer ${bgClass} flex-1 min-w-0 max-w-[10rem] mb-0 rounded-t-sm h-full transition-all duration-100`
+        tabE.dataset.themeState = tab.isMainTab ? "main" : tab.isActive ? "active" : "resting";
 
         tabE.title = tab.title || "Tab";
 

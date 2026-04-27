@@ -2,6 +2,16 @@
 import { renderTabs } from '../tabs/TabUI.js';
 import { setupSearchListeners, updateAddressBar } from '../addressBar/SearchUI.js';
 
+        window.themeUtils.applyTheme();
+        
+        window.addEventListener("storage", (event) => {
+            if (event.key === window.themeUtils.THEME_KEY) {
+                window.themeUtils.applyTheme();
+            }
+        });
+        
+        window.addEventListener("theme-updated", () => window.themeUtils.applyTheme());
+
         
         document.getElementById("new-tab").onclick = () => window.electronAPI.createTab();
         document.getElementById("settings").addEventListener("click", () => window.electronAPI.showSettingsMenu());

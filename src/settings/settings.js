@@ -1,5 +1,48 @@
 const tabsList = document.getElementById("tabs-list");
 
+window.themeUtils.applyTheme();
+
+const syncThemeControls = () => {
+  const theme = window.themeUtils.getTheme();
+  document.getElementById("theme-color").value = theme.color;
+  document.getElementById("theme-accent").value = theme.accent;
+  document.getElementById("theme-overall-opacity").value = theme.overallOpacity;
+  document.getElementById("theme-accent-opacity").value = theme.accentOpacity;
+  document.getElementById("theme-color-value").textContent = theme.color;
+  document.getElementById("theme-accent-value").textContent = theme.accent;
+  document.getElementById("theme-overall-opacity-value").textContent = `${Math.round(theme.overallOpacity * 100)}%`;
+  document.getElementById("theme-accent-opacity-value").textContent = `${Math.round(theme.accentOpacity * 100)}%`;
+};
+
+window.addEventListener("storage", (event) => {
+  if (event.key === window.themeUtils.THEME_KEY) {
+    syncThemeControls();
+    window.themeUtils.applyTheme();
+  }
+});
+
+window.addEventListener("theme-updated", () => {
+  syncThemeControls();
+  window.themeUtils.applyTheme();
+});
+
+document.getElementById("theme-color").addEventListener("input", (e) => {
+  window.themeUtils.saveTheme({ color: e.target.value });
+});
+
+document.getElementById("theme-accent").addEventListener("input", (e) => {
+  window.themeUtils.saveTheme({ accent: e.target.value });
+});
+
+document.getElementById("theme-overall-opacity").addEventListener("input", (e) => {
+  window.themeUtils.saveTheme({ overallOpacity: Number(e.target.value) });
+});
+
+document.getElementById("theme-accent-opacity").addEventListener("input", (e) => {
+  window.themeUtils.saveTheme({ accentOpacity: Number(e.target.value) });
+});
+
+syncThemeControls();
 
 // Need to use a prev state bacuse 
 let prevTabState = [];
@@ -18,16 +61,13 @@ window.electronAPI.onUpdateTabs((tabs) => {
 const closeAfterSelect = document.getElementById("close-after-select");
 if (closeAfterSelect) {
   closeAfterSelect.value = closeAfter;
-  
+
   closeAfterSelect.addEventListener("change", (e) => {
     closeAfter = parseInt(e.target.value);
     localStorage.setItem("closeAfter", closeAfter);
     renderTabs(prevTabState);
-    console.log(closeAfter);
   });
 }
-
-
 
 const getTimeTabActive = (lastActive) => {
   if (!lastActive) return -1;
@@ -45,7 +85,6 @@ const getTimeTabActive = (lastActive) => {
 const renderTabs = (tabs) => {
 
   tabsList.innerHTML = "";
-  tabsList.className = ""
 
   if (tabs.length < 2) {
     tabsList.innerHTML = '<div class="text-slate-400">Must have at least 2 tabs open</div>';
@@ -69,18 +108,16 @@ const renderTabs = (tabs) => {
     tabTitle.textContent =  tab.title || "New Tab";
 
     const tabStatus = document.createElement("div");
-    tabStatus.className = `text-sm min-h-full ${tab.isActive ? "text-slate-100" : "text-slate-500"} flex items-center justify-center `;
+    tabStatus.className = `text-sm min-h-full ${tab.isActive ? "text-slate-100" : "text-slate-500"} flex items-center justify-center`;
     tabStatus.textContent = tab.isActive ? "Active" : "Hibernated";
 
     const tabDur = document.createElement("div");
-    tabDur.className = "text-sm font-light text-slate-400/80 min-h-full flex items-center justify-center ";
+    tabDur.className = "text-sm font-light text-slate-400/80 min-h-full flex items-center justify-center";
 
-    //CLOSING TABS AFTER OPEN TOO LONG
-    tabDuration = getTimeTabActive(tab.lastActiveAt);
+    const tabDuration = getTimeTabActive(tab.lastActiveAt);
     tabDur.textContent = tabDuration;
-    if(tabDuration > closeAfter && closeAfter != -1 && tab.isActive && !tab.keepActive){
+    if (tabDuration > closeAfter && closeAfter !== -1 && tab.isActive && !tab.keepActive) {
       window.electronAPI.hibernateTab(index);
-
     }
 
     tabInfo.appendChild(tIndex);
@@ -89,8 +126,7 @@ const renderTabs = (tabs) => {
     tabInfo.appendChild(tabDur);
 
     const hibernateBtn = document.createElement("button");
-    hibernateBtn.className = ` rounded-sm text-sm font-light ${tab.isActive ? `bg-red-700/40` : `bg-slate-700/40`} transition-all duration-100 px-4 py-1 text-white`;
-
+    hibernateBtn.className = `rounded-sm text-sm font-light ${tab.isActive ? "bg-red-700/40" : "bg-slate-700/40"} transition-all duration-100 px-4 py-1 text-white`;
     hibernateBtn.textContent = tab.isActive ? "Hibernate" : "Hibernated";
     hibernateBtn.disabled = !tab.isActive;
 
@@ -103,7 +139,6 @@ const renderTabs = (tabs) => {
     tabDiv.appendChild(tabInfo);
     tabDiv.appendChild(hibernateBtn);
     tabsList.appendChild(tabDiv);
-
   });
 };
 
@@ -111,17 +146,15 @@ setInterval(() => {
   renderTabs(prevTabState);
 }, 1000);
 
-
 const siteChoice = document.getElementById("siteChoiceBar");
 
-
 siteChoice.addEventListener("keydown", (event) => {
-        if (event.key == "Enter") {
-            event.preventDefault();
-            defaultSite = siteChoice.value;
-            window.electronAPI.updateDefaultSite(defaultSite);
-        }
-    });
+  if (event.key === "Enter") {
+    event.preventDefault();
+    defaultSite = siteChoice.value;
+    window.electronAPI.updateDefaultSite(defaultSite);
+  }
+});
 
 window.electronAPI.onInitSettings((settings) => {
   if (settings.defaultSite) {
@@ -138,10 +171,6 @@ searchEngineSelect.addEventListener("change", (e) => {
   window.electronAPI.updateSearchEngine(e.target.value);
 });
 
-
-// COOKIES
-
-
 let allCookies = [];
 let cookieFilter = "";
 let hideThirdParty = true;
@@ -157,8 +186,7 @@ const buildCookieUrl = (cookie) => {
 };
 
 const getFilteredCookies = () => {
-
-  return allCookies.filter(cookie => {
+  return allCookies.filter((cookie) => {
     if (hideThirdParty && cookie.isThirdParty) return false;
 
     if (cookieFilter) {
@@ -167,12 +195,10 @@ const getFilteredCookies = () => {
     }
     return true;
   });
-
 };
 
 const renderCookies = () => {
   const filtered = getFilteredCookies();
-  const thirdPartyCount = allCookies.filter(c => c.isThirdParty).length;
 
   cookieCount.textContent = `${filtered.length} of ${allCookies.length} cookie${allCookies.length !== 1 ? "s" : ""}`;
 
@@ -183,7 +209,7 @@ const renderCookies = () => {
 
   const byDomain = {};
 
-  filtered.forEach(cookie => {
+  filtered.forEach((cookie) => {
     const domain = cookie.domain.replace(/^\./, "");
     if (!byDomain[domain]) byDomain[domain] = [];
     byDomain[domain].push(cookie);
@@ -192,7 +218,7 @@ const renderCookies = () => {
   cookiesList.innerHTML = "";
 
   Object.entries(byDomain).sort(([a], [b]) => a.localeCompare(b)).forEach(([domain, cookies]) => {
-    const isThirdParty = cookies.every(c => c.isThirdParty);
+    const isThirdParty = cookies.every((cookie) => cookie.isThirdParty);
 
     const domainRow = document.createElement("div");
     domainRow.className = "flex items-center justify-between bg-slate-900 px-3 py-2 rounded-sm mt-2 cursor-pointer select-none";
@@ -212,25 +238,20 @@ const renderCookies = () => {
     countBadge.className = "text-slate-500 text-xs flex-shrink-0";
     countBadge.textContent = `${cookies.length} cookie${cookies.length !== 1 ? "s" : ""}`;
 
+    domainLabel.appendChild(arrow);
+    domainLabel.appendChild(domainText);
+    domainLabel.appendChild(countBadge);
+
     if (isThirdParty) {
       const trackerBadge = document.createElement("span");
       trackerBadge.className = "text-xs bg-orange-900/50 text-orange-300/80 px-1.5 py-0 rounded flex-shrink-0";
       trackerBadge.title = "cookie set by a third-party";
       trackerBadge.textContent = "3rd party";
-      domainLabel.appendChild(arrow);
-      domainLabel.appendChild(domainText);
-      domainLabel.appendChild(countBadge);
       domainLabel.appendChild(trackerBadge);
-    } 
-    
-    else {
-      domainLabel.appendChild(arrow);
-      domainLabel.appendChild(domainText);
-      domainLabel.appendChild(countBadge);
     }
 
     const deleteDomainBtn = document.createElement("button");
-    deleteDomainBtn.className = "text-red-400/70  text-xs px-2 py-0.5 rounded  transition-all duration-100 flex-shrink-0 ml-2";
+    deleteDomainBtn.className = "text-red-400/70 text-xs px-2 py-0.5 rounded transition-all duration-100 flex-shrink-0 ml-2";
     deleteDomainBtn.textContent = "Delete All";
     deleteDomainBtn.onclick = async (e) => {
       e.stopPropagation();
@@ -238,18 +259,13 @@ const renderCookies = () => {
       await loadCookies();
     };
 
-
-
-
-    // 
-
     domainRow.appendChild(domainLabel);
     domainRow.appendChild(deleteDomainBtn);
 
     const cookieContainer = document.createElement("div");
     cookieContainer.className = "hidden";
 
-    cookies.forEach(cookie => {
+    cookies.forEach((cookie) => {
       const row = document.createElement("div");
       row.className = "flex items-start justify-between bg-slate-800/40 px-3 py-2 border-l-2 border-slate-700 ml-2 gap-2";
 
@@ -275,11 +291,10 @@ const renderCookies = () => {
       const meta = document.createElement("div");
       meta.className = "flex gap-3 flex-wrap";
 
-      const addMeta = (label, val=null, highlight = false) => {
+      const addMeta = (label, val = null, highlight = false) => {
         const el = document.createElement("span");
         el.className = `text-xs ${highlight ? "text-amber-400/80" : "text-slate-500"}`;
-        if (val) el.textContent = `${label}: ${val}`;
-        else el.textContent = `${label}`
+        el.textContent = val ? `${label}: ${val}` : label;
         meta.appendChild(el);
       };
 
@@ -287,14 +302,12 @@ const renderCookies = () => {
       if (cookie.expirationDate) {
         const exp = new Date(cookie.expirationDate * 1000);
         addMeta("expires", exp.toLocaleDateString());
-      } 
-      
-      else {
+      } else {
         addMeta("expires", "session");
       }
 
       if (cookie.secure) addMeta("secure", null, true);
-      if (cookie.httpOnly) addMeta("httpOnly",null,  true);
+      if (cookie.httpOnly) addMeta("httpOnly", null, true);
 
       info.appendChild(nameVal);
       info.appendChild(meta);
@@ -316,7 +329,6 @@ const renderCookies = () => {
     domainRow.onclick = () => {
       const collapsed = cookieContainer.classList.contains("hidden");
       cookieContainer.classList.toggle("hidden", !collapsed);
-    
     };
 
     cookiesList.appendChild(domainRow);
@@ -325,14 +337,11 @@ const renderCookies = () => {
 };
 
 const loadCookies = async () => {
-
   try {
     cookiesList.innerHTML = '<div class="text-slate-600 text-sm py-2">Loading...</div>';
     allCookies = await window.electronAPI.getCookies();
     renderCookies();
-  } 
-  
-  catch (e) {
+  } catch (e) {
     cookiesList.innerHTML = '<div class="text-red-400 text-sm">Failed to load cookies.</div>';
   }
 };
@@ -342,8 +351,6 @@ document.getElementById("cookie-search").addEventListener("input", (e) => {
   renderCookies();
 });
 
-
-
 document.getElementById("toggle-third-party").checked = true;
 document.getElementById("toggle-third-party").addEventListener("change", (e) => {
   hideThirdParty = e.target.checked;
@@ -351,10 +358,11 @@ document.getElementById("toggle-third-party").addEventListener("change", (e) => 
 });
 
 document.getElementById("clear-third-party").addEventListener("click", async () => {
-  const count = allCookies.filter(c => c.isThirdParty).length;
+  const count = allCookies.filter((cookie) => cookie.isThirdParty).length;
   if (count === 0) {
-     alert("No third-party cookies to clear."); 
-    return; }
+    alert("No third-party cookies to clear.");
+    return;
+  }
 
   if (!confirm(`Delete ${count} third-party tracker cookie${count !== 1 ? "s" : ""}?`)) return;
 
@@ -368,16 +376,10 @@ document.getElementById("clear-all-cookies").addEventListener("click", async () 
   await loadCookies();
 });
 
-
-
-
 document.getElementById("block-trackers").addEventListener("change", (e) => {
   window.electronAPI.setBlockTrackers(e.target.checked);
 });
 
-
 window.electronAPI.setBlockTrackers(true);
-
-
 
 loadCookies();

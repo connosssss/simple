@@ -3,60 +3,45 @@
   <head>
     <meta charset="UTF-8" />
     <title>Hello World!</title>
-    
     <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="./index.css" />
   </head>
 
 
   <body class="overflow-hidden m-0 p-0 bg-transparent">
-    <!-- temp way of making it look nicer at top-->
-    <div class="w-screen flex flex-row bg-slate-950/50 backdrop-blur-md h-[30px] items-center justify-center text-center" style="-webkit-app-region: drag;">
-      <div class=" text-slate-500 text-md"> simple</div>
+    <div class="theme-shell theme-border w-screen flex flex-row backdrop-blur-md h-[30px] items-center justify-center text-center border-b border-black/20" style="-webkit-app-region: drag;">
+      <div class="theme-faint text-md"> simple</div>
     </div>
 
-    <div class="w-screen flex flex-row bg-slate-950/50 backdrop-blur-md h-[30px] items-center justify-start gap-2 border-b border-black/20">
+    <div class="theme-shell theme-border w-screen flex flex-row backdrop-blur-md h-[30px] items-center justify-start gap-2 border-b border-black/20">
       <div id="tabs-list" class="flex flex-row overflow-x-hidden gap-1 h-full items-end ml-1"></div>
-
-
-      <button id="new-tab" class="min-w-[1.5rem] min-h-[1.5rem] bg-slate-800/40 text-white rounded-md hover:bg-slate-700/60 transition-all duration-100
-      mr-2">+</button>
-
-        
-
+      <button id="new-tab" class="theme-button min-w-[1.5rem] min-h-[1.5rem] text-white rounded-md transition-all duration-100 mr-2">+</button>
     </div>
 
-    <div id="stack-tabs-bar" class="w-screen hidden flex-col bg-slate-900/50 backdrop-blur-md pt-1 h-[32px] items-start justify-end gap-1 border-b border-black/20">
+    <div id="stack-tabs-bar" class="theme-shell theme-border w-screen hidden flex-col backdrop-blur-md pt-1 h-[32px] items-start justify-end gap-1 border-b border-black/20">
       <div id="stack-tabs-list" class="flex flex-row overflow-x-hidden gap-1 h-[26px] items-end ml-1 flex-1 w-full"></div>
     </div>
 
-    <div class="w-screen flex flex-row bg-slate-900/50 backdrop-blur-md h-[40px] gap-1 items-center justify-start border-b border-black/20" id="address-bar-part">
+    <div class="theme-shell theme-border w-screen flex flex-row backdrop-blur-md h-[40px] gap-1 items-center justify-start border-b border-black/20" id="address-bar-part">
       <div class="flex flex-row gap-1 ml-1">
-        <button class="w-[2.0rem] h-[2.0rem] bg-slate-800/60 hover:bg-slate-700/70 text-white text-sm rounded-sm  transition-all duration-100" id="back"> <- </button>
-        <button class="w-[2.0rem] h-[2.0rem] bg-slate-800/60 hover:bg-slate-700/70 text-white text-sm rounded-sm  transition-all duration-100" id="forward"> -> </button>
-        <button class="w-[2.0rem] h-[2.0rem] bg-slate-800/60 hover:bg-slate-700/70 text-white text-sm rounded-sm  transition-all duration-100" id="refresh">⟳ </button>
+        <button class="theme-button w-[2.0rem] h-[2.0rem] bg-slate-800/60 hover:bg-slate-700/70 text-white text-sm rounded-sm  transition-all duration-100" id="back"> <- </button>
+        <button class="theme-button w-[2.0rem] h-[2.0rem] bg-slate-800/60 hover:bg-slate-700/70 text-white text-sm rounded-sm  transition-all duration-100" id="forward"> -> </button>
+        <button class="theme-button w-[2.0rem] h-[2.0rem] bg-slate-800/60 hover:bg-slate-700/70 text-white text-sm rounded-sm  transition-all duration-100" id="refresh">⟳ </button>
       </div>
-      
 
-      <input class="w-full h-[80%] bg-slate-800/60 px-2 outline-none text-slate-100/80 text-sm rounded-sm selection:bg-slate-700/60" id="address-bar" onfocus="this.select()"/>
+      <input class="theme-input w-full h-[80%] px-2 outline-none text-sm rounded-sm selection:bg-slate-700/60" id="address-bar" onfocus="this.select()" />
 
-      <div id="find-bar" class="hidden flex bg-slate-800/60 backdrop-blur-md rounded-sm p-[2px] flex gap-[2px]">
+      <div id="find-bar" class="theme-panel hidden flex backdrop-blur-md rounded-sm p-[2px] gap-[2px]">
+        <input id="find-input" class="theme-input text-sm px-2 py-1 rounded-sm outline-none" placeholder="Find in page" />
+        <button id="find-close" class="theme-button-alt text-xs px-1 rounded">✕</button>
+      </div>
 
-          <input id="find-input" class="bg-slate-700/40 text-white text-sm px-2 py-1 rounded-sm outline-none" placeholder="Find in page" />
-
-          <button id="find-close" class="text-white text-xs px-1 hover:bg-slate-700/60 rounded">✕</button>
-        </div>
-
-
-      <button class="w-[2.0rem] h-[2.0rem] bg-slate-800/60 hover:bg-slate-700/70 text-white text-sm rounded-sm  transition-all duration-100 mr-1" id="settings">
-      O
-       </button>
-
+      <button class="theme-button w-[2.0rem] h-[2.0rem] text-white text-sm rounded-sm transition-all duration-100 mr-1" id="settings">
+        O
+      </button>
     </div>
 
-
-    <script type="module" src="./main/mainUI.js"> </script>
+    <script src="./theme.js"></script>
+    <script type="module" src="./main/mainUI.js"></script>
   </body>
 </html>
-
-
-

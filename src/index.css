@@ -1,0 +1,88 @@
+:root {
+  --theme-shell: rgba(15, 23, 42, 0.5);
+  --theme-panel: rgba(15, 23, 42, 0.64);
+  --theme-panel-strong: rgba(15, 23, 42, 0.76);
+  --theme-accent-soft: rgba(51, 65, 85, 0.6);
+  --theme-resting: rgba(15, 23, 42, 0.18);
+  --theme-border: rgba(51, 65, 85, 0.55);
+  --theme-text: rgba(255, 255, 255, 0.94);
+  --theme-muted: rgba(226, 232, 240, 0.72);
+  --theme-faint: rgba(148, 163, 184, 0.72);
+}
+
+.theme-shell {
+  background: var(--theme-shell) !important;
+}
+
+.theme-panel {
+  background: var(--theme-panel) !important;
+}
+
+.theme-border {
+  border-color: var(--theme-border) !important;
+}
+
+.theme-text {
+  color: var(--theme-text) !important;
+}
+
+.theme-muted {
+  color: var(--theme-muted) !important;
+}
+
+.theme-faint {
+  color: var(--theme-faint) !important;
+}
+
+.theme-input {
+  background: var(--theme-panel) !important;
+  border-color: var(--theme-border) !important;
+  color: var(--theme-text) !important;
+}
+
+.theme-button {
+  background: var(--theme-accent-soft) !important;
+  color: var(--theme-text) !important;
+}
+
+.theme-button-alt {
+  background: var(--theme-panel-strong) !important;
+  color: var(--theme-text) !important;
+}
+
+.theme-button:hover,
+.theme-button-alt:hover {
+  filter: brightness(1.1);
+}
+
+.theme-swatch {
+  inline-size: 1.5rem;
+  block-size: 1.5rem;
+  border: 1px solid var(--theme-border);
+  border-radius: 0.125rem;
+}
+
+#tabs-list > div[data-theme-state="main"],
+#tabs-list > div[data-theme-state="active"],
+#stack-tabs-list > div[data-theme-state="main"],
+#stack-tabs-list > div[data-theme-state="active"] {
+  background: var(--theme-accent-soft) !important;
+  color: var(--theme-text) !important;
+}
+
+#tabs-list > div[data-theme-state="idle"],
+#stack-tabs-list > div[data-theme-state="idle"] {
+  background: var(--theme-panel) !important;
+  color: var(--theme-muted) !important;
+}
+
+#tabs-list > div[data-theme-state="resting"],
+#stack-tabs-list > div[data-theme-state="resting"] {
+  background: var(--theme-resting) !important;
+  color: var(--theme-faint) !important;
+}
+
+#tabs-list > div:hover,
+#stack-tabs-list > div:hover {
+  filter: brightness(1.12);
+}
