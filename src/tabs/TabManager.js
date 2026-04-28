@@ -95,6 +95,68 @@ class TabManager {
         this.sendTabData();
     }
 
+    createSettingsTab(switchTo = true) {
+        const existingIndex = this.tabs.findIndex(t => t.isSettingsTab);
+        if (existingIndex !== -1) {
+            if (switchTo) this.switchTab(existingIndex);
+            return this.tabs[existingIndex].contentView;
+        }
+
+        let newTab = {
+            contentView: new WebContentsView({
+                webPreferences: {
+                    preload: path.join(__dirname, '../main/preload.js'),
+                    partition: "persist:main"
+                }
+            }),
+          
+            address: "about://settings",
+            title: "Settings",
+            isActive: true,
+            isStacked: false,
+            stackId: null,
+            lastActiveAt: Date.now(),
+            keepActive: false,
+            isSettingsTab: true
+        };
+        
+        this.tabs.push(newTab);
+      
+        newTab.contentView.webContents.loadFile(path.join(__dirname, '../settings/settings.html')); 
+
+        newTab.contentView.webContents.on('page-title-updated', () => {
+            newTab.title = "Settings";
+            newTab.address = "about://settings";
+            this.sendTabData();
+        });
+
+        newTab.contentView.webContents.setWindowOpenHandler((desc) => {
+            if (desc.features && (desc.features.includes("width") || desc.features.includes("height"))){
+                return {action: "allow"};
+            }
+          
+            this.createTab(desc.url, false);
+            return {action: "deny"}
+        })
+
+        this.attachContextMenu(newTab);
+        
+        if (switchTo){
+            this.switchTab(this.tabs.length - 1);
+            this.mainTab = newTab;
+        }
+
+        this.lastOpenedTabs.push(newTab);
+        newTab.title = "Settings";
+        this.settingsUI = newTab.contentView;
+        
+        this.sendTabData();
+
+        return newTab.contentView;
+    }
+
+  
+  
     switchTab(tabID) {
         if (tabID >= this.tabs.length) return;
 

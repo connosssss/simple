@@ -3,7 +3,6 @@ const path = require('node:path');
 const WindowResizing = require("./WindowResizing")
 const TabManager = require('../tabs/TabManager');
 const Navigation = require('../addressBar/Navigation');
-const SettingsManager = require('../settings/SettingsManager');
 const WindowManager = require('./WindowManager');
 const { setupTrackerBlocking, registerCookieAndTrackerIPC } = require('./cookiesAndTrackers');
 // const TabManager = require("./")
@@ -199,9 +198,8 @@ const ipcSetup = () => {
   ipcMain.on("showSettingsMenu", (event) => {
     const data = getManager(event);
     if (!data) return;
-    const settingsView = SettingsManager.openSettingsMenu(data.window);
+    const settingsView = data.tabManager.createSettingsTab();
     data.tabManager.setSettingsUI(settingsView);
-
 
     
     WindowManager.registerWebContents(settingsView.webContents.id, data.window.id);
@@ -210,7 +208,6 @@ const ipcSetup = () => {
         WindowManager.unregisterWebContents(settingsView.webContents.id);
     });
     
-
 
     settingsView.webContents.once('did-finish-load', () => {
       data.tabManager.sendTabData();
