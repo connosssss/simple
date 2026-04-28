@@ -87,8 +87,8 @@ module.exports = {
         if (this.isLoading) return;
 
 
-        try {
-            const savedTabs = this.tabs.map(tab => ({
+        try {                                         // may need to do this with a lot more tabs, might be better to make a single bool in the future
+            const savedTabs = this.tabs.filter(tab => !(tab.isSettingsTab)).map(tab => ({
                 address: tab.address,
                 title: tab.title,
                 isStacked: tab.isStacked,
