@@ -106,7 +106,7 @@ class TabManager {
             contentView: new WebContentsView({
                 webPreferences: {
                     preload: path.join(__dirname, '../main/preload.js'),
-                    partition: "persist:main"
+            
                 }
             }),
           

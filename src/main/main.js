@@ -214,6 +214,21 @@ const ipcSetup = () => {
     });
   });
 
+  ipcMain.on("broadcastThemeUpdate", (event) => {
+    const windows = WindowManager.getAllWindows();
+    
+    for (const winData of windows) {
+      
+        if (winData.ui) {
+            winData.ui.webContents.send("themeUpdated");
+        }
+      
+        if (winData.tabManager && winData.tabManager.settingsUI) {
+            winData.tabManager.settingsUI.webContents.send("themeUpdated");
+        }
+    }
+  });
+
   ipcMain.on('showContextMenu', (event, vars) => {
     const data = getManager(event);
     if (!data) return;

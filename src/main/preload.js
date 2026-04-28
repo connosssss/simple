@@ -32,6 +32,8 @@ contextBridge.exposeInMainWorld("electronAPI", {
     updateDefaultSite: (site) => ipcRenderer.send("updateDefaultSite", site),
     updateSearchEngine: (engine) => ipcRenderer.send("updateSearchEngine", engine),
     onInitSettings: (callback) => ipcRenderer.on('initSettings', (event, settings) => callback(settings)),
+    broadcastThemeUpdate: () => ipcRenderer.send("broadcastThemeUpdate"),
+    onThemeUpdated: (callback) => ipcRenderer.on("themeUpdated", callback),
 
 
     tabPopOff: (tabIndex) => ipcRenderer.send("tabPopOff", { tabIndex }),

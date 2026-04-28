@@ -6,12 +6,12 @@ const syncThemeControls = () => {
   const theme = window.themeUtils.getTheme();
   document.getElementById("theme-color").value = theme.color;
   document.getElementById("theme-accent").value = theme.accent;
-  document.getElementById("theme-text").value = theme.color;
+  document.getElementById("theme-text").value = theme.text;
   document.getElementById("theme-overall-opacity").value = theme.overallOpacity;
   document.getElementById("theme-accent-opacity").value = theme.accentOpacity;
   document.getElementById("theme-color-value").textContent = theme.color;
   document.getElementById("theme-accent-value").textContent = theme.accent;
-  document.getElementById("theme-color-value").textContent = theme.color;
+  document.getElementById("theme-text-value").textContent = theme.text;
   document.getElementById("theme-overall-opacity-value").textContent = `${Math.round(theme.overallOpacity * 100)}%`;
   document.getElementById("theme-accent-opacity-value").textContent = `${Math.round(theme.accentOpacity * 100)}%`;
 };
@@ -26,6 +26,9 @@ window.addEventListener("storage", (event) => {
 window.addEventListener("theme-updated", () => {
   syncThemeControls();
   window.themeUtils.applyTheme();
+  if (window.electronAPI && window.electronAPI.broadcastThemeUpdate) {
+    window.electronAPI.broadcastThemeUpdate();
+  }
 });
 
 document.getElementById("theme-color").addEventListener("input", (e) => {

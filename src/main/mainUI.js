@@ -12,6 +12,12 @@ import { setupSearchListeners, updateAddressBar } from '../addressBar/SearchUI.j
         
         window.addEventListener("theme-updated", () => window.themeUtils.applyTheme());
 
+        if (window.electronAPI && window.electronAPI.onThemeUpdated) {
+            window.electronAPI.onThemeUpdated(() => {
+                window.themeUtils.applyTheme();
+            });
+        }
+
         
         document.getElementById("new-tab").onclick = () => window.electronAPI.createTab();
         document.getElementById("settings").addEventListener("click", () => window.electronAPI.showSettingsMenu());

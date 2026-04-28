@@ -44,6 +44,7 @@
       return {
         color: savedTheme.color || DEFAULT_THEME.color,
         accent: savedTheme.accent || DEFAULT_THEME.accent,
+        text: savedTheme.text || DEFAULT_THEME.text,
         overallOpacity: clamp(Number(savedTheme.overallOpacity ?? savedTheme.opacity ?? DEFAULT_THEME.overallOpacity), 0.02, 1),
         accentOpacity: clamp(Number(savedTheme.accentOpacity ?? DEFAULT_THEME.accentOpacity), 0.02, 1)
       };
@@ -64,6 +65,7 @@
     root.style.setProperty("--theme-accent-soft", rgba(theme.accent, theme.accentOpacity));
     root.style.setProperty("--theme-resting", rgba(theme.color, Math.max(theme.overallOpacity * 0.35, 0.04)));
     root.style.setProperty("--theme-border", rgba(theme.accent, 0.55));
+    root.style.setProperty("--theme-text", rgba(theme.text, 0.70));
 
     return theme;
   };
