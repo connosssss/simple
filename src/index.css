@@ -8,6 +8,7 @@
   --theme-text: rgba(255, 255, 255, 0.94);
   --theme-muted: rgba(226, 232, 240, 0.72);
   --theme-faint: rgba(148, 163, 184, 0.72);
+  
 }
 
 .theme-shell {
@@ -61,6 +62,7 @@
   border: 1px solid var(--theme-border);
   border-radius: 0.125rem;
 }
+
 
 #tabs-list > div[data-theme-state="main"],
 #tabs-list > div[data-theme-state="active"],

@@ -10,6 +10,7 @@
   const DEFAULT_THEME = {
     color: "#0f172a",
     accent: "#334155",
+    text: "#E2E8F0",
     overallOpacity: 0.5,
     accentOpacity: 0.6
   };
