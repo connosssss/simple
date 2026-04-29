@@ -147,12 +147,41 @@ const ipcSetup = () => {
   // Navigation
   ipcMain.on("search", (event, address) => {
     const tm = getTabManager(event);
-    if (tm) Navigation.search(address, tm.getMainTab(), tm.searchEngine);
+    if (!tm) return;
+
+    let a = address.trim().toLowerCase();
+    if (a === "about://settings") {
+        const data = getManager(event);
+        const settingsView = tm.navigateTabToSettings(tm.currentIndex); 
+        
+        if (settingsView && tm.getMainTab().isSettingsTab) {
+            WindowManager.registerWebContents(settingsView.webContents.id, data.window.id);
+
+            settingsView.webContents.on('destroyed', () => {
+                WindowManager.unregisterWebContents(settingsView.webContents.id);
+            });
+            
+            settingsView.webContents.once('did-finish-load', () => {
+                settingsView.webContents.send("initSettings", { defaultSite: tm.defaultSite, searchEngine: tm.searchEngine });
+                tm.sendTabData();
+            });
+        }
+        return;
+    }
+
+    if (tm.getMainTab().isSettingsTab) {
+         const regularView = tm.navigateTabToRegular(tm.currentIndex, address);
+         return;
+    }
+
+    Navigation.search(address, tm.getMainTab(), tm.searchEngine);
   });
 
   ipcMain.on("tBAction", (event, action) => {
     const tm = getTabManager(event);
-    if (tm) Navigation.toolbarAction(action, tm.getMainTab());
+    if (tm && !tm.getMainTab().isSettingsTab) {
+        Navigation.toolbarAction(action, tm.getMainTab());
+    }
   });
 
 
@@ -199,7 +228,6 @@ const ipcSetup = () => {
     const data = getManager(event);
     if (!data) return;
     const settingsView = data.tabManager.createSettingsTab();
-    data.tabManager.setSettingsUI(settingsView);
 
     
     WindowManager.registerWebContents(settingsView.webContents.id, data.window.id);
@@ -223,8 +251,11 @@ const ipcSetup = () => {
             winData.ui.webContents.send("themeUpdated");
         }
       
-        if (winData.tabManager && winData.tabManager.settingsUI) {
-            winData.tabManager.settingsUI.webContents.send("themeUpdated");
+        if (winData.tabManager) {
+            const settingsTabs = winData.tabManager.tabs.filter(t => t.isSettingsTab && t.contentView && !t.contentView.webContents.isDestroyed());
+            for (const t of settingsTabs) {
+                t.contentView.webContents.send("themeUpdated");
+            }
         }
     }
   });

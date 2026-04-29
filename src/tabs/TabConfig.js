@@ -2,36 +2,26 @@ const fs = require('fs');
 
 module.exports = {
 
-    setSettingsUI(view) {
-        this.settingsUI = view;
-
-        if (this.settingsUI && !this.settingsUI.webContents.isDestroyed()) {
-
-            this.settingsUI.webContents.once('did-finish-load', () => {
-                
-                this.settingsUI.webContents.send("initSettings", { defaultSite: this.defaultSite, searchEngine: this.searchEngine });
-                this.sendTabData();
-            });
-        }
-
-    },
+    // setSettingsUI is removed
 
     updateDefaultSite(site) {
         this.defaultSite = site;
 
         this.saveConfig();
-        if (this.settingsUI && !this.settingsUI.webContents.isDestroyed()) {
-
-            this.settingsUI.webContents.send("initSettings", { defaultSite: this.defaultSite, searchEngine: this.searchEngine });
-
-        }},
+        const settingsTabs = this.tabs.filter(t => t.isSettingsTab && t.contentView && !t.contentView.webContents.isDestroyed());
+        settingsTabs.forEach(t => {
+            t.contentView.webContents.send("initSettings", { defaultSite: this.defaultSite, searchEngine: this.searchEngine });
+        });
+    },
 
     updateSearchEngine(engine) {
         this.searchEngine = engine;
         this.saveConfig();
-        if (this.settingsUI && !this.settingsUI.webContents.isDestroyed()) {
-            this.settingsUI.webContents.send("initSettings", { defaultSite: this.defaultSite, searchEngine: this.searchEngine });
-        }},
+        const settingsTabs = this.tabs.filter(t => t.isSettingsTab && t.contentView && !t.contentView.webContents.isDestroyed());
+        settingsTabs.forEach(t => {
+            t.contentView.webContents.send("initSettings", { defaultSite: this.defaultSite, searchEngine: this.searchEngine });
+        });
+    },
 
 
 

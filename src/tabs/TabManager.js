@@ -18,7 +18,6 @@ class TabManager {
         this.mainTab = null;
         this.currentIndex = -1;
         this.lastOpenedTabs = [];
-        this.settingsUI = null; 
         this.defaultSite = "https://google.com";
         this.searchEngine = "https://www.google.com/search?q=";
         this.stackNames = {};
@@ -96,11 +95,6 @@ class TabManager {
     }
 
     createSettingsTab(switchTo = true) {
-        const existingIndex = this.tabs.findIndex(t => t.isSettingsTab);
-        if (existingIndex !== -1) {
-            if (switchTo) this.switchTab(existingIndex);
-            return this.tabs[existingIndex].contentView;
-        }
 
         let newTab = {
             contentView: new WebContentsView({
@@ -148,7 +142,6 @@ class TabManager {
 
         this.lastOpenedTabs.push(newTab);
         newTab.title = "Settings";
-        this.settingsUI = newTab.contentView;
         
         this.sendTabData();
 
@@ -338,9 +331,117 @@ class TabManager {
         this.ui.webContents.send("updateTabs", tabData);
         this.saveConfig();
 
-        if (this.settingsUI && !this.settingsUI.webContents.isDestroyed()) {
-            this.settingsUI.webContents.send("updateTabs", tabData);
+      const settingsTabs = this.tabs.filter(t => t.isSettingsTab && t.contentView && !t.contentView.webContents.isDestroyed());
+      
+        settingsTabs.forEach(t => {
+            t.contentView.webContents.send("updateTabs", tabData);
+        });
+    }
+
+  navigateTabToSettings(index) {
+      
+    const tab = this.tabs[index];
+    if (!tab || tab.isSettingsTab) return null;
+    
+
+        const oldContentView = tab.contentView;
+        
+        const newContentView = new WebContentsView({
+            webPreferences: {
+                preload: path.join(__dirname, '../main/preload.js')
+            }
+        });
+
+        tab.isSettingsTab = true;
+        tab.address = "about://settings";
+        tab.title = "Settings";
+        tab.contentView = newContentView;
+
+        newContentView.webContents.loadFile(path.join(__dirname, '../settings/settings.html')); 
+
+        newContentView.webContents.on('page-title-updated', () => {
+            tab.title = "Settings";
+            tab.address = "about://settings";
+            this.sendTabData();
+        });
+
+        newContentView.webContents.setWindowOpenHandler((desc) => {
+            if (desc.features && (desc.features.includes("width") || desc.features.includes("height"))){
+                return {action: "allow"};
+            }
+            this.createTab(desc.url, false);
+            return {action: "deny"}
+        });
+
+        this.attachContextMenu(tab);
+
+        if (this.mainTab === tab) {
+            try {
+                this.mainWindow.contentView.removeChildView(oldContentView);
+            } catch (e) {}
+            this.mainWindow.contentView.addChildView(newContentView);
+            WindowResizing.resize(this.mainWindow, this.ui, this);
         }
+
+        if (oldContentView && oldContentView.webContents && !oldContentView.webContents.isDestroyed()) {
+            oldContentView.webContents.destroy();
+        }
+        
+        this.sendTabData();
+        return newContentView;
+    }
+
+    navigateTabToRegular(index, address) {
+        const tab = this.tabs[index];
+        if (!tab || !tab.isSettingsTab) return null;
+
+        const oldContentView = tab.contentView;
+        
+        const newContentView = new WebContentsView({
+            webPreferences: {
+                partition: "persist:main"
+            }
+        });
+
+        tab.isSettingsTab = false;
+        tab.contentView = newContentView;
+
+        newContentView.webContents.on('page-title-updated', () => {
+            tab.title = newContentView.webContents.getTitle();
+            tab.address = newContentView.webContents.getURL();
+            this.sendTabData();
+        });
+
+        newContentView.webContents.setWindowOpenHandler((desc) => {
+            if (desc.features && (desc.features.includes("width") || desc.features.includes("height"))){
+                return {action: "allow"};
+            }
+            this.createTab(desc.url, false);
+            return {action: "deny"}
+        });
+
+        this.attachContextMenu(tab);
+
+        if (this.mainTab === tab) {
+            try {
+                this.mainWindow.contentView.removeChildView(oldContentView);
+            }
+            
+            catch (e) { }
+          
+            this.mainWindow.contentView.addChildView(newContentView);
+            WindowResizing.resize(this.mainWindow, this.ui, this);
+        }
+
+        if (oldContentView && oldContentView.webContents && !oldContentView.webContents.isDestroyed()) {
+            oldContentView.webContents.destroy();
+        }
+        
+        const Navigation = require('../addressBar/Navigation');
+        Navigation.search(address, tab, this.searchEngine);
+        
+        this.sendTabData();
+        return newContentView;
     }
 
     getMainTab() { return this.mainTab; }

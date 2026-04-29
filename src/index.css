@@ -65,8 +65,13 @@
 
 
 #tabs-list > div[data-theme-state="main"],
+#stack-tabs-list > div[data-theme-state="main"] {
+  background: var(--theme-accent-soft) !important;
+  color: var(--theme-text) !important;
+  filter: brightness(1.4);
+}
+
 #tabs-list > div[data-theme-state="active"],
-#stack-tabs-list > div[data-theme-state="main"],
 #stack-tabs-list > div[data-theme-state="active"] {
   background: var(--theme-accent-soft) !important;
   color: var(--theme-text) !important;
