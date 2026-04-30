@@ -21,7 +21,7 @@ stackTabsBar.ondrop = (e) => {
     if (dragStackId) return; 
 
     const startingIndex = parseInt(e.dataTransfer.getData("text/plain"));
-    if (!startingIndex && latestTabs) {
+    if (!Number.isNaN(startingIndex) && latestTabs) {
         const startingTab = latestTabs[startingIndex];
         if (startingTab && startingTab.stackId !== activeStackId) {
             window.electronAPI.updateStack(activeStackId, startingIndex);
@@ -139,7 +139,7 @@ export const renderTabs = (tabs) => {
 
             const closeB = document.createElement("button");
             closeB.className = `bg-slate-900/80 hover:bg-slate-800 transition-all duration-100 text-white rounded-sm text-xs font-bold flex-shrink-0 ml-2 px-1`;
-            closeB.textContent = "×";
+            closeB.textContent = "x";
             closeB.onclick = (e) => {
                 e.stopPropagation();
                 window.electronAPI.closeStack(tab.stackId);
@@ -369,7 +369,7 @@ function createTabElement(tab, index, isInStack, tabs) {
         //displaying tabs
         const closeB = document.createElement("button");
         closeB.className = `${tab.isMainTab ? `bg-slate-900 hover:bg-slate-800` : `bg-slate-900/80 hover:bg-slate-800`} transition-all duration-100 text-white rounded-sm text-xs font-bold  flex-shrink-0 ml-2 px-1`;
-        closeB.textContent = "×";
+        closeB.textContent = "x";
         closeB.onclick = (e) => {
             e.stopPropagation();
             window.electronAPI.closeTab(index);
