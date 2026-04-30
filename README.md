@@ -8,6 +8,9 @@ simple is an electron based browser focused around giving users more features ar
 The list is mainly just a way to track semi big features or updates as they come out, with it not covering things like bug fixes
 
 ---
+4.28 Customizable themes/colors added
+
+4.23 Semi transparency working in navbar
 
 4.16 Default Search engine choice + default site on tab open
 
@@ -30,8 +33,4 @@ The list is mainly just a way to track semi big features or updates as they come
 
 #### Coming soon
 ---
-Tab Grouping
-
-More Themes
-
 Chrome Extension support
