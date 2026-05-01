@@ -25,19 +25,40 @@ const createBaseTab = (overrides = {}) => ({
 const isLiveWebContents = (contentView) =>
   Boolean(contentView && contentView.webContents && !contentView.webContents.isDestroyed());
 
-const createRegularContentView = () =>
-  new WebContentsView({
+const applyZoomLimits = (webContents) => {
+  try {
+    webContents.setVisualZoomLevelLimits(1, 5);
+  } 
+  
+  catch (e) {
+    console.log("Webcontents destroyed\n Message: ", e.message);
+
+    }
+};
+
+
+
+const createRegularContentView = () => {
+  const view = new WebContentsView({
     webPreferences: {
       partition: MAIN_PARTITION,
     },
   });
 
-const createSettingsContentView = () =>
-  new WebContentsView({
+  applyZoomLimits(view.webContents);
+  return view;
+};
+
+const createSettingsContentView = () => {
+  const view = new WebContentsView({
     webPreferences: {
       preload: PRELOAD_FILE,
     },
   });
+  applyZoomLimits(view.webContents);
+  return view;
+};
+
 
 const createRegularTab = ({ address = "", defaultSite, isStacked = false, stackId = null }) => {
   const tab = createBaseTab({
@@ -101,6 +122,7 @@ const attachTabLifecycle = (manager, tab) => {
   const { webContents } = tab.contentView;
   
   const syncAndBroadcast = () => {
+    applyZoomLimits(webContents);
     syncTabState(tab);
     manager.sendTabData();
   };
