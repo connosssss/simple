@@ -2,17 +2,32 @@ const crypto = require('crypto');
 
 module.exports = {
 
+    clearStackState(tab) {
+        if (!tab) return;
+        tab.isStacked = false;
+        tab.stackId = null;
+    },
+
+    cleanupStack(stackId, excludedTab = null) {
+        if (!stackId) return;
+
+        const remainingTabs = this.tabs.filter(tab => tab.stackId === stackId && tab !== excludedTab);
+        if (remainingTabs.length >= 2) return;
+
+        remainingTabs.forEach(tab => this.clearStackState(tab));
+        delete this.stackNames[stackId];
+        this.recalculateStackNumber();
+    },
+
     recalculateStackNumber() {
         let max = 0;
 
         for (const name of Object.values(this.stackNames)) {
-
             if (name) {
                 const match = name.match(/^Stack (\d+)$/);
 
                 if (match) {
                     const num = parseInt(match[1]);
-
                     if (num > max) max = num;
                 }
             }
@@ -25,79 +40,40 @@ module.exports = {
         const stackId = crypto.randomUUID();
 
         tabIndices.forEach(index => {
-            if (this.tabs[index]) {
-                const oldStackId = this.tabs[index].stackId;
-                if (oldStackId) {
-                    const remaining = this.tabs.filter(
-                        t => t.stackId === oldStackId && t !== this.tabs[index]
-                    );
-                    if (remaining.length < 2) {
-                        remaining.forEach(t => {
-                            t.isStacked = false;
-                            t.stackId = null;
-                        });
-                        delete this.stackNames[oldStackId];
-                        this.recalculateStackNumber();
-                    }
-                }
-                this.tabs[index].isStacked = true;
-                this.tabs[index].stackId = stackId;
-            }
+            const tab = this.tabs[index];
+            if (!tab) return;
+
+            this.cleanupStack(tab.stackId, tab);
+            tab.isStacked = true;
+            tab.stackId = stackId;
         });
 
         this.stackNames[stackId] = `Stack ${this.nextStackNumber}`;
         this.nextStackNumber++;
 
         this.sendTabData();
-
-
     },
 
     updateStack(stackId, tabIndex) {
-        if (this.tabs[tabIndex]) {
-            const oldStackId = this.tabs[tabIndex].stackId;
-            if (oldStackId && oldStackId !== stackId) {
-                const remaining = this.tabs.filter(
-                    t => t.stackId === oldStackId && t !== this.tabs[tabIndex]
-                );
-                if (remaining.length < 2) {
-                    remaining.forEach(t => {
-                        t.isStacked = false;
-                        t.stackId = null;
-                    });
-                    delete this.stackNames[oldStackId];
-                    this.recalculateStackNumber();
-                }
-            }
-            this.tabs[tabIndex].stackId = stackId;
-            this.tabs[tabIndex].isStacked = true;
+        const tab = this.tabs[tabIndex];
+        if (!tab) return;
+
+        if (tab.stackId && tab.stackId !== stackId) {
+            this.cleanupStack(tab.stackId, tab);
         }
 
+        tab.stackId = stackId;
+        tab.isStacked = true;
         this.sendTabData();
     },
 
     removeFromStack(tabIndex) {
+        const tab = this.tabs[tabIndex];
+        if (!tab) return;
 
-        if (this.tabs[tabIndex]) {
-            const oldStackId = this.tabs[tabIndex].stackId;
-
-            this.tabs[tabIndex].isStacked = false;
-            this.tabs[tabIndex].stackId = null;
-
-            if (oldStackId) {
-                const remaining = this.tabs.filter(t => t.stackId === oldStackId);
-                if (remaining.length < 2) {
-                    remaining.forEach(t => {
-                        t.isStacked = false;
-                        t.stackId = null;
-                    });
-                    delete this.stackNames[oldStackId];
-                    this.recalculateStackNumber();
-                }
-            }
-
-
-        }
+        const oldStackId = tab.stackId;
+        this.clearStackState(tab);
+        this.cleanupStack(oldStackId);
         this.sendTabData();
     },
 
@@ -105,8 +81,7 @@ module.exports = {
     deleteStack(stackId) {
         this.tabs.forEach(tab => {
             if (tab.stackId === stackId) {
-                tab.isStacked = false;
-                tab.stackId = null;
+                this.clearStackState(tab);
             }
 
         });
