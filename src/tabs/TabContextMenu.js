@@ -3,8 +3,14 @@ const { Menu, clipboard } = require('electron');
 module.exports = {
 
     attachContextMenu(tab) {
-        
-        tab.contentView.webContents.on('context-menu', (event, params) => {
+        const webContents = tab.contentView && tab.contentView.webContents;
+        if (!webContents || webContents.isDestroyed()) return;
+
+        if (tab.contextMenuHandler) {
+            webContents.removeListener('context-menu', tab.contextMenuHandler);
+        }
+
+        tab.contextMenuHandler = (event, params) => {
             const menuTemplate = [];
 
             if (params.linkURL) {
@@ -62,7 +68,9 @@ module.exports = {
 
             const menu = Menu.buildFromTemplate(menuTemplate);
             menu.popup();
-        });
+        };
+
+        webContents.on('context-menu', tab.contextMenuHandler);
     },
 
 };
