@@ -1,119 +1,101 @@
-const { app, BaseWindow, WebContentsView, globalShortcut, ipcMain, Menu, session  } = require('electron');
-const path = require('node:path');
-const WindowResizing = require("./WindowResizing")
-const TabManager = require('../tabs/TabManager');
+const { app, BaseWindow, globalShortcut, ipcMain, Menu } = require('electron');
+
 const Navigation = require('../addressBar/Navigation');
 const WindowManager = require('./WindowManager');
-const { setupTrackerBlocking, registerCookieAndTrackerIPC } = require('./cookiesAndTrackers');
-// const TabManager = require("./")
-
-
-
+const { registerCookieAndTrackerIPC } = require('./cookiesAndTrackers');
 
 // Handle creating/removing shortcuts on Windows when installing/uninstalling.
 if (require('electron-squirrel-startup')) {
   app.quit();
 }
 
+const registerSettingsView = (windowId, tabManager, settingsView) => {
+  if (!settingsView?.webContents) return;
 
+  WindowManager.registerWebContents(settingsView.webContents.id, windowId);
+  settingsView.webContents.on('destroyed', () => {
+    WindowManager.unregisterWebContents(settingsView.webContents.id);
+  });
+  settingsView.webContents.once('did-finish-load', () => {
+    settingsView.webContents.send("initSettings", {
+      defaultSite: tabManager.defaultSite,
+      searchEngine: tabManager.searchEngine,
+    });
+    tabManager.sendTabData();
+  });
+};
 
+const moveTabToWindow = (sourceData, tabIndex, targetData = null) => {
+  const { tabManager, window } = sourceData;
+  const tab = tabManager.popTab(tabIndex);
+  if (!tab) return;
 
-
-const ipcSetup = () => {
-  const getTabManager = (event) => {
-    const data = WindowManager.getManagerBySend(event.sender);
-    return data ? data.tabManager : null;
+  if (targetData) {
+    targetData.tabManager.stickTab(tab);
+    targetData.window.focus();
+  } else {
+    WindowManager.createWindow(tab);
   }
 
-  const getManager = (event) => {
-    return WindowManager.getManagerBySend(event.sender);
+  if (tabManager.tabs.length === 0) {
+    window.close();
+  }
+};
+
+const ipcSetup = () => {
+  const getWindowData = (event) => WindowManager.getManagerBySend(event.sender);
+  const getTabManager = (event) => getWindowData(event)?.tabManager ?? null;
+
+  const onTabManager = (channel, handler) => {
+    
+    ipcMain.on(channel, (event, ...args) => {
+      const tabManager = getTabManager(event);
+      if (tabManager) {
+        handler(tabManager, event, ...args);
+      }
+      
+    });
+    
   };
 
-   ipcMain.on("createTab", (event) => {
-      const tm = getTabManager(event);
-      if (tm) tm.createTab();
-  });
+  const onWindowData = (channel, handler) => {
+    
+    ipcMain.on(channel, (event, ...args) => {
+      const data = getWindowData(event);
+      if (data) {
+        handler(data, event, ...args);
+      }
+      
+    });
+    
+  };
 
-  ipcMain.on("switchTab", (event, tabID) => {
-      const tm = getTabManager(event);
-      if (tm) tm.switchTab(tabID);
-  });
+  onTabManager("createTab", (tabManager) => tabManager.createTab());
+  onTabManager("switchTab", (tabManager, event, tabId) => tabManager.switchTab(tabId));
+  onTabManager("reorderTabs", (tabManager, event, start, end) => tabManager.reorderTabs(start, end));
+  onTabManager("closeTab", (tabManager, event, tabId) => tabManager.closeTab(tabId));
+  onTabManager("hibernateTab", (tabManager, event, tabId) => tabManager.sleep(tabId));
+  onTabManager("updateDefaultSite", (tabManager, event, site) => tabManager.updateDefaultSite(site));
+  onTabManager("updateSearchEngine", (tabManager, event, engine) => tabManager.updateSearchEngine(engine));
   
-  ipcMain.on("reorderTabs", (event, start, end) => {
-      const tm = getTabManager(event);
-      if (tm) tm.reorderTabs(start, end);
-  });
-
-  ipcMain.on("closeTab", (event, tabID) => {
-      const tm = getTabManager(event);
-      if (tm) tm.closeTab(tabID);
-  });
-
-  ipcMain.on("hibernateTab", (event, tabID) => {
-      const tm = getTabManager(event);
-      if (tm) tm.sleep(tabID);
-  });
-
-  ipcMain.on("updateDefaultSite", (event, site) => {
-      const tm = getTabManager(event);
-      if (tm) tm.updateDefaultSite(site);
-  });
-
-  ipcMain.on("updateSearchEngine", (event, engine) => {
-      const tm = getTabManager(event);
-      if (tm) tm.updateSearchEngine(engine);
-  });
-  
-
   // Tab stacking
-  ipcMain.on("createStack", (event, tabIndices) => {
-      const tm = getTabManager(event);
-      if (tm) tm.createStack(tabIndices);
+  onTabManager("createStack", (tabManager, event, tabIndices) => tabManager.createStack(tabIndices));
+  onTabManager("updateStack", (tabManager, event, stackId, tabIndex) => tabManager.updateStack(stackId, tabIndex));
+  onTabManager("deleteStack", (tabManager, event, stackId) => tabManager.deleteStack(stackId));
+  onTabManager("closeStack", (tabManager, event, stackId) => tabManager.closeStack(stackId));
+  onTabManager("removeFromStack", (tabManager, event, tabIndex) => tabManager.removeFromStack(tabIndex));
+  onTabManager("renameStack", (tabManager, event, stackId, name) => tabManager.renameStack(stackId, name));
+  onTabManager("reorderStack", (tabManager, event, stackId, toIndex) => tabManager.reorderStack(stackId, toIndex));
+
+  onWindowData("stackBarVisible", (data, event, visible) => {
+    
+    data.tabManager.setStackBarVisible(visible);
+    data.tabManager.resizeWindow();
+    
   });
 
-  ipcMain.on("updateStack", (event, stackId, tabIndex) => {
-      const tm = getTabManager(event);
-      if (tm) tm.updateStack(stackId, tabIndex);
-  });
-
-  ipcMain.on("deleteStack", (event, stackId) => {
-      const tm = getTabManager(event);
-      if (tm) tm.deleteStack(stackId);
-  });
-
-  ipcMain.on("closeStack", (event, stackId) => {
-      const tm = getTabManager(event);
-      if (tm) tm.closeStack(stackId);
-  });
-
-  ipcMain.on("removeFromStack", (event, tabIndex) => {
-      const tm = getTabManager(event);
-      if (tm) tm.removeFromStack(tabIndex);
-  });
-
-  ipcMain.on("renameStack", (event, stackId, name) => {
-      const tm = getTabManager(event);
-      if (tm) tm.renameStack(stackId, name);
-  });
-
-  ipcMain.on("reorderStack", (event, stackId, toIndex) => {
-      const tm = getTabManager(event);
-      if (tm) tm.reorderStack(stackId, toIndex);
-  });
-
-  ipcMain.on("stackBarVisible", (event, visible) => {
-      const data = getManager(event);
-      if (!data) return;
-      data.stackBarVisible = visible;
-      WindowResizing.resize(data.window, data.ui, data.tabManager, visible);
-  });
-
-  ipcMain.on("showStackContextMenu", (event, vars) => {
-  const data = getManager(event);
-    if (!data) return;
-    const { tabManager, window: win } = data;
-
-
+  onWindowData("showStackContextMenu", (data, event, vars) => {
+    const { tabManager, window } = data;
     const currentName = tabManager.stackNames[vars.stackId] || "";
 
     const cmTemplate = [
@@ -137,7 +119,7 @@ const ipcSetup = () => {
 
     const menu = Menu.buildFromTemplate(cmTemplate);
     menu.popup({
-      window: win,
+      window: window,
       x: vars.x,
       y: vars.y
     });
@@ -146,100 +128,70 @@ const ipcSetup = () => {
 
   // Navigation
   ipcMain.on("search", (event, address) => {
-    const tm = getTabManager(event);
-    if (!tm) return;
+    const tabManager = getTabManager(event);
+    const data = getWindowData(event);
+    if (!tabManager || !data) return;
 
-    let a = address.trim().toLowerCase();
-    if (a === "about://settings") {
-        const data = getManager(event);
-        const settingsView = tm.navigateTabToSettings(tm.currentIndex); 
+    const trimmedAddress = address.trim();
+    const mainTab = tabManager.getMainTab();
+    if (!mainTab) return;
+
+    if (trimmedAddress.toLowerCase() === "about://settings") {
+        const settingsView = tabManager.navigateTabToSettings(tabManager.currentIndex); 
         
-        if (settingsView && tm.getMainTab().isSettingsTab) {
-            WindowManager.registerWebContents(settingsView.webContents.id, data.window.id);
-
-            settingsView.webContents.on('destroyed', () => {
-                WindowManager.unregisterWebContents(settingsView.webContents.id);
-            });
-            
-            settingsView.webContents.once('did-finish-load', () => {
-                settingsView.webContents.send("initSettings", { defaultSite: tm.defaultSite, searchEngine: tm.searchEngine });
-                tm.sendTabData();
-            });
+        if (settingsView && tabManager.getMainTab()?.isSettingsTab) {
+            registerSettingsView(data.window.id, tabManager, settingsView);
         }
         return;
     }
 
-    if (tm.getMainTab().isSettingsTab) {
-         const regularView = tm.navigateTabToRegular(tm.currentIndex, address);
+    if (mainTab.isSettingsTab) {
+         tabManager.navigateTabToRegular(tabManager.currentIndex, address);
          return;
     }
 
-    Navigation.search(address, tm.getMainTab(), tm.searchEngine);
+    Navigation.search(address, mainTab, tabManager.searchEngine);
   });
 
-  ipcMain.on("tBAction", (event, action) => {
-    const tm = getTabManager(event);
-    if (tm && !tm.getMainTab().isSettingsTab) {
-        Navigation.toolbarAction(action, tm.getMainTab());
+  onTabManager("tBAction", (tabManager, event, action) => {
+    const mainTab = tabManager.getMainTab();
+    if (mainTab && !mainTab.isSettingsTab) {
+        Navigation.toolbarAction(action, mainTab);
     }
   });
 
 
-      // in page
+  // in page
       
-  ipcMain.on("searchInPage", (event, phrase, options) => {
-    const tm = getTabManager(event);
-    if (!tm) return;
-    const mainTab = tm.getMainTab();
+  onTabManager("searchInPage", (tabManager, event, phrase, options) => {
+    const webContents = tabManager.getMainTab()?.contentView?.webContents;
+    if (!webContents) return;
 
-    if (mainTab && mainTab.contentView && mainTab.contentView.webContents) {
-
-      if (phrase) {
-  
-        mainTab.contentView.webContents.findInPage(phrase, options || {});
+    if (phrase) {
+        webContents.findInPage(phrase, options || {});
     }
-    
-      else {1
-        mainTab.contentView.webContents.stopFindInPage('clearSelection');
-      }
+    else {
+        webContents.stopFindInPage('clearSelection');
     }
   });
 
-  ipcMain.on("stopFindInPage", (event) => {
-    const tm = getTabManager(event);
-    if (!tm) return;
-    const mainTab = tm.getMainTab();
-
-
-    if (mainTab && mainTab.contentView && mainTab.contentView.webContents) {
-      mainTab.contentView.webContents.stopFindInPage('clearSelection');
+  onTabManager("stopFindInPage", (tabManager) => {
+    const webContents = tabManager.getMainTab()?.contentView?.webContents;
+    if (webContents) {
+      webContents.stopFindInPage('clearSelection');
     }
   });
 
-   ipcMain.on("focusUI", (event) => {
-    const data = getManager(event);
-    if (data && data.ui && data.ui.webContents) {
+  onWindowData("focusUI", (data) => {
+    if (data.ui && data.ui.webContents) {
         data.ui.webContents.focus();
     }
   });
 
   // Settings
-  ipcMain.on("showSettingsMenu", (event) => {
-    const data = getManager(event);
-    if (!data) return;
+  onWindowData("showSettingsMenu", (data) => {
     const settingsView = data.tabManager.createSettingsTab();
-
-    
-    WindowManager.registerWebContents(settingsView.webContents.id, data.window.id);
-
-    settingsView.webContents.on('destroyed', () => {
-        WindowManager.unregisterWebContents(settingsView.webContents.id);
-    });
-    
-
-    settingsView.webContents.once('did-finish-load', () => {
-      data.tabManager.sendTabData();
-    });
+    registerSettingsView(data.window.id, data.tabManager, settingsView);
   });
 
   ipcMain.on("broadcastThemeUpdate", (event) => {
@@ -252,7 +204,7 @@ const ipcSetup = () => {
         }
       
         if (winData.tabManager) {
-            const settingsTabs = winData.tabManager.tabs.filter(t => t.isSettingsTab && t.contentView && !t.contentView.webContents.isDestroyed());
+            const settingsTabs = winData.tabManager.getSettingsTabs ? winData.tabManager.getSettingsTabs() : winData.tabManager.tabs.filter(t => t.isSettingsTab && t.contentView && !t.contentView.webContents.isDestroyed());
             for (const t of settingsTabs) {
                 t.contentView.webContents.send("themeUpdated");
             }
@@ -260,9 +212,7 @@ const ipcSetup = () => {
     }
   });
 
-  ipcMain.on('showContextMenu', (event, vars) => {
-    const data = getManager(event);
-    if (!data) return;
+  onWindowData('showContextMenu', (data, event, vars) => {
     const { tabManager, window } = data;
 
     const targetTab = tabManager.tabs[vars.tabIndex];
@@ -280,9 +230,7 @@ const ipcSetup = () => {
       {
         label: 'Reload Tab',
         click: () => {
-          if (vars.tabIndex !== undefined && tabManager.tabs[vars.tabIndex]) {
-            tabManager.tabs[vars.tabIndex].contentView.webContents.reload();
-          }
+          tabManager.reloadTab(vars.tabIndex);
         }
       },
       { type: 'separator' },
@@ -312,23 +260,14 @@ const ipcSetup = () => {
     });
   });
 
-  ipcMain.on('tabPopOff', (event, { tabIndex }) => {
-      const data = getManager(event);
-      if (!data) return;
-
-      const { tabManager, window } = data;
-      const tab = tabManager.popTab(tabIndex);
-
-      if (tab) {
-          WindowManager.createWindow(tab);
-          
-          if (tabManager.tabs.length === 0) {
-              window.close();
-          }
-      }
+  onWindowData('tabPopOff', (data, event, { tabIndex }) => {
+      moveTabToWindow(data, tabIndex);
   });
 
-
+  onWindowData("tabTransfer", (data, event, { tabIndex, screenX, screenY }) => {
+    const targetData = WindowManager.getWindowAtPoint(screenX, screenY, data.window.id);
+    moveTabToWindow(data, tabIndex, targetData);
+  });
 
 }
 

@@ -158,7 +158,9 @@ class TabManager {
         
                 
                 tabToClose.contentView = null;
-        
+                
+            }
+
         if (tabID === this.currentIndex) {
             const nextIndex = Math.min(tabID, this.tabs.length - 1);
 
@@ -173,7 +175,6 @@ class TabManager {
         else if (tabID < this.currentIndex) {
             this.currentIndex--;
         }
-
         this.sendTabData();
     }
 
@@ -210,7 +211,9 @@ class TabManager {
 
         if (tab.isSettingsTab) {
             loadSettingsTabContent(tab);
-        } else {
+        } 
+        
+        else {
             loadRegularTabContent(tab, tab.address, this.defaultSite);
         }
 
@@ -408,5 +411,7 @@ class TabManager {
 Object.assign(TabManager.prototype, TabStacking);
 Object.assign(TabManager.prototype, TabContextMenu);
 Object.assign(TabManager.prototype, TabConfig);
+
+
 
 module.exports = TabManager;
