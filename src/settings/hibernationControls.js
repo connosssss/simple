@@ -48,7 +48,7 @@ export const setupHibernationControls = () => {
       const activeMinutes = getTimeTabActiveMinutes(tab.lastActiveAt);
       tabDuration.textContent = activeMinutes;
 
-      if (activeMinutes > closeAfter && closeAfter !== -1 && tab.isActive && !tab.keepActive) {
+      if (activeMinutes >= closeAfter && closeAfter !== -1 && tab.isActive && !tab.keepActive) {
         window.electronAPI.hibernateTab(index);
       }
 

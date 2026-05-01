@@ -53,7 +53,7 @@ class TabManager {
     }
 
     resizeWindow() {
-        WindowResizing.resize(this.mainWindow, this.ui, this);
+        WindowResizing.resize(this.mainWindow, this.ui, this, this.stackBarVisible);
     }
 
     removeContentView(contentView) {
@@ -156,10 +156,7 @@ class TabManager {
             console.log("Error in closing or already closed \n Message: " + e)
         }
         
-                
-                tabToClose.contentView = null;
-                
-            }
+        tabToClose.contentView = null;
 
         if (tabID === this.currentIndex) {
             const nextIndex = Math.min(tabID, this.tabs.length - 1);
