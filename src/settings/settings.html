@@ -57,6 +57,37 @@
 
     </div>
 
+    
+    <div class="rounded-md p-4 mb-4 text-slate-200">
+      <div class="text-lg font-semibold mb-4 border-b border-slate-600 text-slate-200">Extensions</div>
+      
+      <div class="flex flex-col gap-3 mb-4">
+        <label class="text-slate-300 text-sm">Install from Chrome Web Store:</label>
+        
+        <div class="flex gap-2">
+          <input id="extension-url-input"
+            placeholder="Paste Chrome Web Store URL..."
+            class="flex-1 bg-slate-800 p-2 outline-none text-slate-100/80 text-sm rounded-sm " />
+          <button id="extension-install-btn"
+            class="bg-emerald-700/60 text-white text-sm px-4 py-2 rounded-sm">
+            Install
+          </button>
+        </div>
+        <div id="extension-status" class="text-xs hidden"></div>
+        <div class="text-slate-500 text-xs">
+          Electron supports a subset of Chrome APIs. Some extensions may not work correctly.
+        </div>
+      </div>
+
+      <div class="text-sm font-medium text-slate-300 mb-2">Installed Extensions</div>
+      <div id="extensions-list" class="space-y-1">
+        <div class="text-slate-500 text-sm">No extensions installed.</div>
+      </div>
+    </div>
+
+
+    
+
     <div class="rounded-lg p-4 mb-2">
       <div class="text-lg font-semibold text-white mb-4 border-b border-slate-600">Manually Hibernate Tabs</div>
       <div id="tabs-list" class="space-y-2"></div>

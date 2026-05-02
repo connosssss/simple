@@ -3,6 +3,7 @@ const { app, BaseWindow, globalShortcut, ipcMain, Menu } = require('electron');
 const Navigation = require('../addressBar/Navigation');
 const WindowManager = require('./WindowManager');
 const { registerCookieAndTrackerIPC } = require('./cookiesAndTrackers');
+const extensionManager = require('../extensions/extensionManager');
 
 // Handle creating/removing shortcuts on Windows when installing/uninstalling.
 if (require('electron-squirrel-startup')) {
@@ -269,6 +270,28 @@ const ipcSetup = () => {
     moveTabToWindow(data, tabIndex, targetData);
   });
 
+  // ── Extension IPC ──────────────────────────────────────────────
+  ipcMain.handle('getExtensions', () => {
+    return extensionManager.getInstalledExtensions();
+  });
+
+  ipcMain.handle('installExtension', async (_event, url) => {
+    try {
+      const result = await extensionManager.installExtension(url);
+      return { success: true, extension: result };
+    } catch (e) {
+      return { success: false, error: e.message };
+    }
+  });
+
+  ipcMain.handle('removeExtension', async (_event, extensionId) => {
+    try {
+      await extensionManager.removeExtension(extensionId);
+      return { success: true };
+    } catch (e) {
+      return { success: false, error: e.message };
+    }
+  });
 }
 
 
@@ -276,10 +299,19 @@ const ipcSetup = () => {
 
 
 
-app.whenReady().then(() => {
+app.whenReady().then(async () => {
 
   ipcSetup();
   registerCookieAndTrackerIPC();
+
+  // Load previously installed extensions before creating windows
+  try {
+    await extensionManager.loadAllExtensions();
+    console.log('Extensions loaded successfully');
+  } catch (e) {
+    console.error('Failed to load extensions:', e);
+  }
+
   WindowManager.createWindow();
 
 

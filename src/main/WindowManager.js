@@ -197,7 +197,32 @@ class WindowManager {
             ui.webContents.focus(); 
             ui.webContents.send("toggleFindBar");
           })
-          
+
+          // Picture-in-Picture: Alt+P
+          globalShortcut.register("Alt+P", () => {
+            const mainTab = tabManager.getMainTab();
+            if (mainTab && mainTab.contentView && mainTab.contentView.webContents) {
+              mainTab.contentView.webContents.executeJavaScript(`
+                (async () => {
+                  // If already in PiP, exit
+                  if (document.pictureInPictureElement) {
+                    await document.exitPictureInPicture();
+                    return 'exited';
+                  }
+                  // Find videos on the page
+                  const videos = Array.from(document.querySelectorAll('video'));
+                  if (videos.length === 0) return 'no-video';
+                  // Prefer a playing video, then the largest one
+                  const playing = videos.filter(v => !v.paused && !v.ended);
+                  const target = playing.length > 0
+                    ? playing.reduce((a, b) => (a.videoWidth * a.videoHeight) >= (b.videoWidth * b.videoHeight) ? a : b)
+                    : videos.reduce((a, b) => (a.videoWidth * a.videoHeight) >= (b.videoWidth * b.videoHeight) ? a : b);
+                  await target.requestPictureInPicture();
+                  return 'pip';
+                })()
+              `).catch(() => {});
+            }
+          });
         
         globalShortcut.register("CommandOrControl+N", () => {
             this.createWindow();

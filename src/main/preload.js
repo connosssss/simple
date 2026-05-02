@@ -58,4 +58,8 @@ contextBridge.exposeInMainWorld("electronAPI", {
     onPromptStackName: (callback) => ipcRenderer.on('promptStackName', (event, data) => callback(data)),
     stackBarVisible: (visible) => ipcRenderer.send("stackBarVisible", visible),
 
+    // Extensions
+    getExtensions: () => ipcRenderer.invoke('getExtensions'),
+    installExtension: (url) => ipcRenderer.invoke('installExtension', url),
+    removeExtension: (extensionId) => ipcRenderer.invoke('removeExtension', extensionId),
 })
