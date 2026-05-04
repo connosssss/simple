@@ -1,0 +1,76 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="UTF-8" />
+    <title>Extensions</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+  </head>
+
+  
+  <body class="bg-[#202124] text-[#e8eaed] font-sans overflow-hidden select-none rounded-lg border border-white/10 h-screen">
+    <div class="flex justify-between items-center p-3 px-4 border-b border-white/10">
+      <span class="text-sm font-medium text-[#e8eaed]">Extensions</span>
+      
+    </div>
+    
+    <div class="overflow-y-auto max-h-[360px] py-1" id="extensions-list">
+      <div class="p-6 px-4 text-center text-white/40 text-[13px]">Loading...</div>
+    </div>
+    
+    <div class="p-2 px-4 pb-2.5 border-t border-white/10">
+      <a class="text-[13px] text-[#8ab4f8] cursor-pointer hover:text-[#aecbfa] hover:underline transition-colors" id="manage-extensions">Manage Extensions</a>
+    </div>
+
+    <script>
+      const { ipcRenderer } = require('electron');
+
+      const listEl = document.getElementById('extensions-list');
+      const manageLink = document.getElementById('manage-extensions');
+
+      ipcRenderer.on('load-extensions', (event, extensions) => {
+        listEl.innerHTML = '';
+
+        if (!extensions || extensions.length === 0) {
+          listEl.innerHTML = '<div class="p-6 px-4 text-center text-white/40 text-[13px]">No extensions installed</div>';
+          return;
+        }
+
+        extensions.forEach(ext => {
+          const item = document.createElement('div');
+          item.className = 'flex items-center p-2 px-4 cursor-pointer transition-colors duration-100 gap-3 hover:bg-white/10 active:bg-white/15';
+
+          const icon = document.createElement('div');
+          icon.className = 'w-6 h-6 rounded bg-white/10 flex items-center justify-center text-sm shrink-0 overflow-hidden';
+          if (ext.iconPath) {
+            const img = document.createElement('img');
+            img.src = 'file:///' + ext.iconPath.replace(/\\/g, '/');
+            img.className = 'w-full h-full object-contain';
+            icon.appendChild(img);
+          } 
+          else {
+            icon.textContent = ext.name.charAt(0).toUpperCase();
+          }
+
+          const name = document.createElement('div');
+          name.className = 'text-[13px] text-[#e8eaed] truncate flex-1';
+          name.textContent = ext.name;
+          name.title = ext.name;
+
+          item.appendChild(icon);
+          item.appendChild(name);
+
+          item.addEventListener('click', () => {
+            ipcRenderer.send('extension-menu-click', ext.id);
+          });
+
+          listEl.appendChild(item);
+        });
+      });
+
+      manageLink.addEventListener('click', () => {
+        ipcRenderer.send('extension-menu-manage');
+      });
+    </script>
+  </body>
+</html>
+

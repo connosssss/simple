@@ -7,6 +7,12 @@
     <link rel="stylesheet" href="./index.css" />
   </head>
 
+<head>
+  <meta charset="UTF-8" />
+  <title>Hello World!</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="./index.css" />
+</head>
 
   <body class="overflow-hidden m-0 p-0 bg-transparent">
     <div class="theme-shell theme-border w-screen flex flex-row backdrop-blur-md h-[30px] items-center justify-center text-center border-b border-black/20" style="-webkit-app-region: drag;">
@@ -36,9 +42,15 @@
         <button id="find-close" class="theme-button-alt text-xs px-1 rounded">✕</button>
       </div>
 
+      <button class="theme-button w-[2.0rem] h-[2.0rem] text-white text-sm rounded-sm transition-all duration-100"
+        id="extensions-menu">
+        E
+      </button>
+      
       <button class="theme-button w-[2.0rem] h-[2.0rem] text-white text-sm rounded-sm transition-all duration-100 mr-1" id="settings">
         O
       </button>
+      
     </div>
 
     <script src="./theme.js"></script>

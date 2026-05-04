@@ -340,6 +340,47 @@ class ExtensionManager {
     if (!popupPath) return null;
     return `chrome-extension://${extensionId}/${popupPath}`;
   }
+
+  getIconPath(extensionId) {
+    
+    const extPath = path.join(EXTENSIONS_DIR, extensionId);
+    const manifestPath = path.join(extPath, 'manifest.json');
+
+    try {
+      if (!fs.existsSync(manifestPath)) return null;
+      
+      const manifest = JSON.parse(fs.readFileSync(manifestPath, 'utf8'));
+      const icons = manifest.icons || {};
+      const action = manifest.action || manifest.browser_action || manifest.page_action || {};
+      const actionIcons = action.default_icon;
+      
+      let iconFile = null;
+      if (typeof actionIcons === 'string') {
+        iconFile = actionIcons;
+      }
+      else if (actionIcons && typeof actionIcons === 'object') {
+        const sizes = Object.keys(actionIcons).map(Number).sort((a, b) => b - a);
+        if (sizes.length > 0) iconFile = actionIcons[sizes[0]];
+      }
+      else if (Object.keys(icons).length > 0) {
+        const sizes = Object.keys(icons).map(Number).sort((a, b) => b - a);
+        
+        if (sizes.length > 0) iconFile = icons[sizes[0]];
+      }
+
+      if (iconFile) {
+        const fullPath = path.join(extPath, iconFile);
+        
+        if (fs.existsSync(fullPath)) return fullPath;
+      }
+
+      return null;
+    }
+
+    catch {
+      return null;
+    }
+  }
 }
 
 module.exports = new ExtensionManager();

@@ -62,4 +62,5 @@ contextBridge.exposeInMainWorld("electronAPI", {
     getExtensions: () => ipcRenderer.invoke('getExtensions'),
     installExtension: (url) => ipcRenderer.invoke('installExtension', url),
     removeExtension: (extensionId) => ipcRenderer.invoke('removeExtension', extensionId),
+    showExtensionsMenu: (bounds) => ipcRenderer.send('showExtensionsMenu', bounds),
 })

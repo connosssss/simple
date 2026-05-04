@@ -1,6 +1,7 @@
 import { setupAddressBarUI, updateAddressBar } from "./addressBarUI.js";
 import { setupFindBarUI } from "./findBarUI.js";
 import { renderTabs } from "./tabBarUI.js";
+import { setupExtensionsUI } from "./extensionsUI.js";
 
 const addressBar = document.getElementById("address-bar");
 
@@ -72,4 +73,5 @@ setupThemeSync();
 setupWindowControls();
 setupAddressBarUI();
 setupFindBarUI();
+setupExtensionsUI();
 setupTabSubscription();

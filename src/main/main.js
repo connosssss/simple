@@ -1,4 +1,5 @@
-const { app, BaseWindow, globalShortcut, ipcMain, Menu } = require('electron');
+const { app, BaseWindow, BrowserWindow, WebContentsView, globalShortcut, ipcMain, Menu, session } = require('electron');
+const path = require('node:path');
 
 const Navigation = require('../addressBar/Navigation');
 const WindowManager = require('./WindowManager');
@@ -270,7 +271,7 @@ const ipcSetup = () => {
     moveTabToWindow(data, tabIndex, targetData);
   });
 
-  // ── Extension IPC ──────────────────────────────────────────────
+  //EXTENSIONS
   ipcMain.handle('getExtensions', () => {
     return extensionManager.getInstalledExtensions();
   });
@@ -291,6 +292,200 @@ const ipcSetup = () => {
     } catch (e) {
       return { success: false, error: e.message };
     }
+  });
+
+ 
+  let activeExtensionsMenu = null;
+  let activeExtensionPopup = null;
+
+  const closeExtensionsMenu = () => {
+    if (activeExtensionsMenu && !activeExtensionsMenu.isDestroyed()) {
+      activeExtensionsMenu.close();
+    }
+    
+    activeExtensionsMenu = null;
+  };
+
+  const closeExtensionPopup = () => {
+    if (activeExtensionPopup && !activeExtensionPopup.isDestroyed()) {
+      activeExtensionPopup.close();
+    }
+    
+    activeExtensionPopup = null;
+  };
+
+  ipcMain.on('showExtensionsMenu', (event, bounds) => {
+    if (activeExtensionsMenu && !activeExtensionsMenu.isDestroyed()) {
+      closeExtensionsMenu();
+      return;
+    }
+
+    const menuWidth = 300;
+    const menuHeight = 400;
+
+    activeExtensionsMenu = new BrowserWindow({
+      width: menuWidth,
+      height: menuHeight,
+      x: Math.round(bounds.x - menuWidth),
+      y: Math.round(bounds.y + 4),
+      frame: false,
+      show: false,
+      alwaysOnTop: true,
+      resizable: false,
+      skipTaskbar: true,
+      transparent: true,
+      webPreferences: {
+        nodeIntegration: true,
+        contextIsolation: false,
+      }
+    });
+
+    const parentData = WindowManager.getManagerBySend(event.sender);
+    
+    if (parentData) {
+      WindowManager.registerWebContents(activeExtensionsMenu.webContents.id, parentData.window.id);
+    }
+
+    activeExtensionsMenu.loadFile(path.join(__dirname, '../extensions/extensionsMenu.html'));
+
+    activeExtensionsMenu.once('ready-to-show', () => {
+      if (activeExtensionsMenu && !activeExtensionsMenu.isDestroyed()) {
+        const extensions = extensionManager.getInstalledExtensions();
+
+       
+        const extensionsWithIcons = extensions.map(ext => {
+          
+          const iconPath = extensionManager.getIconPath ? extensionManager.getIconPath(ext.id) : null;
+          return { ...ext, iconPath };
+          
+        });
+
+        activeExtensionsMenu.webContents.send('load-extensions', extensionsWithIcons);
+        activeExtensionsMenu.show();
+      }
+    });
+
+    activeExtensionsMenu.on('blur', () => {
+      closeExtensionsMenu();
+    });
+
+    activeExtensionsMenu.on('closed', () => {
+      activeExtensionsMenu = null;
+    });
+  });
+
+  const createExtensionPopupWindow = (popupUrl, options = {}) => {
+    closeExtensionPopup();
+
+    const popupWindow = new BaseWindow({
+      width: options.width || 400,
+      height: options.height || 500,
+      x: options.x,
+      y: options.y,
+      frame: false,
+      show: false,
+      alwaysOnTop: true,
+      resizable: false,
+      skipTaskbar: true,
+      backgroundColor: '#ffffff',
+    });
+
+    const parentWindow = BaseWindow.getFocusedWindow();
+    if (parentWindow) {
+      WindowManager.registerWebContents(popupWindow.contentView.webContents.id, parentWindow.id);
+    }
+
+    const popupView = new WebContentsView({
+      webPreferences: {
+        partition: 'persist:main',
+        preload: path.join(__dirname, '../extensions/popupPreload.js')
+      }
+    });
+
+    popupWindow.contentView.addChildView(popupView);
+
+    const resizeView = () => {
+      const bounds = popupWindow.contentView.getBounds();
+      popupView.setBounds({ x: 0, y: 0, width: bounds.width, height: bounds.height });
+    };
+    resizeView();
+    popupWindow.on('resize', resizeView);
+
+    let initialLoadDone = false;
+    popupView.webContents.on('will-navigate', (event, url) => {
+      if (initialLoadDone) {
+        console.log('[EXT POPUP] Blocked self-reload:', url);
+        event.preventDefault();
+      }
+    });
+
+    popupView.webContents.on('will-navigate', (event, url) => {
+      if (initialLoadDone) {
+        event.preventDefault();
+      }
+    });
+
+    popupView.webContents.loadURL(popupUrl);
+
+    popupView.webContents.once('did-finish-load', () => {
+      initialLoadDone = true;
+
+      if (!popupWindow.isDestroyed()) {
+        popupWindow.show();
+        popupWindow.focus();
+
+        setTimeout(() => {
+          if (!popupWindow.isDestroyed()) {
+            
+            popupWindow.on('blur', () => {
+              closeExtensionPopup();
+            });
+            
+          }
+        }, 300);
+      }
+    });
+
+    popupWindow.on('closed', () => {
+      activeExtensionPopup = null;
+    });
+
+    activeExtensionPopup = popupWindow;
+  };
+
+  ipcMain.on('extension-menu-click', (event, extensionId) => {
+    const popupUrl = extensionManager.getPopupUrl(extensionId);
+    if (!popupUrl) return;
+
+    closeExtensionsMenu();
+
+    setTimeout(() => {
+      createExtensionPopupWindow(popupUrl);
+    }, 150);
+  });
+
+  ipcMain.on('extension-menu-manage', (event) => {
+    const data = getWindowData(event);
+    closeExtensionsMenu();
+
+    if (data) {
+      // Focus the main window
+      data.window.focus();
+      
+      // Create and show settings tab
+      const settingsView = data.tabManager.createSettingsTab();
+      registerSettingsView(data.window.id, data.tabManager, settingsView);
+    }
+  });
+
+  ipcMain.on('openExtensionPopup', (event, extensionId, bounds) => {
+    const popupUrl = extensionManager.getPopupUrl(extensionId);
+    if (!popupUrl) return;
+
+    createExtensionPopupWindow(popupUrl, {
+      x: Math.round(bounds.x - 400 + bounds.width),
+      y: Math.round(bounds.y + 10),
+    });
   });
 }
 
