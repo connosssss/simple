@@ -390,11 +390,6 @@ const ipcSetup = () => {
       backgroundColor: '#ffffff',
     });
 
-    const parentWindow = BaseWindow.getFocusedWindow();
-    if (parentWindow) {
-      WindowManager.registerWebContents(popupWindow.contentView.webContents.id, parentWindow.id);
-    }
-
     const popupView = new WebContentsView({
       webPreferences: {
         partition: 'persist:main',
@@ -403,6 +398,11 @@ const ipcSetup = () => {
     });
 
     popupWindow.contentView.addChildView(popupView);
+
+    const parentWindow = BaseWindow.getFocusedWindow();
+    if (parentWindow) {
+      WindowManager.registerWebContents(popupView.webContents.id, parentWindow.id);
+    }
 
     const resizeView = () => {
       const bounds = popupWindow.contentView.getBounds();
