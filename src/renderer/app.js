@@ -53,6 +53,12 @@ const setupTabSubscription = () => {
     const mainTab = tabs.find((tab) => tab.isMainTab);
     if (mainTab) {
       updateAddressBar(mainTab.address);
+      const windowTitle = document.getElementById("window-title");
+
+      if (windowTitle) {
+        windowTitle.textContent = mainTab.title || "simple";
+      }
+
     }
 
     const openedNewTab =
