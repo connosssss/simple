@@ -1,6 +1,18 @@
 const { app, BaseWindow, BrowserWindow, WebContentsView, globalShortcut, ipcMain, Menu, session } = require('electron');
 const path = require('node:path');
 
+const configureAppStorage = () => {
+  if (app.isPackaged) {
+    return;
+  }
+
+  const devUserDataPath = path.join(app.getPath('appData'), `${app.getName()}-dev`);
+  app.setPath('userData', devUserDataPath);
+  app.setPath('sessionData', path.join(devUserDataPath, 'session-data'));
+};
+
+configureAppStorage();
+
 const Navigation = require('../addressBar/Navigation');
 const WindowManager = require('./WindowManager');
 const { registerCookieAndTrackerIPC } = require('./cookiesAndTrackers');
