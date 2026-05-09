@@ -153,9 +153,17 @@ class WindowManager {
               mainTab.contentView.webContents.toggleDevTools();
             }
           })
+      
         
         
-          globalShortcut.register("Control+O", () => { })
+      globalShortcut.register("Control+O", () => { })
+
+      globalShortcut.register("CommandOrControl+P", () => {
+        const mainTab = tabManager.getMainTab();
+        if (mainTab && mainTab.contentView && mainTab.contentView.webContents) {
+          document.getElementsByTagName('VIDEO')[0].requestPictureInPicture();
+        }
+      })
         
         
         
