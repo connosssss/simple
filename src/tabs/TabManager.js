@@ -403,6 +403,50 @@ class TabManager {
         this.sendTabData();
     }
 
+    togglePictureInPicture(tab, x = null, y = null) {
+        if (!tab || !tab.contentView || !tab.contentView.webContents) return;
+        
+        const script = `
+            (async () => {
+                try {
+                    if (document.pictureInPictureElement) {
+                        await document.exitPictureInPicture();
+                        return 'exited';
+                    }
+                    
+                    let target;
+                    const x = ${x};
+                    const y = ${y};
+                    
+                    if (x !== null && y !== null) {
+                        const el = document.elementFromPoint(x, y);
+                        target = el && el.tagName === 'VIDEO' ? el : (document.querySelector('video:hover') || document.querySelector('video'));
+                    } 
+
+                    else {
+                        const videos = Array.from(document.querySelectorAll('video'));
+                        if (videos.length === 0) return 'no-video';
+                        const playing = videos.filter(v => !v.paused && !v.ended);
+                        target = playing.length > 0
+                            ? playing.reduce((a, b) => (a.videoWidth * a.videoHeight) >= (b.videoWidth * b.videoHeight) ? a : b)
+                            : videos.reduce((a, b) => (a.videoWidth * a.videoHeight) >= (b.videoWidth * b.videoHeight) ? a : b);
+                    }
+                    
+                    if (target) {
+                        await target.requestPictureInPicture();
+                        return 'pip';
+                    }
+                } 
+
+                catch (e) {
+                    console.error('PiP failed', e);
+                }
+            })();
+        `;
+        
+        tab.contentView.webContents.executeJavaScript(script).catch(err => console.error('PiP execution failed:', err));
+    }
+
 }
 
 Object.assign(TabManager.prototype, TabStacking);

@@ -48,6 +48,14 @@ module.exports = {
                 menuTemplate.push({ type: 'separator' });
             }
 
+            if (params.mediaType === 'video') {
+                menuTemplate.push({
+                    label: 'Picture in Picture',
+                    click: () => this.togglePictureInPicture(tab, params.x, params.y)
+                });
+                menuTemplate.push({ type: 'separator' });
+            }
+
             if (params.selectionText) {
                 menuTemplate.push({ role: 'copy' });
             }
