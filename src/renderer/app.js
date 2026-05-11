@@ -57,7 +57,7 @@ const setupTabSubscription = () => {
 
       if (windowTitle) {
         windowTitle.textContent = mainTab.title || "simple";
-        windowTitle.className = "theme-text text-md truncate max-w-2/3 max-h-full ";
+        windowTitle.className = "theme-text text-md max-w-[60%] truncate max-h-full";
       }
       
 
