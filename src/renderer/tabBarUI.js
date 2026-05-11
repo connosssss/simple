@@ -181,19 +181,22 @@ export const renderTabs = (tabs) => {
             };
 
             stackContainer.onclick = (e) => {
-                e.stopPropagation();
+              e.stopPropagation();
+              
                 if (activeStackId === tab.stackId) {
                     activeStackId = null;
                     renderTabs(tabs);
-                } else {
+                }
+
+                else {
                     const rememberedIndex = lastActiveStackTab.get(tab.stackId);
-                    const targetTab = rememberedIndex != null
-                        ? stackTabs.find(st => st.index === rememberedIndex)
-                        : null;
+                    const targetTab = rememberedIndex != null ? stackTabs.find(st => st.index === rememberedIndex): null;
                     const tabToSwitch = targetTab || stackTabs[0];
+                  
                     if (tabToSwitch) {
                         window.electronAPI.switchTab(tabToSwitch.index);
                     }
+                  
                 }
             };
 
