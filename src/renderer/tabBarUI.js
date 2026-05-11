@@ -3,6 +3,7 @@ const stackTabsBar = document.getElementById("stack-tabs-bar");
 const stackTabsList = document.getElementById("stack-tabs-list");
 
 let activeStackId = null;
+const lastActiveStackTab = new Map();
 
 tabsList.ondragover = (e) => { e.preventDefault(); };
 
@@ -101,6 +102,7 @@ export const renderTabs = (tabs) => {
 
     if (currentStackId) {
         activeStackId = currentStackId;
+        lastActiveStackTab.set(currentStackId, mainTab.index);
     }
     
     else {
@@ -184,9 +186,13 @@ export const renderTabs = (tabs) => {
                     activeStackId = null;
                     renderTabs(tabs);
                 } else {
-                    const firstTab = stackTabs[0];
-                    if (firstTab) {
-                        window.electronAPI.switchTab(firstTab.index);
+                    const rememberedIndex = lastActiveStackTab.get(tab.stackId);
+                    const targetTab = rememberedIndex != null
+                        ? stackTabs.find(st => st.index === rememberedIndex)
+                        : null;
+                    const tabToSwitch = targetTab || stackTabs[0];
+                    if (tabToSwitch) {
+                        window.electronAPI.switchTab(tabToSwitch.index);
                     }
                 }
             };
