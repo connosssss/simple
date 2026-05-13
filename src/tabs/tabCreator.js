@@ -143,7 +143,16 @@ const attachTabLifecycle = (manager, tab) => {
       return { action: "allow" };
     }
 
-    manager.createTab(details.url, false);
+    const shouldOpenInForeground = details.disposition === "foreground-tab";
+    const shouldStayInStack = Boolean(tab.isStacked && tab.stackId);
+
+    manager.createTab({
+      address: details.url,
+      switchTo: shouldOpenInForeground,
+      isStacked: shouldStayInStack,
+      stackId: shouldStayInStack ? tab.stackId : null,
+    });
+
     return { action: "deny" };
   });
 

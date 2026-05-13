@@ -84,7 +84,7 @@ const ipcSetup = () => {
     
   };
 
-  onTabManager("createTab", (tabManager) => tabManager.createTab());
+  onTabManager("createTab", (tabManager, event, options) => tabManager.createTab(options));
   onTabManager("switchTab", (tabManager, event, tabId) => tabManager.switchTab(tabId));
   onTabManager("reorderTabs", (tabManager, event, start, end) => tabManager.reorderTabs(start, end));
   onTabManager("closeTab", (tabManager, event, tabId) => tabManager.closeTab(tabId));

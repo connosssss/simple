@@ -1,9 +1,22 @@
 const tabsList = document.getElementById("tabs-list");
 const stackTabsBar = document.getElementById("stack-tabs-bar");
 const stackTabsList = document.getElementById("stack-tabs-list");
+const newStackTabButton = document.getElementById("new-stack-tab");
 
 let activeStackId = null;
 const lastActiveStackTab = new Map();
+
+newStackTabButton?.addEventListener("click", (event) => {
+    event.stopPropagation();
+
+    if (!activeStackId) return;
+
+    window.electronAPI.createTab({
+        switchTo: true,
+        isStacked: true,
+        stackId: activeStackId
+    });
+});
 
 tabsList.ondragover = (e) => { e.preventDefault(); };
 
