@@ -6,7 +6,7 @@
   const THEME_KEY = "themeTheme";
   
   
-  
+
   const DEFAULT_THEME = {
     color: "#0f172a",
     accent: "#334155",
@@ -34,22 +34,23 @@
     return `rgba(${r}, ${g}, ${b}, ${alpha})`;
   };
   
-  
+
+  const parseTheme = (savedTheme) => {
+    if (!savedTheme) return { ...DEFAULT_THEME };
+    return {
+      color: savedTheme.color || DEFAULT_THEME.color,
+      accent: savedTheme.accent || DEFAULT_THEME.accent,
+      text: savedTheme.text || DEFAULT_THEME.text,
+      overallOpacity: clamp(Number(savedTheme.overallOpacity ?? savedTheme.opacity ?? DEFAULT_THEME.overallOpacity), 0.02, 1),
+      accentOpacity: clamp(Number(savedTheme.accentOpacity ?? DEFAULT_THEME.accentOpacity), 0.02, 1)
+    };
+  };
 
   const getTheme = () => {
-    
     try {
       const savedTheme = JSON.parse(localStorage.getItem(THEME_KEY) || "{}");
-      
-      return {
-        color: savedTheme.color || DEFAULT_THEME.color,
-        accent: savedTheme.accent || DEFAULT_THEME.accent,
-        text: savedTheme.text || DEFAULT_THEME.text,
-        overallOpacity: clamp(Number(savedTheme.overallOpacity ?? savedTheme.opacity ?? DEFAULT_THEME.overallOpacity), 0.02, 1),
-        accentOpacity: clamp(Number(savedTheme.accentOpacity ?? DEFAULT_THEME.accentOpacity), 0.02, 1)
-      };
+      return parseTheme(savedTheme);
     }
-    
     catch {
       return { ...DEFAULT_THEME };
     }
@@ -83,10 +84,32 @@
     
     localStorage.setItem(THEME_KEY, JSON.stringify(nextTheme));
     applyTheme();
-    
+
+    if (window.electronAPI?.saveThemeToFile) {
+      window.electronAPI.saveThemeToFile(nextTheme);
+    }
     
     window.dispatchEvent(new Event("theme-updated"));
   };
+
+  const initThemeFromFile = async () => {
+    if (window.electronAPI?.loadThemeFromFile) {
+      try {
+        const fileTheme = await window.electronAPI.loadThemeFromFile();
+        if (fileTheme) {
+          const theme = parseTheme(fileTheme);
+          localStorage.setItem(THEME_KEY, JSON.stringify(theme));
+          applyTheme();
+        }
+      } 
+      
+      catch (e) {
+        console.error("Failed to load theme from file:", e);
+      }
+    }
+  };
+
+  initThemeFromFile();
 
   window.themeUtils = {
     THEME_KEY,

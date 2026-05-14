@@ -1,5 +1,6 @@
 const { app, BaseWindow, BrowserWindow, WebContentsView, globalShortcut, ipcMain, Menu, session } = require('electron');
 const path = require('node:path');
+const fs = require('fs');
 
 const configureAppStorage = () => {
   if (app.isPackaged) {
@@ -55,6 +56,8 @@ const moveTabToWindow = (sourceData, tabIndex, targetData = null) => {
     window.close();
   }
 };
+
+const getThemePath = () => path.join(app.getPath('userData'), 'theme.json');
 
 const ipcSetup = () => {
   const getWindowData = (event) => WindowManager.getManagerBySend(event.sender);
@@ -224,6 +227,29 @@ const ipcSetup = () => {
             }
         }
     }
+  });
+
+  // Theme persistence
+  ipcMain.handle("saveThemeToFile", (event, themeData) => {
+    try {
+      fs.writeFileSync(getThemePath(), JSON.stringify(themeData));
+      return { success: true };
+    } catch (e) {
+      console.error("Error saving theme:", e);
+      return { success: false, error: e.message };
+    }
+  });
+
+  ipcMain.handle("loadThemeFromFile", () => {
+    try {
+      const themePath = getThemePath();
+      if (fs.existsSync(themePath)) {
+        return JSON.parse(fs.readFileSync(themePath, 'utf-8'));
+      }
+    } catch (e) {
+      console.error("Error loading theme:", e);
+    }
+    return null;
   });
 
   onWindowData('showContextMenu', (data, event, vars) => {

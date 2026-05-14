@@ -11,6 +11,7 @@ const closeFindBar = () => {
 export const setupFindBarUI = () => {
 
   window.electronAPI.onToggleFindBar(() => {
+
     findBar.classList.toggle("hidden");
 
     if (!findBar.classList.contains("hidden")) {
