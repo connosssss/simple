@@ -34,6 +34,8 @@ contextBridge.exposeInMainWorld("electronAPI", {
     onInitSettings: (callback) => ipcRenderer.on('initSettings', (event, settings) => callback(settings)),
     broadcastThemeUpdate: () => ipcRenderer.send("broadcastThemeUpdate"),
     onThemeUpdated: (callback) => ipcRenderer.on("themeUpdated", callback),
+    saveThemeToFile: (themeData) => ipcRenderer.invoke("saveThemeToFile", themeData),
+    loadThemeFromFile: () => ipcRenderer.invoke("loadThemeFromFile"),
 
 
     tabPopOff: (tabIndex) => ipcRenderer.send("tabPopOff", { tabIndex }),
