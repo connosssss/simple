@@ -60,14 +60,28 @@ const createSettingsContentView = () => {
 };
 
 
-const createRegularTab = ({ address = "", defaultSite, isStacked = false, stackId = null }) => {
-  const tab = createBaseTab({
-    contentView: createRegularContentView(),
+const createRegularTab = ({
+  address = "",
+  defaultSite,
+  isStacked = false,
+  stackId = null,
+  startHibernated = true,}) => {
+    
+    const tab = createBaseTab({
+    contentView: startHibernated ? null : createRegularContentView(),
+    address,
+    title: address,
+    isActive: !startHibernated,
     isStacked,
     stackId,
   });
 
-  loadRegularTabContent(tab, address, defaultSite);
+  if (!startHibernated) {
+
+    loadRegularTabContent(tab, address, defaultSite);
+  }
+
+
   return tab;
 };
 
