@@ -18,6 +18,9 @@ contextBridge.exposeInMainWorld("electronAPI", {
     search: (address) => ipcRenderer.send("search", address),
     toolbarAction: (action) => ipcRenderer.send("tBAction", action),
     bookmark: (action) => ipcRenderer.send("bookmark", action),
+    getBookmarks: () => ipcRenderer.invoke("getBookmarks"),
+    removeBookmark: (url) => ipcRenderer.invoke("removeBookmark", url),
+    onUpdateBookmarks: (callback) => ipcRenderer.on("updateBookmarks", (event, bookmarks) => callback(bookmarks)),
 
 
 

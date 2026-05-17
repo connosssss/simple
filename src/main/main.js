@@ -276,6 +276,14 @@ const ipcSetup = () => {
 
   ipcMain.handle("getBookmarks", () => bookmarkManager.getAll());
 
+  ipcMain.handle("removeBookmark", (_event, url) => {
+    bookmarkManager.remove(url);
+    for (const data of WindowManager.getAllWindows()) {
+      data.ui.webContents.send("updateBookmarks", bookmarkManager.getAll());
+    }
+    return { success: true };
+  });
+
   onWindowData('showContextMenu', (data, event, vars) => {
     const { tabManager, window } = data;
 

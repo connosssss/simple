@@ -1,9 +1,17 @@
 const addressBar = document.getElementById("address-bar");
+const bookmarkBtn = document.getElementById("bookmark");
 let currentAddress = "";
+let bookmarkedUrls = new Set();
+
+const updateBookmarkButton = () => {
+  const isBookmarked = bookmarkedUrls.has(currentAddress);
+  bookmarkBtn.textContent = isBookmarked ? "★" : "☆";
+};
 
 export const updateAddressBar = (address) => {
   currentAddress = address;
   addressBar.value = shortenAddress(address);
+  updateBookmarkButton();
 };
 
 export const setupAddressBarUI = () => {
@@ -40,10 +48,20 @@ export const setupAddressBarUI = () => {
     window.electronAPI.toolbarAction("refresh");
   });
 
-  document.getElementById("bookmark").addEventListener("click", () =>{
+  bookmarkBtn.addEventListener("click", () => {
     window.electronAPI.bookmark();
-  }
- );
+  });
+
+  // Load initial bookmarks and listen for updates
+  window.electronAPI.getBookmarks().then((bookmarks) => {
+    bookmarkedUrls = new Set(bookmarks.map(b => b.url));
+    updateBookmarkButton();
+  });
+
+  window.electronAPI.onUpdateBookmarks((bookmarks) => {
+    bookmarkedUrls = new Set(bookmarks.map(b => b.url));
+    updateBookmarkButton();
+  });
 };
 
 const shortenAddress = (address) => {
