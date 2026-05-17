@@ -61,14 +61,8 @@ tabsList.ondrop = (e) => {
 
 let latestTabs = null;
 
-window.electronAPI.onPromptStackName((data) => {
-    const { stackId, currentName } = data;
-
-    const toggleBtn = document.querySelector(`[data-stack-id="${stackId}"]`);
-    if (!toggleBtn) return;
-
-    toggleBtn.innerHTML = "";
-
+function startInlineStackRename(container, stackId, currentName) {
+    container.innerHTML = "";
 
     const input = document.createElement("input");
     input.type = "text";
@@ -97,9 +91,20 @@ window.electronAPI.onPromptStackName((data) => {
         commit();
     });
 
-    toggleBtn.appendChild(input);
+    container.appendChild(input);
     input.focus();
     input.select();
+}
+
+
+
+window.electronAPI.onPromptStackName((data) => {
+    const { stackId, currentName } = data;
+
+    const toggleBtn = document.querySelector(`[data-stack-id="${stackId}"]`);
+    if (!toggleBtn) return;
+
+    startInlineStackRename(toggleBtn, stackId, currentName);
 });
 
 
@@ -143,7 +148,7 @@ export const renderTabs = (tabs) => {
 
 
             const nameSpan = document.createElement("span");
-            nameSpan.className = "truncate flex-1 overflow-hidden pointer-events-none text-sm";
+            nameSpan.className = "truncate flex-1 overflow-hidden text-sm";
             nameSpan.textContent = tab.stackName || "Stack";
             stackContainer.appendChild(nameSpan);
 
@@ -193,9 +198,15 @@ export const renderTabs = (tabs) => {
                 }
             };
 
-            stackContainer.onclick = (e) => {
+            let clickTimer = null;
+
+            stackContainer.addEventListener("click", (e) => {
               e.stopPropagation();
-              
+              if (clickTimer) return;
+
+              clickTimer = setTimeout(() => {
+                clickTimer = null;
+
                 if (activeStackId === tab.stackId) {
                     activeStackId = null;
                     renderTabs(tabs);
@@ -211,7 +222,17 @@ export const renderTabs = (tabs) => {
                     }
                   
                 }
-            };
+              }, 250);
+            });
+
+            stackContainer.addEventListener("dblclick", (e) => {
+              e.stopPropagation();
+              if (clickTimer) {
+                clearTimeout(clickTimer);
+                clickTimer = null;
+              }
+              startInlineStackRename(stackContainer, tab.stackId, tab.stackName);
+            });
 
             stackContainer.addEventListener("contextmenu", (e) => {
                 e.preventDefault();
