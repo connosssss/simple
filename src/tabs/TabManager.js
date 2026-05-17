@@ -5,6 +5,8 @@ const path = require('path');
 const TabStacking = require('./TabStacking');
 const TabContextMenu = require('./TabContextMenu');
 const TabConfig = require('./TabConfig');
+const Bookmarks = require('../bookmarks/bookmarks');
+
 
 
 const {
@@ -46,6 +48,7 @@ class TabManager {
         if (!skipConfig) {
             this.loadConfig();
         }
+
     }
 
     setStackBarVisible(visible) {

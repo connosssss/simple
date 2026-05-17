@@ -17,6 +17,7 @@ contextBridge.exposeInMainWorld("electronAPI", {
 
     search: (address) => ipcRenderer.send("search", address),
     toolbarAction: (action) => ipcRenderer.send("tBAction", action),
+    bookmark: (action) => ipcRenderer.send("bookmark", action),
 
 
 

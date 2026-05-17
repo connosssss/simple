@@ -39,6 +39,11 @@ export const setupAddressBarUI = () => {
   document.getElementById("refresh").addEventListener("click", () => {
     window.electronAPI.toolbarAction("refresh");
   });
+
+  document.getElementById("bookmark").addEventListener("click", () =>{
+    window.electronAPI.bookmark();
+  }
+ );
 };
 
 const shortenAddress = (address) => {

@@ -23,7 +23,7 @@ module.exports = {
             const url = new URL(temp);
             const host = url.hostname;
           const isIP = /^(\d{1,3}\.){3}\d{1,3}$/.test(host);
-          //thanks 32h and 33
+          //thanks 32h and 33 
           const isNumericOnly = /^\d+$/.test(host);
 
           

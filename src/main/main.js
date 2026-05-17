@@ -2,6 +2,8 @@ const { app, BaseWindow, BrowserWindow, WebContentsView, globalShortcut, ipcMain
 const path = require('node:path');
 const fs = require('fs');
 
+
+
 const configureAppStorage = () => {
   if (app.isPackaged) {
     return;
@@ -18,6 +20,8 @@ const Navigation = require('../addressBar/Navigation');
 const WindowManager = require('./WindowManager');
 const { registerCookieAndTrackerIPC } = require('./cookiesAndTrackers');
 const extensionManager = require('../extensions/extensionManager');
+const bookmarkManager = require('../bookmarks/bookmarks');
+
 
 // Handle creating/removing shortcuts on Windows when installing/uninstalling.
 if (require('electron-squirrel-startup')) {
@@ -172,11 +176,29 @@ const ipcSetup = () => {
 
   onTabManager("tBAction", (tabManager, event, action) => {
     const mainTab = tabManager.getMainTab();
+
     if (mainTab && !mainTab.isSettingsTab) {
         Navigation.toolbarAction(action, mainTab);
     }
+
   });
 
+  onTabManager("bookmark", (tabManager) => {
+    const mainTab = tabManager.getMainTab();
+    if(!mainTab) return;
+
+    const url = mainTab.address;
+
+    if (bookmarkManager.isBookmarked(url)){
+      bookmarkManager.remove(url);
+    }
+
+    else {bookmarkManager.add(url, mainTab.title);}
+
+    for(const data of WindowManager.getAllWindows()){
+      data.ui.webContents.send("updateBookmarks", bookmarkManager.getAll());
+    }
+  });
 
   // in page
       
@@ -229,7 +251,7 @@ const ipcSetup = () => {
     }
   });
 
-  // Theme persistence
+  // Theme / bookmark / loading stuff
   ipcMain.handle("saveThemeToFile", (event, themeData) => {
     try {
       fs.writeFileSync(getThemePath(), JSON.stringify(themeData));
@@ -251,6 +273,8 @@ const ipcSetup = () => {
     }
     return null;
   });
+
+  ipcMain.handle("getBookmarks", () => bookmarkManager.getAll());
 
   onWindowData('showContextMenu', (data, event, vars) => {
     const { tabManager, window } = data;
