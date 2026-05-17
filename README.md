@@ -35,4 +35,8 @@ The list is mainly just a way to track semi big features or updates as they come
 
 #### Coming soon
 ---
-...
+- Bookmarks bar
+- Autofill in the address bar
+- Font customization
+  ...
+  
