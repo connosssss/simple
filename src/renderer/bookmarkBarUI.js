@@ -13,29 +13,16 @@ const syncVisibility = (isVisible) => {
 };
 
 const renderBookmarkBar = () => {
-  if (!bookmarkBar || !bookmarkBarList || bookmarks.length == 0) return;
+  if (!bookmarkBar || !bookmarkBarList) return;
 
-  const shouldShow = showBookmarkBar;
+  const shouldShow = showBookmarkBar && bookmarks.length > 0;
   bookmarkBar.classList.toggle("hidden", !shouldShow);
   bookmarkBar.classList.toggle("flex", shouldShow);
 
-
-  if (!shouldShow) {
-    bookmarkBarList.innerHTML = "";
-    syncVisibility(false);
-    return;
-  }
-
-
-
   bookmarkBarList.innerHTML = "";
 
-  if (bookmarks.length === 0) {
-    const emptyState = document.createElement("div");
-    emptyState.className = "theme-faint text-xs px-2 select-none";
-    emptyState.textContent = "No bookmarks yet";
-    bookmarkBarList.appendChild(emptyState);
-    syncVisibility(true);
+  if (!shouldShow) {
+    syncVisibility(false);
     return;
   }
 
@@ -46,7 +33,6 @@ const renderBookmarkBar = () => {
     button.className = "theme-button-alt theme-text text-xs rounded-sm px-2 py-1 max-w-48 truncate transition-all duration-100";
     button.textContent = bookmark.title || bookmark.url;
     button.title = bookmark.url;
-
 
     button.addEventListener("click", () => {
       window.electronAPI.openBookmark(bookmark.url);
