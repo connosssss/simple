@@ -16,7 +16,7 @@ module.exports = {
     const mainTab = tabManager ?  tabManager.getMainTab() : null;
 
     const stackBarHeight = isStackBarVisible ? 32 : 0;
-    const bookmarkBarHeight = tabManager?.showBookmarkBar ? 32 : 0;
+    const bookmarkBarHeight = tabManager?.bookmarkBarVisible ? 32 : 0;
     const topBarHeight = 100 + stackBarHeight + bookmarkBarHeight;
 
     if (isFullscreen) {

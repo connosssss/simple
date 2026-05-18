@@ -43,6 +43,7 @@ class TabManager {
         this.stackNames = {};
         this.nextStackNumber = 1;
         this.stackBarVisible = false;
+        this.bookmarkBarVisible = false;
         this.saveTimer = null;
         this.configPath = path.join(app.getPath('userData'), 'config.json');
 
@@ -269,6 +270,7 @@ class TabManager {
             title: tab.title || "",
             address: tab.address,
             isActive: tab.isActive,
+            iconURL: tab.iconURL || "",
             lastActiveAt: tab.lastActiveAt,
             keepActive: tab.keepActive,
             isStacked: tab.isStacked,

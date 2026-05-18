@@ -12,6 +12,7 @@ const createBaseTab = (overrides = {}) => ({
   address: "",
   title: "",
   isActive: true,
+  iconURL: "",
   isStacked: false,
   stackId: null,
   lastActiveAt: Date.now(),
@@ -67,7 +68,7 @@ const createRegularTab = ({
   stackId = null,
   startHibernated = true,}) => {
     
-    const tab = createBaseTab({
+  const tab = createBaseTab({
     contentView: startHibernated ? null : createRegularContentView(),
     address,
     title: address,
@@ -145,6 +146,10 @@ const attachTabLifecycle = (manager, tab) => {
     ["page-title-updated", syncAndBroadcast],
     ["did-navigate", syncAndBroadcast],
     ["did-navigate-in-page", syncAndBroadcast],
+    ["page-favicon-updated", (event, favicons) => {    // NEEDS TO BE CUSTOM
+        tab.iconURL = favicons[0] || "";                  // There is no icon getter like there are for title or url so it has to wait for it be be updated
+        manager.sendTabData();
+    }],
     ["did-finish-load", syncAndBroadcast],
   ];
 

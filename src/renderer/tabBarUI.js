@@ -296,10 +296,21 @@ function createTabElement(tab, index, isInStack, tabs) {
         else {
             bgClass = "bg-slate-800/25 hover:bg-slate-700/50 text-slate-600";
         }
-        tabE.className = `flex items-center px-4 cursor-pointer ${bgClass} flex-1 min-w-0 max-w-[10rem] mb-0 rounded-t-sm h-full transition-all duration-100`
+
+
+        tabE.className = `flex items-center px-2 cursor-pointer ${bgClass} flex-1 min-w-0 max-w-[10rem] mb-0 rounded-t-sm h-full transition-all duration-100 gap-2`
         tabE.dataset.themeState = tab.isMainTab ? "main" : tab.isActive ? "active" : "resting";
 
         tabE.title = tab.title || "Tab";
+
+        if (tab.iconURL) {
+            const icon = document.createElement("img");
+            icon.src = tab.iconURL;
+            icon.className = "w-4 h-4 mr-0 pointer-events-none opacity-75";
+            tabE.appendChild(icon);
+        }
+        
+    
 
 
 

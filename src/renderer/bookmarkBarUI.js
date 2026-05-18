@@ -2,18 +2,31 @@ const bookmarkBar = document.getElementById("bookmark-bar");
 const bookmarkBarList = document.getElementById("bookmark-bar-list");
 
 let bookmarks = [];
-let showBookmarkBar = true;
+let showBookmarkBar = false;
+let lastVisibility = null;
+
+const syncVisibility = (isVisible) => {
+  if (lastVisibility === isVisible) return;
+
+  lastVisibility = isVisible;
+  window.electronAPI.bookmarkBarVisible(isVisible);
+};
 
 const renderBookmarkBar = () => {
-  if (!bookmarkBar || !bookmarkBarList) return;
+  if (!bookmarkBar || !bookmarkBarList || bookmarks.length == 0) return;
 
-  bookmarkBar.classList.toggle("hidden", !showBookmarkBar);
-  bookmarkBar.classList.toggle("flex", showBookmarkBar);
+  const shouldShow = showBookmarkBar;
+  bookmarkBar.classList.toggle("hidden", !shouldShow);
+  bookmarkBar.classList.toggle("flex", shouldShow);
 
-  if (!showBookmarkBar) {
+
+  if (!shouldShow) {
     bookmarkBarList.innerHTML = "";
+    syncVisibility(false);
     return;
   }
+
+
 
   bookmarkBarList.innerHTML = "";
 
@@ -22,20 +35,27 @@ const renderBookmarkBar = () => {
     emptyState.className = "theme-faint text-xs px-2 select-none";
     emptyState.textContent = "No bookmarks yet";
     bookmarkBarList.appendChild(emptyState);
+    syncVisibility(true);
     return;
   }
 
   for (const bookmark of bookmarks) {
+    
     const button = document.createElement("button");
     button.type = "button";
     button.className = "theme-button-alt theme-text text-xs rounded-sm px-2 py-1 max-w-48 truncate transition-all duration-100";
     button.textContent = bookmark.title || bookmark.url;
     button.title = bookmark.url;
+
+
     button.addEventListener("click", () => {
       window.electronAPI.openBookmark(bookmark.url);
     });
+
     bookmarkBarList.appendChild(button);
   }
+
+  syncVisibility(true);
 };
 
 export const setupBookmarkBarUI = () => {

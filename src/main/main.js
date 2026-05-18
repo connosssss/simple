@@ -135,6 +135,11 @@ const ipcSetup = () => {
     
   });
 
+  onWindowData("bookmarkBarVisible", (data, event, visible) => {
+    data.tabManager.bookmarkBarVisible = visible;
+    data.tabManager.resizeWindow();
+  });
+
   onWindowData("showStackContextMenu", (data, event, vars) => {
     const { tabManager, window } = data;
     const currentName = tabManager.stackNames[vars.stackId] || "";
