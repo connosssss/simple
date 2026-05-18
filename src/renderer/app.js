@@ -1,4 +1,5 @@
 import { setupAddressBarUI, updateAddressBar } from "./addressBarUI.js";
+import { setupBookmarkBarUI } from "./bookmarkBarUI.js";
 import { setupFindBarUI } from "./findBarUI.js";
 import { renderTabs } from "./tabBarUI.js";
 import { setupExtensionsUI } from "./extensionsUI.js";
@@ -80,6 +81,7 @@ const setupTabSubscription = () => {
 setupThemeSync();
 setupWindowControls();
 setupAddressBarUI();
+setupBookmarkBarUI();
 setupFindBarUI();
 setupExtensionsUI();
 setupTabSubscription();

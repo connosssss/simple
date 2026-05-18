@@ -1,6 +1,13 @@
 export function setupBookmarkControls() {
   const list = document.getElementById("bookmarks-list");
+  const toggle = document.getElementById("show-bookmark-bar");
+  
   if (!list) return;
+
+  const syncToggle = (settings) => {
+    if (!toggle || typeof settings?.showBookmarkBar !== "boolean") return;
+    toggle.checked = settings.showBookmarkBar;
+  };
 
   const render = (bookmarks) => {
 
@@ -42,5 +49,15 @@ export function setupBookmarkControls() {
     }
   };
 
+  if (toggle) {
+    toggle.addEventListener("change", () => {
+      window.electronAPI.updateShowBookmarkBar(toggle.checked);
+    });
+  }
+
   window.electronAPI.getBookmarks().then(render);
+  window.electronAPI.getSettings().then(syncToggle);
+  window.electronAPI.onUpdateBookmarks(render);
+  window.electronAPI.onInitSettings(syncToggle);
+  window.electronAPI.onSettingsUpdated(syncToggle);
 }

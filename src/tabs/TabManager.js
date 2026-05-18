@@ -39,6 +39,7 @@ class TabManager {
         this.lastOpenedTabs = [];
         this.defaultSite = "https://google.com";
         this.searchEngine = "https://www.google.com/search?q=";
+        this.showBookmarkBar = true;
         this.stackNames = {};
         this.nextStackNumber = 1;
         this.stackBarVisible = false;
@@ -54,6 +55,7 @@ class TabManager {
     setStackBarVisible(visible) {
         this.stackBarVisible = visible;
     }
+
 
     resizeWindow() {
         WindowResizing.resize(this.mainWindow, this.ui, this, this.stackBarVisible);

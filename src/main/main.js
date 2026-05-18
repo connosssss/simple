@@ -36,10 +36,7 @@ const registerSettingsView = (windowId, tabManager, settingsView) => {
     WindowManager.unregisterWebContents(settingsView.webContents.id);
   });
   settingsView.webContents.once('did-finish-load', () => {
-    settingsView.webContents.send("initSettings", {
-      defaultSite: tabManager.defaultSite,
-      searchEngine: tabManager.searchEngine,
-    });
+    settingsView.webContents.send("initSettings", tabManager.getSettingsPayload());
     tabManager.sendTabData();
   });
 };
@@ -91,6 +88,19 @@ const ipcSetup = () => {
     
   };
 
+  const broadcastBookmarks = () => {
+    const bookmarks = bookmarkManager.getAll();
+
+    for (const data of WindowManager.getAllWindows()) {
+      data.ui.webContents.send("updateBookmarks", bookmarks);
+
+      const settingsTabs = data.tabManager.getSettingsTabs ? data.tabManager.getSettingsTabs() : [];
+      for (const tab of settingsTabs) {
+        tab.contentView.webContents.send("updateBookmarks", bookmarks);
+      }
+    }
+  };
+
   onTabManager("createTab", (tabManager, event, options) => tabManager.createTab(options));
   onTabManager("switchTab", (tabManager, event, tabId) => tabManager.switchTab(tabId));
   onTabManager("reorderTabs", (tabManager, event, start, end) => tabManager.reorderTabs(start, end));
@@ -98,6 +108,16 @@ const ipcSetup = () => {
   onTabManager("hibernateTab", (tabManager, event, tabId) => tabManager.sleep(tabId));
   onTabManager("updateDefaultSite", (tabManager, event, site) => tabManager.updateDefaultSite(site));
   onTabManager("updateSearchEngine", (tabManager, event, engine) => tabManager.updateSearchEngine(engine));
+  onTabManager("updateShowBookmarkBar", (tabManager, event, enabled) => {
+    const nextValue = Boolean(enabled);
+
+    for (const data of WindowManager.getAllWindows()) {
+      data.tabManager.showBookmarkBar = nextValue;
+      data.tabManager.queueConfigSave();
+      data.tabManager.broadcastSettings();
+      data.tabManager.resizeWindow();
+    }
+  });
   
   // Tab stacking
   onTabManager("createStack", (tabManager, event, tabIndices) => tabManager.createStack(tabIndices));
@@ -194,10 +214,19 @@ const ipcSetup = () => {
     }
 
     else {bookmarkManager.add(url, mainTab.title);}
+    broadcastBookmarks();
+  });
 
-    for(const data of WindowManager.getAllWindows()){
-      data.ui.webContents.send("updateBookmarks", bookmarkManager.getAll());
+  onTabManager("openBookmark", (tabManager, event, url) => {
+    const mainTab = tabManager.getMainTab();
+    if (!mainTab || !url) return;
+
+    if (mainTab.isSettingsTab) {
+      tabManager.navigateTabToRegular(tabManager.currentIndex, url);
+      return;
     }
+
+    Navigation.search(url, mainTab, tabManager.searchEngine);
   });
 
   // in page
@@ -276,11 +305,14 @@ const ipcSetup = () => {
 
   ipcMain.handle("getBookmarks", () => bookmarkManager.getAll());
 
+  ipcMain.handle("getSettings", (event) => {
+    const tabManager = getTabManager(event);
+    return tabManager ? tabManager.getSettingsPayload() : null;
+  });
+
   ipcMain.handle("removeBookmark", (_event, url) => {
     bookmarkManager.remove(url);
-    for (const data of WindowManager.getAllWindows()) {
-      data.ui.webContents.send("updateBookmarks", bookmarkManager.getAll());
-    }
+    broadcastBookmarks();
     return { success: true };
   });
 

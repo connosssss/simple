@@ -10,12 +10,14 @@ module.exports = {
       isStackBarVisible = stackBarVisible;
     }
 
+
     let bounds = mainWindow.contentView.getBounds();
     const isFullscreen = mainWindow.isFullScreen();
     const mainTab = tabManager ?  tabManager.getMainTab() : null;
 
     const stackBarHeight = isStackBarVisible ? 32 : 0;
-    const topBarHeight = 100 + stackBarHeight;
+    const bookmarkBarHeight = tabManager?.showBookmarkBar ? 32 : 0;
+    const topBarHeight = 100 + stackBarHeight + bookmarkBarHeight;
 
     if (isFullscreen) {
       ui.setBounds({ x: 0, y: 0, width: bounds.width, height: 0 });

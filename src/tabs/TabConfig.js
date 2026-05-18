@@ -4,20 +4,29 @@ const SAVE_DELAY_MS = 150;
 
 module.exports = {
 
+    getSettingsPayload() {
+        return {
+            defaultSite: this.defaultSite,
+            searchEngine: this.searchEngine,
+            showBookmarkBar: this.showBookmarkBar
+        };
+    },
+
     getSettingsTabs() {
         return this.tabs.filter(tab => tab.isSettingsTab && tab.contentView 
             && tab.contentView.webContents && !tab.contentView.webContents.isDestroyed());
     },
 
     broadcastSettings() {
-        const settingsPayload = {
-            defaultSite: this.defaultSite,
-            searchEngine: this.searchEngine
-        };
+        const settingsPayload = this.getSettingsPayload();
 
         this.getSettingsTabs().forEach(tab => {
             tab.contentView.webContents.send("initSettings", settingsPayload);
         });
+
+        if (this.ui?.webContents && !this.ui.webContents.isDestroyed()) {
+            this.ui.webContents.send("settingsUpdated", settingsPayload);
+        }
     },
 
     updateDefaultSite(site) {
@@ -32,6 +41,7 @@ module.exports = {
         this.broadcastSettings();
     },
 
+
     serializeConfig() {
         const savedTabs = this.tabs.filter(tab => !(tab.isSettingsTab)).map(tab => ({
             address: tab.address,
@@ -43,6 +53,7 @@ module.exports = {
         return {
             defaultSite: this.defaultSite,
             searchEngine: this.searchEngine,
+            showBookmarkBar: this.showBookmarkBar,
             tabs: savedTabs,
             stackNames: this.stackNames,
             nextStackNumber: this.nextStackNumber,
@@ -80,6 +91,10 @@ module.exports = {
 
                 if (config.searchEngine) {
                     this.searchEngine = config.searchEngine;
+                }
+
+                if (typeof config.showBookmarkBar === "boolean") {
+                    this.showBookmarkBar = config.showBookmarkBar;
                 }
 
                 if (config.stackNames) {
