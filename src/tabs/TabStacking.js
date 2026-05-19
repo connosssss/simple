@@ -104,6 +104,19 @@ module.exports = {
         }
     },
 
+    hibernateStack(stackId){
+        let tabsToHibernate = this.tabs.filter(t => t.stackId == stackId);
+
+        for (let i = tabsToHibernate.length - 1; i >= 0; i--) {
+
+            const index = this.tabs.indexOf(tabsToHibernate[i]);
+            if (index != -1) {
+                this.sleep(index);
+            }
+        }
+    },
+
+
     renameStack(stackId, name) {
         if (name && name.trim()) {
             this.stackNames[stackId] = name.trim();

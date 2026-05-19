@@ -159,8 +159,15 @@ const ipcSetup = () => {
         label: 'Ungroup Stack',
         click: () => {
           tabManager.deleteStack(vars.stackId);
-        }
-      }
+        },
+        
+        
+      },
+      {
+        label: "Hibernate Stack",
+        click: () => {
+          tabManager.hibernateStack(vars.stackId);
+        }},
     ];
 
     const menu = Menu.buildFromTemplate(cmTemplate);
