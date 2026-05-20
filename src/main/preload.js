@@ -34,6 +34,7 @@ contextBridge.exposeInMainWorld("electronAPI", {
     showContextMenu: (vars) => ipcRenderer.send("showContextMenu", vars),
     showSettingsMenu: (vars) => ipcRenderer.send("showSettingsMenu"),
     hibernateTab: (index) => ipcRenderer.send("hibernateTab", index),
+    hibernateStack: (stackId) => ipcRenderer.send("hibernateStack", stackId),
     updateDefaultSite: (site) => ipcRenderer.send("updateDefaultSite", site),
     updateSearchEngine: (engine) => ipcRenderer.send("updateSearchEngine", engine),
     updateShowBookmarkBar: (enabled) => ipcRenderer.send("updateShowBookmarkBar", enabled),

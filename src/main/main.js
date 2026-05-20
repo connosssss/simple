@@ -106,6 +106,7 @@ const ipcSetup = () => {
   onTabManager("reorderTabs", (tabManager, event, start, end) => tabManager.reorderTabs(start, end));
   onTabManager("closeTab", (tabManager, event, tabId) => tabManager.closeTab(tabId));
   onTabManager("hibernateTab", (tabManager, event, tabId) => tabManager.sleep(tabId));
+  onTabManager("hibernateStack", (tabManager, event, stackId) => tabManager.hibernateStack(stackId));
   onTabManager("updateDefaultSite", (tabManager, event, site) => tabManager.updateDefaultSite(site));
   onTabManager("updateSearchEngine", (tabManager, event, engine) => tabManager.updateSearchEngine(engine));
   onTabManager("updateShowBookmarkBar", (tabManager, event, enabled) => {
