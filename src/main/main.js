@@ -226,7 +226,7 @@ const ipcSetup = () => {
       bookmarkManager.remove(url);
     }
 
-    else {bookmarkManager.add(url, mainTab.title);}
+    else {bookmarkManager.add(url, mainTab.title, mainTab.iconURL);}
     broadcastBookmarks();
   });
 

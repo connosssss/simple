@@ -37,12 +37,12 @@ load();
 
 module.exports = {
 
-    add(url, title) {
+    add(url, title, iconURL) {
         if (bookmarks.some(b => b.url === url)) return;
 
         
 
-        bookmarks.push({ url, title: title || url, createdAt: Date.now() });
+        bookmarks.push({ url, title: title || url, iconURL: iconURL || "", createdAt: Date.now() });
         save();
     },
 

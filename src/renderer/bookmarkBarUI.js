@@ -30,8 +30,20 @@ const renderBookmarkBar = () => {
     
     const button = document.createElement("button");
     button.type = "button";
-    button.className = "theme-button-alt theme-text text-xs rounded-sm px-2 py-1 max-w-48 truncate transition-all duration-100";
-    button.textContent = bookmark.title || bookmark.url;
+    button.className = "theme-button-alt theme-text text-xs rounded-sm px-2 py-1 max-w-48 truncate transition-all duration-100 flex items-center gap-1";
+
+    if (bookmark.iconURL) {
+      const icon = document.createElement("img");
+      icon.src = bookmark.iconURL;
+      icon.className = "w-4 h-4 flex-shrink-0 pointer-events-none opacity-75";
+      button.appendChild(icon);
+    }
+
+    const label = document.createElement("span");
+    label.className = "truncate pointer-events-none";
+    label.textContent = bookmark.title || bookmark.url;
+    button.appendChild(label);
+
     button.title = bookmark.url;
 
     button.addEventListener("click", () => {
