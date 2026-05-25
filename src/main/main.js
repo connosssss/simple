@@ -608,8 +608,21 @@ const ipcSetup = () => {
 
 
 
+const userAgentString = (ua) => {
+  //keep ua for now
+  return 'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:130.0) Gecko/20100101 Firefox/130.0';
+};
+
+const setSessionUserAgent = (ses) => {
+  const current = ses.getUserAgent();
+  ses.setUserAgent(userAgentString(current));
+};
 
 app.whenReady().then(async () => {
+
+  app.userAgentFallback = userAgentString(app.userAgentFallback);
+  setSessionUserAgent(session.defaultSession);
+  setSessionUserAgent(session.fromPartition('persist:main'));
 
   ipcSetup();
   registerCookieAndTrackerIPC();
