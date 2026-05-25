@@ -622,7 +622,26 @@ app.whenReady().then(async () => {
 
   app.userAgentFallback = userAgentString(app.userAgentFallback);
   setSessionUserAgent(session.defaultSession);
-  setSessionUserAgent(session.fromPartition('persist:main'));
+
+
+  // Changed to help fix bug of logging out of active account sessions when you close a window
+  const mainSession = session.fromPartition('persist:main');
+  setSessionUserAgent(mainSession);
+
+  let flushTimer = null;
+
+  
+  mainSession.cookies.on('changed', () => {
+    if (flushTimer) clearTimeout(flushTimer);
+    
+    flushTimer = setTimeout(() => {
+      
+      mainSession.cookies.flushStore().catch(err => {
+        console.error('Failed to flush cookie store on change:', err);
+      });
+      
+    }, 1000);
+  });
 
   ipcSetup();
   registerCookieAndTrackerIPC();
@@ -654,5 +673,15 @@ app.on('window-all-closed', () => {
   
   if (process.platform !== 'darwin') {
     app.quit();
+  }
+});
+
+app.on('will-quit', async () => {
+  try {
+    await session.fromPartition('persist:main').cookies.flushStore();
+  }
+
+  catch (err) {
+    console.error('Failed to flush cookie store on will-quit:', err);
   }
 });

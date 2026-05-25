@@ -1,4 +1,4 @@
-const { BaseWindow, WebContentsView, app, globalShortcut, ipcMain } = require('electron');
+const { BaseWindow, WebContentsView, app, globalShortcut, ipcMain, session } = require('electron');
 const path = require('node:path');
 const WindowResizing = require("./WindowResizing");
 const TabManager = require('../tabs/TabManager');
@@ -71,6 +71,10 @@ class WindowManager {
         mainWindow.on('closed', () => {
             this.windows.delete(windowId);
             this.webContentsIds.delete(ui.webContents.id);
+            // Flush the persistent cookie store immediately on window close
+            session.fromPartition('persist:main').cookies.flushStore().catch(err => {
+                console.error("Failed to flush cookie store on window close:", err);
+            });
         });
 
         if (curTab) {
