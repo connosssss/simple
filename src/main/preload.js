@@ -21,6 +21,8 @@ contextBridge.exposeInMainWorld("electronAPI", {
     openBookmark: (url) => ipcRenderer.send("openBookmark", url),
     getBookmarks: () => ipcRenderer.invoke("getBookmarks"),
     removeBookmark: (url) => ipcRenderer.invoke("removeBookmark", url),
+    updateBookmark: (url, updates) => ipcRenderer.invoke("updateBookmark", url, updates),
+    showBookmarkFolderMenu: (vars) => ipcRenderer.send("showBookmarkFolderMenu", vars),
     onUpdateBookmarks: (callback) => ipcRenderer.on("updateBookmarks", (event, bookmarks) => callback(bookmarks)),
 
 
@@ -29,7 +31,7 @@ contextBridge.exposeInMainWorld("electronAPI", {
     onToggleFindBar: (callback) => ipcRenderer.on('toggleFindBar', callback),
     stopFindInPage: () => ipcRenderer.send("stopFindInPage"),
     focusUI: () => ipcRenderer.send("focusUI"),
-    
+
 
     showContextMenu: (vars) => ipcRenderer.send("showContextMenu", vars),
     showSettingsMenu: (vars) => ipcRenderer.send("showSettingsMenu"),
@@ -46,9 +48,8 @@ contextBridge.exposeInMainWorld("electronAPI", {
     saveThemeToFile: (themeData) => ipcRenderer.invoke("saveThemeToFile", themeData),
     loadThemeFromFile: () => ipcRenderer.invoke("loadThemeFromFile"),
 
-
     tabPopOff: (tabIndex) => ipcRenderer.send("tabPopOff", { tabIndex }),
-    tabTransfer: (tabIndex, screenX, screenY) => ipcRenderer.send("tabTransfer", {tabIndex, screenX, screenY }),
+    tabTransfer: (tabIndex, screenX, screenY) => ipcRenderer.send("tabTransfer", { tabIndex, screenX, screenY }),
 
     getCookies: () => ipcRenderer.invoke("getCookies"),
     deleteCookie: (url, name) => ipcRenderer.invoke("deleteCookie", url, name),
@@ -56,7 +57,6 @@ contextBridge.exposeInMainWorld("electronAPI", {
     clearAllCookies: () => ipcRenderer.invoke("clearAllCookies"),
     clearThirdPartyCookies: () => ipcRenderer.invoke("clearThirdPartyCookies"),
     setBlockTrackers: (enabled) => ipcRenderer.send("setBlockTrackers", enabled),
-
 
     createStack: (tabIndices) => ipcRenderer.send("createStack", tabIndices),
     updateStack: (stackId, tabIndex) => ipcRenderer.send("updateStack", stackId, tabIndex),

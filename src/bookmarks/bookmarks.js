@@ -51,6 +51,16 @@ module.exports = {
         save();
     },
 
+    update(url, updates) {
+        bookmarks = bookmarks.map(b => {
+            if (b.url === url) {
+                return { ...b, ...updates };
+            }
+            return b;
+        });
+        save();
+    },
+
     isBookmarked(url) {
         return bookmarks.some(b => b.url === url);
     },

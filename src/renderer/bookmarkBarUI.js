@@ -26,8 +26,54 @@ const renderBookmarkBar = () => {
     return;
   }
 
-  for (const bookmark of bookmarks) {
-    
+  const folders = {};
+  const rootBookmarks = [];
+
+  for (const b of bookmarks) {
+    if (b.folder && b.folder.trim() !== "") {
+      const folderName = b.folder.trim();
+      if (!folders[folderName]) {
+        folders[folderName] = [];
+      }
+      folders[folderName].push(b);
+    } else {
+      rootBookmarks.push(b);
+    }
+  }
+
+  const folderNames = Object.keys(folders).sort((a, b) => a.localeCompare(b));
+
+  for (const name of folderNames) {
+    const folderBtn = document.createElement("button");
+    folderBtn.type = "button";
+    folderBtn.className = "theme-button-alt theme-text text-xs rounded-sm px-2 py-1 max-w-48 truncate transition-all duration-100 flex items-center gap-1 font-semibold";
+
+    const icon = document.createElement("span");
+    icon.className = "opacity-75 flex-shrink-0";
+    icon.textContent = "F";
+    folderBtn.appendChild(icon);
+
+    const label = document.createElement("span");
+    label.className = "truncate pointer-events-none";
+    label.textContent = name;
+    folderBtn.appendChild(label);
+
+    folderBtn.title = `${name} folder`;
+
+    folderBtn.addEventListener("click", (e) => {
+      const rect = folderBtn.getBoundingClientRect();
+      window.electronAPI.showBookmarkFolderMenu({
+        folderName: name,
+        x: rect.left,
+        y: rect.bottom
+      });
+    });
+
+    bookmarkBarList.appendChild(folderBtn);
+  }
+
+
+  for (const bookmark of rootBookmarks) {
     const button = document.createElement("button");
     button.type = "button";
     button.className = "theme-button-alt theme-text text-xs rounded-sm px-2 py-1 max-w-48 truncate transition-all duration-100 flex items-center gap-1";

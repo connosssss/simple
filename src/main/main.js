@@ -65,27 +65,27 @@ const ipcSetup = () => {
   const getTabManager = (event) => getWindowData(event)?.tabManager ?? null;
 
   const onTabManager = (channel, handler) => {
-    
+
     ipcMain.on(channel, (event, ...args) => {
       const tabManager = getTabManager(event);
       if (tabManager) {
         handler(tabManager, event, ...args);
       }
-      
+
     });
-    
+
   };
 
   const onWindowData = (channel, handler) => {
-    
+
     ipcMain.on(channel, (event, ...args) => {
       const data = getWindowData(event);
       if (data) {
         handler(data, event, ...args);
       }
-      
+
     });
-    
+
   };
 
   const broadcastBookmarks = () => {
@@ -119,7 +119,7 @@ const ipcSetup = () => {
       data.tabManager.resizeWindow();
     }
   });
-  
+
   // Tab stacking
   onTabManager("createStack", (tabManager, event, tabIndices) => tabManager.createStack(tabIndices));
   onTabManager("updateStack", (tabManager, event, stackId, tabIndex) => tabManager.updateStack(stackId, tabIndex));
@@ -130,10 +130,10 @@ const ipcSetup = () => {
   onTabManager("reorderStack", (tabManager, event, stackId, toIndex) => tabManager.reorderStack(stackId, toIndex));
 
   onWindowData("stackBarVisible", (data, event, visible) => {
-    
+
     data.tabManager.setStackBarVisible(visible);
     data.tabManager.resizeWindow();
-    
+
   });
 
   onWindowData("bookmarkBarVisible", (data, event, visible) => {
@@ -149,7 +149,7 @@ const ipcSetup = () => {
       {
         label: currentName ? `Rename Stack "${currentName}"` : 'Name Stack',
         click: () => {
-            data.ui.webContents.send("promptStackName", {
+          data.ui.webContents.send("promptStackName", {
             stackId: vars.stackId,
             currentName: currentName
           });
@@ -161,14 +161,15 @@ const ipcSetup = () => {
         click: () => {
           tabManager.deleteStack(vars.stackId);
         },
-        
-        
+
+
       },
       {
         label: "Hibernate Stack",
         click: () => {
           tabManager.hibernateStack(vars.stackId);
-        }},
+        }
+      },
     ];
 
     const menu = Menu.buildFromTemplate(cmTemplate);
@@ -191,17 +192,17 @@ const ipcSetup = () => {
     if (!mainTab) return;
 
     if (trimmedAddress.toLowerCase() === "about://settings") {
-        const settingsView = tabManager.navigateTabToSettings(tabManager.currentIndex); 
-        
-        if (settingsView && tabManager.getMainTab()?.isSettingsTab) {
-            registerSettingsView(data.window.id, tabManager, settingsView);
-        }
-        return;
+      const settingsView = tabManager.navigateTabToSettings(tabManager.currentIndex);
+
+      if (settingsView && tabManager.getMainTab()?.isSettingsTab) {
+        registerSettingsView(data.window.id, tabManager, settingsView);
+      }
+      return;
     }
 
     if (mainTab.isSettingsTab) {
-         tabManager.navigateTabToRegular(tabManager.currentIndex, address);
-         return;
+      tabManager.navigateTabToRegular(tabManager.currentIndex, address);
+      return;
     }
 
     Navigation.search(address, mainTab, tabManager.searchEngine);
@@ -211,22 +212,22 @@ const ipcSetup = () => {
     const mainTab = tabManager.getMainTab();
 
     if (mainTab && !mainTab.isSettingsTab) {
-        Navigation.toolbarAction(action, mainTab);
+      Navigation.toolbarAction(action, mainTab);
     }
 
   });
 
   onTabManager("bookmark", (tabManager) => {
     const mainTab = tabManager.getMainTab();
-    if(!mainTab) return;
+    if (!mainTab) return;
 
     const url = mainTab.address;
 
-    if (bookmarkManager.isBookmarked(url)){
+    if (bookmarkManager.isBookmarked(url)) {
       bookmarkManager.remove(url);
     }
 
-    else {bookmarkManager.add(url, mainTab.title, mainTab.iconURL);}
+    else { bookmarkManager.add(url, mainTab.title, mainTab.iconURL); }
     broadcastBookmarks();
   });
 
@@ -243,16 +244,16 @@ const ipcSetup = () => {
   });
 
   // in page
-      
+
   onTabManager("searchInPage", (tabManager, event, phrase, options) => {
     const webContents = tabManager.getMainTab()?.contentView?.webContents;
     if (!webContents) return;
 
     if (phrase) {
-        webContents.findInPage(phrase, options || {});
+      webContents.findInPage(phrase, options || {});
     }
     else {
-        webContents.stopFindInPage('clearSelection');
+      webContents.stopFindInPage('clearSelection');
     }
   });
 
@@ -265,7 +266,7 @@ const ipcSetup = () => {
 
   onWindowData("focusUI", (data) => {
     if (data.ui && data.ui.webContents) {
-        data.ui.webContents.focus();
+      data.ui.webContents.focus();
     }
   });
 
@@ -277,19 +278,19 @@ const ipcSetup = () => {
 
   ipcMain.on("broadcastThemeUpdate", (event) => {
     const windows = WindowManager.getAllWindows();
-    
+
     for (const winData of windows) {
-      
-        if (winData.ui) {
-            winData.ui.webContents.send("themeUpdated");
+
+      if (winData.ui) {
+        winData.ui.webContents.send("themeUpdated");
+      }
+
+      if (winData.tabManager) {
+        const settingsTabs = winData.tabManager.getSettingsTabs ? winData.tabManager.getSettingsTabs() : winData.tabManager.tabs.filter(t => t.isSettingsTab && t.contentView && !t.contentView.webContents.isDestroyed());
+        for (const t of settingsTabs) {
+          t.contentView.webContents.send("themeUpdated");
         }
-      
-        if (winData.tabManager) {
-            const settingsTabs = winData.tabManager.getSettingsTabs ? winData.tabManager.getSettingsTabs() : winData.tabManager.tabs.filter(t => t.isSettingsTab && t.contentView && !t.contentView.webContents.isDestroyed());
-            for (const t of settingsTabs) {
-                t.contentView.webContents.send("themeUpdated");
-            }
-        }
+      }
     }
   });
 
@@ -327,6 +328,41 @@ const ipcSetup = () => {
     bookmarkManager.remove(url);
     broadcastBookmarks();
     return { success: true };
+  });
+
+  ipcMain.handle("updateBookmark", (_event, url, updates) => {
+    bookmarkManager.update(url, updates);
+    broadcastBookmarks();
+    return { success: true };
+  });
+
+  onWindowData("showBookmarkFolderMenu", (data, event, vars) => {
+    const { folderName, x, y } = vars;
+    const bookmarks = bookmarkManager.getAll().filter(b => b.folder === folderName);
+    if (bookmarks.length === 0) return;
+
+    const cmTemplate = bookmarks.map(b => ({
+      label: b.title || b.url,
+      click: () => {
+        const tabManager = data.tabManager;
+        const mainTab = tabManager.getMainTab();
+        if (!mainTab) return;
+
+        if (mainTab.isSettingsTab) {
+          tabManager.navigateTabToRegular(tabManager.currentIndex, b.url);
+          return;
+        }
+
+        Navigation.search(b.url, mainTab, tabManager.searchEngine);
+      }
+    }));
+
+    const menu = Menu.buildFromTemplate(cmTemplate);
+    menu.popup({
+      window: data.window,
+      x: Math.round(vars.x),
+      y: Math.round(vars.y)
+    });
   });
 
   onWindowData('showContextMenu', (data, event, vars) => {
@@ -378,7 +414,7 @@ const ipcSetup = () => {
   });
 
   onWindowData('tabPopOff', (data, event, { tabIndex }) => {
-      moveTabToWindow(data, tabIndex);
+    moveTabToWindow(data, tabIndex);
   });
 
   onWindowData("tabTransfer", (data, event, { tabIndex, screenX, screenY }) => {
@@ -409,7 +445,7 @@ const ipcSetup = () => {
     }
   });
 
- 
+
   let activeExtensionsMenu = null;
   let activeExtensionPopup = null;
 
@@ -417,7 +453,7 @@ const ipcSetup = () => {
     if (activeExtensionsMenu && !activeExtensionsMenu.isDestroyed()) {
       activeExtensionsMenu.close();
     }
-    
+
     activeExtensionsMenu = null;
   };
 
@@ -425,7 +461,7 @@ const ipcSetup = () => {
     if (activeExtensionPopup && !activeExtensionPopup.isDestroyed()) {
       activeExtensionPopup.close();
     }
-    
+
     activeExtensionPopup = null;
   };
 
@@ -456,7 +492,7 @@ const ipcSetup = () => {
     });
 
     const parentData = WindowManager.getManagerBySend(event.sender);
-    
+
     if (parentData) {
       WindowManager.registerWebContents(activeExtensionsMenu.webContents.id, parentData.window.id);
     }
@@ -467,12 +503,12 @@ const ipcSetup = () => {
       if (activeExtensionsMenu && !activeExtensionsMenu.isDestroyed()) {
         const extensions = extensionManager.getInstalledExtensions();
 
-       
+
         const extensionsWithIcons = extensions.map(ext => {
-          
+
           const iconPath = extensionManager.getIconPath ? extensionManager.getIconPath(ext.id) : null;
           return { ...ext, iconPath };
-          
+
         });
 
         activeExtensionsMenu.webContents.send('load-extensions', extensionsWithIcons);
@@ -551,11 +587,11 @@ const ipcSetup = () => {
 
         setTimeout(() => {
           if (!popupWindow.isDestroyed()) {
-            
+
             popupWindow.on('blur', () => {
               closeExtensionPopup();
             });
-            
+
           }
         }, 300);
       }
@@ -586,7 +622,7 @@ const ipcSetup = () => {
     if (data) {
       // Focus the main window
       data.window.focus();
-      
+
       // Create and show settings tab
       const settingsView = data.tabManager.createSettingsTab();
       registerSettingsView(data.window.id, data.tabManager, settingsView);
@@ -630,16 +666,16 @@ app.whenReady().then(async () => {
 
   let flushTimer = null;
 
-  
+
   mainSession.cookies.on('changed', () => {
     if (flushTimer) clearTimeout(flushTimer);
-    
+
     flushTimer = setTimeout(() => {
-      
+
       mainSession.cookies.flushStore().catch(err => {
         console.error('Failed to flush cookie store on change:', err);
       });
-      
+
     }, 1000);
   });
 
@@ -670,7 +706,7 @@ app.whenReady().then(async () => {
 app.on('window-all-closed', () => {
 
   globalShortcut.unregisterAll();
-  
+
   if (process.platform !== 'darwin') {
     app.quit();
   }
