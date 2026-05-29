@@ -20,6 +20,7 @@ const createBaseTab = (overrides = {}) => ({
   isSettingsTab: false,
   lifecycleCleanup: null,
   contextMenuHandler: null,
+  isNewTab: false,
   ...overrides,
 });
 
@@ -75,6 +76,7 @@ const createRegularTab = ({
     isActive: !startHibernated,
     isStacked,
     stackId,
+    isNewTab: address === "",
   });
 
   if (!startHibernated) {
@@ -151,6 +153,10 @@ const attachTabLifecycle = (manager, tab) => {
         manager.sendTabData();
     }],
     ["did-finish-load", syncAndBroadcast],
+    ["will-navigate", () => {
+        tab.isNewTab = false;
+        manager.sendTabData();
+    }],
   ];
 
   listeners.forEach(([eventName, handler]) => {

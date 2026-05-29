@@ -197,6 +197,8 @@ const ipcSetup = () => {
     const mainTab = tabManager.getMainTab();
     if (!mainTab) return;
 
+    mainTab.isNewTab = false;
+
     if (trimmedAddress.toLowerCase() === "about://settings") {
       const settingsView = tabManager.navigateTabToSettings(tabManager.currentIndex);
 
@@ -218,6 +220,7 @@ const ipcSetup = () => {
     const mainTab = tabManager.getMainTab();
 
     if (mainTab && !mainTab.isSettingsTab) {
+      mainTab.isNewTab = false;
       Navigation.toolbarAction(action, mainTab);
     }
 
@@ -240,6 +243,8 @@ const ipcSetup = () => {
   onTabManager("openBookmark", (tabManager, event, url) => {
     const mainTab = tabManager.getMainTab();
     if (!mainTab || !url) return;
+
+    mainTab.isNewTab = false;
 
     if (mainTab.isSettingsTab) {
       tabManager.navigateTabToRegular(tabManager.currentIndex, url);
@@ -353,6 +358,8 @@ const ipcSetup = () => {
         const tabManager = data.tabManager;
         const mainTab = tabManager.getMainTab();
         if (!mainTab) return;
+
+        mainTab.isNewTab = false;
 
         if (mainTab.isSettingsTab) {
           tabManager.navigateTabToRegular(tabManager.currentIndex, b.url);

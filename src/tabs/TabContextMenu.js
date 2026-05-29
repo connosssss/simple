@@ -64,7 +64,10 @@ module.exports = {
         
             menuTemplate.push({
                 label: 'Reload',
-                click: () => tab.contentView.webContents.reload()
+                click: () => {
+                    tab.isNewTab = false;
+                    tab.contentView.webContents.reload();
+                }
             });
 
             menuTemplate.push({ type: 'separator' });

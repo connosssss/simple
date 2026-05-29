@@ -53,14 +53,20 @@ const setupTabSubscription = () => {
 
     const mainTab = tabs.find((tab) => tab.isMainTab);
     if (mainTab) {
-      updateAddressBar(mainTab.address);
+      if (mainTab.isNewTab) {
+        updateAddressBar("");
+      }
+
+      else {
+        updateAddressBar(mainTab.address);
+      }
       const windowTitle = document.getElementById("window-title");
 
       if (windowTitle) {
         windowTitle.textContent = mainTab.title || "simple";
         windowTitle.className = "theme-text text-md max-w-[60%] truncate max-h-full";
       }
-      
+
 
     }
 
