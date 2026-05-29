@@ -8,7 +8,8 @@ module.exports = {
         return {
             defaultSite: this.defaultSite,
             searchEngine: this.searchEngine,
-            showBookmarkBar: this.showBookmarkBar
+            showBookmarkBar: this.showBookmarkBar,
+            closeAfter: this.closeAfter
         };
     },
 
@@ -41,6 +42,12 @@ module.exports = {
         this.broadcastSettings();
     },
 
+    updateCloseAfter(closeAfter) {
+        this.closeAfter = parseInt(closeAfter, 10);
+        this.queueConfigSave();
+        this.broadcastSettings();
+    },
+
 
     serializeConfig() {
         const savedTabs = this.tabs.filter(tab => !(tab.isSettingsTab)).map(tab => ({
@@ -54,6 +61,7 @@ module.exports = {
             defaultSite: this.defaultSite,
             searchEngine: this.searchEngine,
             showBookmarkBar: this.showBookmarkBar,
+            closeAfter: this.closeAfter,
             tabs: savedTabs,
             stackNames: this.stackNames,
             nextStackNumber: this.nextStackNumber,
@@ -95,6 +103,10 @@ module.exports = {
 
                 if (typeof config.showBookmarkBar === "boolean") {
                     this.showBookmarkBar = config.showBookmarkBar;
+                }
+
+                if (config.closeAfter !== undefined) {
+                    this.closeAfter = parseInt(config.closeAfter, 10);
                 }
 
                 if (config.stackNames) {

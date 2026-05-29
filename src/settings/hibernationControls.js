@@ -40,10 +40,6 @@ export const setupHibernationControls = () => {
       const activeMinutes = getTimeTabActiveMinutes(tab.lastActiveAt);
       tabDuration.textContent = activeMinutes;
 
-      if (activeMinutes >= closeAfter && closeAfter !== -1 && tab.isActive && !tab.keepActive) {
-        window.electronAPI.hibernateTab(index);
-      }
-
       tabInfo.appendChild(tabIndex);
       tabInfo.appendChild(tabTitle);
       tabInfo.appendChild(tabStatus);
@@ -155,6 +151,7 @@ export const setupHibernationControls = () => {
   closeAfterSelect.addEventListener("change", (event) => {
     closeAfter = parseInt(event.target.value, 10);
     localStorage.setItem("closeAfter", closeAfter);
+    window.electronAPI.updateCloseAfter(closeAfter);
     renderTabs(previousTabs);
   });
 
@@ -187,6 +184,12 @@ export const setupHibernationControls = () => {
 
       if (settings.searchEngine) {
         searchEngineSelect.value = settings.searchEngine;
+      }
+
+      if (settings.closeAfter !== undefined) {
+        closeAfter = settings.closeAfter;
+        closeAfterSelect.value = closeAfter;
+        localStorage.setItem("closeAfter", closeAfter);
       }
     },
   };

@@ -40,6 +40,7 @@ class TabManager {
         this.defaultSite = "https://google.com";
         this.searchEngine = "https://www.google.com/search?q=";
         this.showBookmarkBar = true;
+        this.closeAfter = 10;
         this.stackNames = {};
         this.nextStackNumber = 1;
         this.stackBarVisible = false;
@@ -50,6 +51,8 @@ class TabManager {
         if (!skipConfig) {
             this.loadConfig();
         }
+
+        this.startAutoHibernationChecker();
 
     }
 
@@ -461,6 +464,36 @@ class TabManager {
         `;
         
         tab.contentView.webContents.executeJavaScript(script).catch(err => console.error('PiP execution failed:', err));
+    }
+
+    startAutoHibernationChecker() {
+        this.autoHibernationInterval = setInterval(() => {
+            this.checkAutoHibernation();
+        }, 10000); // check every 10 seconds
+
+        this.mainWindow.on('closed', () => {
+            if (this.autoHibernationInterval) {
+                clearInterval(this.autoHibernationInterval);
+            }
+        });
+    }
+
+    checkAutoHibernation() {
+        if (this.closeAfter === -1) return;
+
+        const now = Date.now();
+        const closeAfterMs = this.closeAfter * 60 * 1000;
+
+        this.tabs.forEach((tab, index) => {
+            if (index === this.currentIndex) return;
+            if (!tab.isActive || !tab.contentView) return;
+            if (tab.keepActive) return;
+
+            const inactiveDuration = now - tab.lastActiveAt;
+            if (inactiveDuration >= closeAfterMs) {
+                this.sleep(index);
+            }
+        });
     }
 
 }

@@ -109,6 +109,12 @@ const ipcSetup = () => {
   onTabManager("hibernateStack", (tabManager, event, stackId) => tabManager.hibernateStack(stackId));
   onTabManager("updateDefaultSite", (tabManager, event, site) => tabManager.updateDefaultSite(site));
   onTabManager("updateSearchEngine", (tabManager, event, engine) => tabManager.updateSearchEngine(engine));
+  onTabManager("updateCloseAfter", (tabManager, event, closeAfter) => {
+    const val = parseInt(closeAfter, 10);
+    for (const data of WindowManager.getAllWindows()) {
+      data.tabManager.updateCloseAfter(val);
+    }
+  });
   onTabManager("updateShowBookmarkBar", (tabManager, event, enabled) => {
     const nextValue = Boolean(enabled);
 

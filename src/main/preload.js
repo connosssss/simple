@@ -39,6 +39,7 @@ contextBridge.exposeInMainWorld("electronAPI", {
     hibernateStack: (stackId) => ipcRenderer.send("hibernateStack", stackId),
     updateDefaultSite: (site) => ipcRenderer.send("updateDefaultSite", site),
     updateSearchEngine: (engine) => ipcRenderer.send("updateSearchEngine", engine),
+    updateCloseAfter: (closeAfter) => ipcRenderer.send("updateCloseAfter", closeAfter),
     updateShowBookmarkBar: (enabled) => ipcRenderer.send("updateShowBookmarkBar", enabled),
     getSettings: () => ipcRenderer.invoke("getSettings"),
     onInitSettings: (callback) => ipcRenderer.on('initSettings', (event, settings) => callback(settings)),
