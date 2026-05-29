@@ -1,4 +1,4 @@
-const { app, BaseWindow, BrowserWindow, WebContentsView, globalShortcut, ipcMain, Menu, session } = require('electron');
+const { app, BaseWindow, BrowserWindow, WebContentsView, ipcMain, Menu, session } = require('electron');
 const path = require('node:path');
 const fs = require('fs');
 
@@ -710,8 +710,6 @@ app.whenReady().then(async () => {
 });
 
 app.on('window-all-closed', () => {
-
-  globalShortcut.unregisterAll();
 
   if (process.platform !== 'darwin') {
     app.quit();

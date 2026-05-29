@@ -496,6 +496,36 @@ class TabManager {
         });
     }
 
+    zoomIn(index = this.currentIndex) {
+        const tab = this.tabs[index];
+        if (tab && tab.contentView && isLiveWebContents(tab.contentView)) {
+            const wc = tab.contentView.webContents;
+            wc.setZoomLevel(wc.getZoomLevel() + 0.5);
+        }
+    }
+
+    zoomOut(index = this.currentIndex) {
+        const tab = this.tabs[index];
+        if (tab && tab.contentView && isLiveWebContents(tab.contentView)) {
+            const wc = tab.contentView.webContents;
+            wc.setZoomLevel(wc.getZoomLevel() - 0.5);
+        }
+    }
+
+    resetZoom(index = this.currentIndex) {
+        const tab = this.tabs[index];
+        if (tab && tab.contentView && isLiveWebContents(tab.contentView)) {
+            tab.contentView.webContents.setZoomLevel(0);
+        }
+    }
+
+    toggleDevTools(index = this.currentIndex) {
+        const tab = this.tabs[index];
+        if (tab && tab.contentView && isLiveWebContents(tab.contentView)) {
+            tab.contentView.webContents.toggleDevTools();
+        }
+    }
+
 }
 
 Object.assign(TabManager.prototype, TabStacking);

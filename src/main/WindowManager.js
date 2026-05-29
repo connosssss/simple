@@ -1,15 +1,20 @@
-const { BaseWindow, WebContentsView, app, globalShortcut, ipcMain, session } = require('electron');
+const { BaseWindow, WebContentsView, app, Menu, ipcMain, session } = require('electron');
 const path = require('node:path');
 const WindowResizing = require("./WindowResizing");
 const TabManager = require('../tabs/TabManager');
 
 class WindowManager {
     constructor() {
-        this.windows = new Map(); 
-        this.webContentsIds = new Map(); 
+        this.windows = new Map();
+        this.webContentsIds = new Map();
     }
 
     createWindow(curTab = null) {
+        if (!this.menuSet) {
+            this.setupApplicationMenu();
+            this.menuSet = true;
+        }
+
         const mainWindow = new BaseWindow({
             width: 800,
             height: 600,
@@ -18,9 +23,9 @@ class WindowManager {
             backgroundMaterial: 'acrylic',
             vibrancy: 'fullscreen-ui',
             titleBarStyle: 'hidden',
-            titleBarOverlay: {  
+            titleBarOverlay: {
                 color: '#00000000',
-                symbolColor: '#ffffff', 
+                symbolColor: '#ffffff',
             }
         });
 
@@ -42,7 +47,7 @@ class WindowManager {
 
 
 
-        
+
         this.windows.set(windowId, windowData);
         this.webContentsIds.set(ui.webContents.id, windowId);
 
@@ -53,20 +58,13 @@ class WindowManager {
         });
 
         const handleResize = () => {
-             WindowResizing.resize(mainWindow, ui, tabManager, tabManager.stackBarVisible);
+            WindowResizing.resize(mainWindow, ui, tabManager, tabManager.stackBarVisible);
         };
 
         mainWindow.on('resize', handleResize);
         mainWindow.on('enter-full-screen', handleResize);
         mainWindow.on('leave-full-screen', handleResize);
-        
-        mainWindow.on('focus', () => {
-            this.registerShortcuts(windowId);
-        });
 
-        mainWindow.on('blur', () => {
-            globalShortcut.unregisterAll();
-        });
 
         mainWindow.on('closed', () => {
             this.windows.delete(windowId);
@@ -79,8 +77,8 @@ class WindowManager {
 
         if (curTab) {
             tabManager.stickTab(curTab);
-        } 
-        
+        }
+
         else if (tabManager.tabs.length == 0) {
             tabManager.createTab();
         }
@@ -98,141 +96,139 @@ class WindowManager {
 
         return null;
     }
-    
+
     registerWebContents(webContentsId, windowId) {
-      this.webContentsIds.set(webContentsId, windowId);
+        this.webContentsIds.set(webContentsId, windowId);
     }
 
     unregisterWebContents(webContentsId) {
-       this.webContentsIds.delete(webContentsId);
+        this.webContentsIds.delete(webContentsId);
     }
 
 
-    registerShortcuts(windowId) {
-        const data = this.windows.get(windowId);
-        if (!data) return;
-        const { tabManager, ui } = data; 
+    getActiveWindowData(browserWindow) {
+        const win = browserWindow || BaseWindow.getFocusedWindow();
+        return win ? this.windows.get(win.id) : null;
+    }
 
-        globalShortcut.unregisterAll(); 
+    setupApplicationMenu() {
+        const template = [
+            {
+                label: 'File',
+                submenu: [
+                    {
+                        label: 'New Tab',
+                        accelerator: 'CmdOrCtrl+T',
+                        click: (menuItem, browserWindow) => {
+                            const data = this.getActiveWindowData(browserWindow);
+                            if (data) data.tabManager.createTab();
+                        }
+                    },
+                    {
+                        label: 'New Window',
+                        accelerator: 'CmdOrCtrl+N',
+                        click: () => {
+                            this.createWindow();
+                        }
+                    },
+                    {
+                        label: 'Close Tab',
+                        accelerator: 'CmdOrCtrl+W',
+                        click: (menuItem, browserWindow) => {
+                            const data = this.getActiveWindowData(browserWindow);
+                            if (data) {
+                                const { tabManager } = data;
+                                if (tabManager.closeLastOpened) {
+                                    tabManager.closeLastOpened();
+                                } else {
+                                    tabManager.closeTab(tabManager.currentIndex);
+                                }
+                            }
+                        }
+                    },
+                    { type: 'separator' },
+                    { role: 'quit' }
+                ]
+            },
+            {
+                label: 'Edit',
+                submenu: [
+                    { role: 'undo' },
+                    { role: 'redo' },
+                    { type: 'separator' },
+                    { role: 'cut' },
+                    { role: 'copy' },
+                    { role: 'paste' },
+                    { role: 'selectall' }
+                ]
+            },
+            {
+                label: 'View',
+                submenu: [
+                    {
+                        label: 'Toggle Developer Tools',
+                        accelerator: 'CmdOrCtrl+Shift+I',
+                        click: (menuItem, browserWindow) => {
+                            const data = this.getActiveWindowData(browserWindow);
+                            if (data) data.tabManager.toggleDevTools();
+                        }
+                    },
+                    {
+                        label: 'Find in Page',
+                        accelerator: 'CmdOrCtrl+F',
+                        click: (menuItem, browserWindow) => {
+                            const data = this.getActiveWindowData(browserWindow);
+                            if (data) {
+                                data.ui.webContents.focus();
+                                data.ui.webContents.send("toggleFindBar");
+                            }
+                        }
+                    },
+                    { type: 'separator' },
+                    {
+                        label: 'Zoom In',
+                        accelerator: 'CmdOrCtrl+=',
+                        click: (menuItem, browserWindow) => {
+                            const data = this.getActiveWindowData(browserWindow);
+                            if (data) data.tabManager.zoomIn();
+                        }
+                    },
+                    {
+                        label: 'Zoom Out',
+                        accelerator: 'CmdOrCtrl+-',
+                        click: (menuItem, browserWindow) => {
+                            const data = this.getActiveWindowData(browserWindow);
+                            if (data) data.tabManager.zoomOut();
+                        }
+                    },
+                    {
+                        label: 'Reset Zoom',
+                        accelerator: 'CmdOrCtrl+0',
+                        click: (menuItem, browserWindow) => {
+                            const data = this.getActiveWindowData(browserWindow);
+                            if (data) data.tabManager.resetZoom();
+                        }
+                    },
+                    { type: 'separator' },
+                    {
+                        label: 'Picture in Picture',
+                        accelerator: 'Alt+P',
+                        click: (menuItem, browserWindow) => {
+                            const data = this.getActiveWindowData(browserWindow);
+                            if (data) {
+                                const mainTab = data.tabManager.getMainTab();
+                                if (mainTab) {
+                                    data.tabManager.togglePictureInPicture(mainTab);
+                                }
+                            }
+                        }
+                    }
+                ]
+            },
+        ];
 
-        globalShortcut.register('CommandOrControl+T', () => {
-            // console.log("attempt");
-            tabManager.createTab();
-            //console.log(tabs);
-          })
-        
-          globalShortcut.register('Shift+Control+1', () => { tabManager.switchTab(0); })
-          globalShortcut.register('Shift+Control+2', () => { tabManager.switchTab(1); })
-          globalShortcut.register('Shift+Control+3', () => { tabManager.switchTab(2); })
-        
-        
-          globalShortcut.register("Control+W", () => {
-            if (tabManager.closeLastOpened) {
-              tabManager.closeLastOpened();
-            }
-        
-            else {
-              tabManager.closeTab(tabManager.currentIndex);
-            }
-          });
-          
-          
-
-        
-        
-          // OTHER STUFF
-          globalShortcut.register("Control+W", () => {
-            if (tabManager.closeLastOpened) {
-              tabManager.closeLastOpened();
-            }
-        
-            else {
-              tabManager.closeTab(tabManager.currentIndex);
-            }
-          });
-        
-          globalShortcut.register("Control+Shift+I", () => {
-            const mainTab = tabManager.getMainTab();
-            if (mainTab && mainTab.contentView && mainTab.contentView.webContents) {
-              mainTab.contentView.webContents.toggleDevTools();
-            }
-          })
-      
-        
-        
-      globalShortcut.register("Control+O", () => { })
-
-      
-        
-        
-        
-        
-          globalShortcut.register('CommandOrControl+=', () => {
-            const mainTab = tabManager.getMainTab();
-        
-            if (mainTab && mainTab.contentView && mainTab.contentView.webContents) {
-              mainTab.contentView.webContents.setZoomLevel(
-                mainTab.contentView.webContents.getZoomLevel() + 0.5
-              );
-        
-            }
-          });
-        
-        
-          globalShortcut.register('CommandOrControl+-', () => {
-            const mainTab = tabManager.getMainTab();
-        
-            if (mainTab && mainTab.contentView && mainTab.contentView.webContents) {
-              mainTab.contentView.webContents.setZoomLevel(
-                mainTab.contentView.webContents.getZoomLevel() - 0.5
-              );
-            }
-        
-          });
-        
-        
-          globalShortcut.register('CommandOrControl+0', () => {
-            const mainTab = tabManager.getMainTab();
-        
-            if (mainTab && mainTab.contentView && mainTab.contentView.webContents) {
-              mainTab.contentView.webContents.setZoomLevel(0);
-            }
-        
-          });
-        
-          globalShortcut.register("CommandOrControl+F", () => {
-            ui.webContents.focus(); 
-            ui.webContents.send("toggleFindBar");
-          })
-
-          globalShortcut.register("Alt+P", () => {
-            const mainTab = tabManager.getMainTab();
-            if (mainTab && mainTab.contentView && mainTab.contentView.webContents) {
-              mainTab.contentView.webContents.executeJavaScript(`
-                (async () => {
-                  if (document.pictureInPictureElement) {
-                    await document.exitPictureInPicture();
-                    return 'exited';
-                  }
-                  const videos = Array.from(document.querySelectorAll('video'));
-                  
-                  if (videos.length === 0) return 'no-video';
-                  const playing = videos.filter(v => !v.paused && !v.ended);
-                  
-                  const target = playing.length > 0
-                    ? playing.reduce((a, b) => (a.videoWidth * a.videoHeight) >= (b.videoWidth * b.videoHeight) ? a : b)
-                    : videos.reduce((a, b) => (a.videoWidth * a.videoHeight) >= (b.videoWidth * b.videoHeight) ? a : b);
-                  await target.requestPictureInPicture();
-                  
-                  return 'pip';
-                })()
-              `).catch(() => {});
-            }
-          });
-        
-        globalShortcut.register("CommandOrControl+N", () => {
-            this.createWindow();
-        });
+        const menu = Menu.buildFromTemplate(template);
+        Menu.setApplicationMenu(menu);
     }
 
     getAllWindows() {
@@ -240,19 +236,19 @@ class WindowManager {
     }
 
     getWindowAtPoint(screenX, screenY, excludeWindowId = null) {
-      for (const [windowId, data] of this.windows) {
-          if (windowId === excludeWindowId) continue;
+        for (const [windowId, data] of this.windows) {
+            if (windowId === excludeWindowId) continue;
 
-          const bounds = data.window.getBounds();
+            const bounds = data.window.getBounds();
 
-          if (screenX >= bounds.x &&screenX < bounds.x + bounds.width &&
-              screenY >= bounds.y && screenY < bounds.y + bounds.height) {
-              return data;
-          }
-          
-      }
+            if (screenX >= bounds.x && screenX < bounds.x + bounds.width &&
+                screenY >= bounds.y && screenY < bounds.y + bounds.height) {
+                return data;
+            }
 
-      return null;
+        }
+
+        return null;
     }
 }
 
