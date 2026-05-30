@@ -30,7 +30,9 @@ module.exports = {
     } 
     
     else {
-      ui.setBounds({ x: 0, y: 0, width: bounds.width, height: topBarHeight });
+      const dropdownHeight = tabManager?.dropdownVisible ? 165 : 0;
+      const uiHeight = topBarHeight + dropdownHeight;
+      ui.setBounds({ x: 0, y: 0, width: bounds.width, height: uiHeight });
       
       if (mainTab) {
         mainTab.contentView.setBounds({

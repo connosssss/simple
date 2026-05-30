@@ -206,6 +206,15 @@ const ipcSetup = () => {
   });
 
 
+  ipcMain.on("setDropdownVisible", (event, visible) => {
+
+    const tabManager = getTabManager(event);
+    
+    if (tabManager && tabManager.setDropdownVisible) {
+      tabManager.setDropdownVisible(visible);
+    }
+  });
+
   // Navigation
   ipcMain.on("search", (event, address) => {
     const tabManager = getTabManager(event);

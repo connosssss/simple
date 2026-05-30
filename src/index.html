@@ -36,7 +36,12 @@
         <button class="theme-button w-[2.0rem] h-[2.0rem] bg-slate-800/60 hover:bg-slate-700/70 text-white text-sm rounded-sm  transition-all duration-100" id="refresh">⟳ </button>
       </div>
 
-      <input class="theme-input w-full h-[80%] px-2 outline-none text-sm rounded-sm selection:bg-slate-700/60" id="address-bar" onfocus="this.select()" />
+      <div class="relative w-full h-[80%] flex items-center">
+        <input class="theme-input w-full h-full px-2 outline-none text-sm rounded-sm selection:bg-slate-700/60" id="address-bar" onfocus="this.select()" />
+        <div id="autocomplete-dropdown" class="absolute left-0 right-0 top-full mt-1 hidden z-50 rounded-sm border shadow-lg overflow-hidden theme-panel theme-border">
+
+        </div>
+      </div>
 
       <div id="find-bar" class="theme-panel hidden flex backdrop-blur-md rounded-sm p-[2px] gap-[2px]">
         <input id="find-input" class="theme-input text-sm px-2 py-1 rounded-sm outline-none" placeholder="Find in page" />

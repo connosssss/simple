@@ -48,6 +48,7 @@ class TabManager {
         this.stackBarVisible = false;
         this.bookmarkBarVisible = false;
         this.saveTimer = null;
+        this.dropdownVisible = false;
         this.configPath = path.join(app.getPath('userData'), 'config.json');
 
         if (!skipConfig) {
@@ -60,6 +61,11 @@ class TabManager {
 
     setStackBarVisible(visible) {
         this.stackBarVisible = visible;
+    }
+
+    setDropdownVisible(visible) {
+        this.dropdownVisible = !!visible;
+        this.resizeWindow();
     }
 
 
@@ -146,6 +152,15 @@ class TabManager {
         this.mainTab = nextTab;
         this.mainTab.lastActiveAt = Date.now();
         this.mainWindow.contentView.addChildView(this.mainTab.contentView);
+        
+        try {
+            this.mainWindow.contentView.removeChildView(this.ui);
+            this.mainWindow.contentView.addChildView(this.ui);
+        } 
+        catch (err) {
+            console.error("Failed to layer-order UI view on switchTab:", err);
+        }
+
         this.currentIndex = tabID;
 
         this.resizeWindow();
@@ -316,6 +331,15 @@ class TabManager {
         if (this.mainTab === tab) {
             this.removeContentView(oldContentView);
             this.mainWindow.contentView.addChildView(nextContentView);
+            
+            // Ensure UI view is always on top of page content views
+            try {
+                this.mainWindow.contentView.removeChildView(this.ui);
+                this.mainWindow.contentView.addChildView(this.ui);
+            } catch (err) {
+                console.error("Failed to layer-order UI view on replaceTabContent:", err);
+            }
+
             this.resizeWindow();
         }
 

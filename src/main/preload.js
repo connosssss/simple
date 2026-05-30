@@ -82,4 +82,5 @@ contextBridge.exposeInMainWorld("electronAPI", {
     deleteHistoryItem: (id) => ipcRenderer.invoke("deleteHistoryItem", id),
     clearHistory: () => ipcRenderer.invoke("clearHistory"),
     onUpdateHistory: (callback) => ipcRenderer.on("updateHistory", (event, history) => callback(history)),
+    setDropdownVisible: (visible) => ipcRenderer.send("setDropdownVisible", visible),
 })
