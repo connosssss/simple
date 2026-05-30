@@ -53,4 +53,8 @@ export const setupThemeControls = () => {
   document.getElementById("theme-accent-opacity").addEventListener("input", (event) => {
     window.themeUtils.saveTheme({ accentOpacity: Number(event.target.value) });
   });
+
+  document.getElementById("reset-theme-btn").addEventListener("click", () => {
+    window.themeUtils.resetTheme();
+  });
 };

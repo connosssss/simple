@@ -146,6 +146,7 @@ class TabManager {
         }
 
         if (this.mainTab && this.mainTab.contentView) {
+            this.mainTab.lastActiveAt = Date.now();
             this.removeContentView(this.mainTab.contentView);
         }
 

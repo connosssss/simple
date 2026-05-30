@@ -92,6 +92,17 @@
     window.dispatchEvent(new Event("theme-updated"));
   };
 
+  const resetTheme = () => {
+    localStorage.setItem(THEME_KEY, JSON.stringify(DEFAULT_THEME));
+    applyTheme();
+
+    if (window.electronAPI?.saveThemeToFile) {
+      window.electronAPI.saveThemeToFile(DEFAULT_THEME);
+    }
+
+    window.dispatchEvent(new Event("theme-updated"));
+  };
+
   const initThemeFromFile = async () => {
     if (window.electronAPI?.loadThemeFromFile) {
       try {
@@ -115,7 +126,8 @@
     THEME_KEY,
     getTheme,
     applyTheme,
-    saveTheme
+    saveTheme,
+    resetTheme
   };
   
 })();

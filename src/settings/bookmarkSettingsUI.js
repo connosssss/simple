@@ -29,6 +29,29 @@ export function setupBookmarkControls() {
       const titleContainer = document.createElement("div");
       titleContainer.className = "flex items-center gap-2";
 
+      const icon = document.createElement("img");
+      icon.className = "w-4 h-4 flex-shrink-0 pointer-events-none rounded-sm";
+
+      let domain = "";
+      try {
+        domain = new URL(b.url).hostname;
+      } catch (e) {
+        domain = "";
+      }
+
+      icon.src = b.iconURL || (domain ? `https://www.google.com/s2/favicons?sz=64&domain=${domain}` : "");
+
+      icon.onerror = () => {
+        const fallbackSvg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+        fallbackSvg.setAttribute("viewBox", "0 0 20 20");
+        fallbackSvg.setAttribute("fill", "currentColor");
+        fallbackSvg.setAttribute("class", "w-4 h-4 text-slate-400 flex-shrink-0");
+        fallbackSvg.innerHTML = `<path d="M5 4a2 2 0 012-2h6a2 2 0 012 2v14l-5-2.5L5 18V4z" />`;
+        icon.replaceWith(fallbackSvg);
+      };
+
+      titleContainer.appendChild(icon);
+
       const title = document.createElement("span");
       title.className = "font-medium text-slate-100 truncate";
       title.textContent = b.title || b.url;

@@ -48,9 +48,12 @@ const renderBookmarkBar = () => {
     folderBtn.type = "button";
     folderBtn.className = "theme-button-alt theme-text text-xs rounded-sm px-2 py-1 max-w-48 truncate transition-all duration-100 flex items-center gap-1 font-semibold";
 
-    const icon = document.createElement("span");
-    icon.className = "opacity-75 flex-shrink-0";
-    icon.textContent = "F";
+    // Use a clean amber folder SVG icon
+    const icon = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+    icon.setAttribute("viewBox", "0 0 20 20");
+    icon.setAttribute("fill", "currentColor");
+    icon.setAttribute("class", "w-3.5 h-3.5 text-amber-400 flex-shrink-0 opacity-80");
+    icon.innerHTML = `<path d="M2 6a2 2 0 012-2h5l2 2h5a2 2 0 012 2v6a2 2 0 01-2 2H4a2 2 0 01-2-2V6z" />`;
     folderBtn.appendChild(icon);
 
     const label = document.createElement("span");
@@ -78,12 +81,29 @@ const renderBookmarkBar = () => {
     button.type = "button";
     button.className = "theme-button-alt theme-text text-xs rounded-sm px-2 py-1 max-w-48 truncate transition-all duration-100 flex items-center gap-1";
 
-    if (bookmark.iconURL) {
-      const icon = document.createElement("img");
-      icon.src = bookmark.iconURL;
-      icon.className = "w-4 h-4 flex-shrink-0 pointer-events-none opacity-75";
-      button.appendChild(icon);
+    const icon = document.createElement("img");
+    icon.className = "w-4 h-4 flex-shrink-0 pointer-events-none opacity-75 rounded-sm";
+
+    let domain = "";
+    try {
+      domain = new URL(bookmark.url).hostname;
+    } catch (e) {
+      domain = "";
     }
+
+    icon.src = bookmark.iconURL || (domain ? `https://www.google.com/s2/favicons?sz=64&domain=${domain}` : "");
+
+    icon.onerror = () => {
+      // Fallback to a default SVG bookmark ribbon icon if image fails to load
+      const fallbackSvg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+      fallbackSvg.setAttribute("viewBox", "0 0 20 20");
+      fallbackSvg.setAttribute("fill", "currentColor");
+      fallbackSvg.setAttribute("class", "w-3.5 h-3.5 opacity-60 flex-shrink-0");
+      fallbackSvg.innerHTML = `<path d="M5 4a2 2 0 012-2h6a2 2 0 012 2v14l-5-2.5L5 18V4z" />`;
+      icon.replaceWith(fallbackSvg);
+    };
+
+    button.appendChild(icon);
 
     const label = document.createElement("span");
     label.className = "truncate pointer-events-none";
