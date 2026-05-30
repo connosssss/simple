@@ -21,6 +21,9 @@ const WindowManager = require('./WindowManager');
 const { registerCookieAndTrackerIPC } = require('./cookiesAndTrackers');
 const extensionManager = require('../extensions/extensionManager');
 const bookmarkManager = require('../bookmarks/bookmarks');
+const historyManager = require('../history/history');
+
+const INTERNAL_PAGES = new Set(["about://settings", "about://history"]);
 
 
 // Handle creating/removing shortcuts on Windows when installing/uninstalling.
@@ -29,16 +32,7 @@ if (require('electron-squirrel-startup')) {
 }
 
 const registerSettingsView = (windowId, tabManager, settingsView) => {
-  if (!settingsView?.webContents) return;
-
-  WindowManager.registerWebContents(settingsView.webContents.id, windowId);
-  settingsView.webContents.on('destroyed', () => {
-    WindowManager.unregisterWebContents(settingsView.webContents.id);
-  });
-  settingsView.webContents.once('did-finish-load', () => {
-    settingsView.webContents.send("initSettings", tabManager.getSettingsPayload());
-    tabManager.sendTabData();
-  });
+  WindowManager.registerSettingsView(windowId, tabManager, settingsView);
 };
 
 const moveTabToWindow = (sourceData, tabIndex, targetData = null) => {
@@ -88,6 +82,21 @@ const ipcSetup = () => {
 
   };
 
+  const broadcastHistory = () => {
+    const historyList = historyManager.getAll();
+
+    for (const data of WindowManager.getAllWindows()) {
+      data.ui.webContents.send("updateHistory", historyList);
+
+      const settingsTabs = data.tabManager.getSettingsTabs ? data.tabManager.getSettingsTabs() : data.tabManager.tabs.filter(t => t.isSettingsTab && t.contentView && !t.contentView.webContents.isDestroyed());
+      for (const tab of settingsTabs) {
+        tab.contentView.webContents.send("updateHistory", historyList);
+      }
+    }
+  };
+
+  ipcMain.on("broadcastHistory", broadcastHistory);
+
   const broadcastBookmarks = () => {
     const bookmarks = bookmarkManager.getAll();
 
@@ -101,7 +110,17 @@ const ipcSetup = () => {
     }
   };
 
-  onTabManager("createTab", (tabManager, event, options) => tabManager.createTab(options));
+  onTabManager("createTab", (tabManager, event, options) => {
+    const address = typeof options === 'string' ? options : (options?.address || "");
+    const isSpecial = INTERNAL_PAGES.has(address);
+    const newTab = tabManager.createTab(options);
+    if (isSpecial && newTab && newTab.isSettingsTab && newTab.contentView) {
+      const data = WindowManager.getManagerBySend(event.sender);
+      if (data) {
+        registerSettingsView(data.window.id, tabManager, newTab.contentView);
+      }
+    }
+  });
   onTabManager("switchTab", (tabManager, event, tabId) => tabManager.switchTab(tabId));
   onTabManager("reorderTabs", (tabManager, event, start, end) => tabManager.reorderTabs(start, end));
   onTabManager("closeTab", (tabManager, event, tabId) => tabManager.closeTab(tabId));
@@ -199,8 +218,9 @@ const ipcSetup = () => {
 
     mainTab.isNewTab = false;
 
-    if (trimmedAddress.toLowerCase() === "about://settings") {
-      const settingsView = tabManager.navigateTabToSettings(tabManager.currentIndex);
+    if (INTERNAL_PAGES.has(trimmedAddress.toLowerCase())) {
+      const address = trimmedAddress.toLowerCase();
+      const settingsView = tabManager.navigateTabToSettings(tabManager.currentIndex, address);
 
       if (settingsView && tabManager.getMainTab()?.isSettingsTab) {
         registerSettingsView(data.window.id, tabManager, settingsView);
@@ -344,6 +364,20 @@ const ipcSetup = () => {
   ipcMain.handle("updateBookmark", (_event, url, updates) => {
     bookmarkManager.update(url, updates);
     broadcastBookmarks();
+    return { success: true };
+  });
+
+  ipcMain.handle("getHistory", () => historyManager.getAll());
+
+  ipcMain.handle("deleteHistoryItem", (event, id) => {
+    historyManager.remove(id);
+    broadcastHistory();
+    return { success: true };
+  });
+
+  ipcMain.handle("clearHistory", () => {
+    historyManager.clear();
+    broadcastHistory();
     return { success: true };
   });
 

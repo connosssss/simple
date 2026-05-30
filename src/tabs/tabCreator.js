@@ -1,10 +1,14 @@
-const { WebContentsView } = require("electron");
+const { WebContentsView, ipcMain } = require("electron");
 const path = require("node:path");
+const historyManager = require("../history/history");
 
 const SETTINGS_ADDRESS = "about://settings";
 const SETTINGS_TITLE = "Settings";
+const HISTORY_ADDRESS = "about://history";
+const HISTORY_TITLE = "History";
 const MAIN_PARTITION = "persist:main";
 const SETTINGS_FILE = path.join(__dirname, "../settings/settings.html");
+const HISTORY_FILE = path.join(__dirname, "../history/history.html");
 const PRELOAD_FILE = path.join(__dirname, "../main/preload.js");
 
 const createBaseTab = (overrides = {}) => ({
@@ -88,11 +92,12 @@ const createRegularTab = ({
   return tab;
 };
 
-const createSettingsTab = () => {
+const createSettingsTab = (address = SETTINGS_ADDRESS) => {
+  const isHistory = address === HISTORY_ADDRESS;
   const tab = createBaseTab({
     contentView: createSettingsContentView(),
-    address: SETTINGS_ADDRESS,
-    title: SETTINGS_TITLE,
+    address: address,
+    title: isHistory ? HISTORY_TITLE : SETTINGS_TITLE,
     isSettingsTab: true,
   });
 
@@ -111,17 +116,18 @@ const loadRegularTabContent = (tab, address, defaultSite) => {
 const loadSettingsTabContent = (tab) => {
   if (!isLiveWebContents(tab.contentView)) return;
 
-  tab.address = SETTINGS_ADDRESS;
-  tab.title = SETTINGS_TITLE;
-  tab.contentView.webContents.loadFile(SETTINGS_FILE);
+  const isHistory = tab.address === HISTORY_ADDRESS;
+  tab.title = isHistory ? HISTORY_TITLE : SETTINGS_TITLE;
+  tab.contentView.webContents.loadFile(isHistory ? HISTORY_FILE : SETTINGS_FILE);
 };
 
 const syncTabState = (tab) => {
   if (!isLiveWebContents(tab.contentView)) return;
 
   if (tab.isSettingsTab) {
-    tab.title = SETTINGS_TITLE;
-    tab.address = SETTINGS_ADDRESS;
+    const isHistory = tab.address === HISTORY_ADDRESS;
+    tab.title = isHistory ? HISTORY_TITLE : SETTINGS_TITLE;
+    tab.address = isHistory ? HISTORY_ADDRESS : SETTINGS_ADDRESS;
     return;
   }
 
@@ -144,14 +150,47 @@ const attachTabLifecycle = (manager, tab) => {
     manager.sendTabData();
   };
 
+  const handleDidNavigate = (event, url) => {
+    syncAndBroadcast();
+    if (url && !url.startsWith("about:") && url !== "about:blank") {
+      historyManager.add(url, webContents.getTitle() || url, tab.iconURL || "");
+      ipcMain.emit("broadcastHistory");
+    }
+  };
+
+  const handleDidNavigateInPage = (event, url) => {
+    syncAndBroadcast();
+    if (url && !url.startsWith("about:") && url !== "about:blank") {
+      historyManager.add(url, webContents.getTitle() || url, tab.iconURL || "");
+      ipcMain.emit("broadcastHistory");
+    }
+  };
+
+  const handlePageTitleUpdated = (event, title) => {
+    syncAndBroadcast();
+    const url = webContents.getURL();
+    if (url && !url.startsWith("about:") && url !== "about:blank") {
+      historyManager.updateLastEntryTitleAndIcon(url, title, tab.iconURL || "");
+      ipcMain.emit("broadcastHistory");
+    }
+  };
+
+  const handlePageFaviconUpdated = (event, favicons) => {
+    tab.iconURL = favicons[0] || "";
+    manager.sendTabData();
+    const url = webContents.getURL();
+    
+    if (url && !url.startsWith("about:") && url !== "about:blank") {
+      historyManager.updateLastEntryTitleAndIcon(url, null, tab.iconURL);
+      ipcMain.emit("broadcastHistory");
+    }
+  };
+
   const listeners = [
-    ["page-title-updated", syncAndBroadcast],
-    ["did-navigate", syncAndBroadcast],
-    ["did-navigate-in-page", syncAndBroadcast],
-    ["page-favicon-updated", (event, favicons) => {    // NEEDS TO BE CUSTOM
-        tab.iconURL = favicons[0] || "";                  // There is no icon getter like there are for title or url so it has to wait for it be be updated
-        manager.sendTabData();
-    }],
+    ["page-title-updated", handlePageTitleUpdated],
+    ["did-navigate", handleDidNavigate],
+    ["did-navigate-in-page", handleDidNavigateInPage],
+    ["page-favicon-updated", handlePageFaviconUpdated],
     ["did-finish-load", syncAndBroadcast],
     ["will-navigate", () => {
         tab.isNewTab = false;

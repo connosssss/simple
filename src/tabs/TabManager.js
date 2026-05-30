@@ -23,6 +23,8 @@ const {
     syncTabState
 } = require('./tabCreator');
 
+const INTERNAL_PAGES = new Set(["about://settings", "about://history"]);
+
 
 
 class TabManager {
@@ -85,6 +87,11 @@ class TabManager {
             } = newAddress);
         }
 
+        if (INTERNAL_PAGES.has(newAddress)) {
+            const contentView = this.createSettingsTab(newAddress, switchTo);
+            return contentView;
+        }
+
         let newTab = createRegularTab({
             address: newAddress,
             defaultSite: this.defaultSite,
@@ -105,8 +112,8 @@ class TabManager {
         return newTab;
     }
 
-    createSettingsTab(switchTo = true) {
-        let newTab = createSettingsTab();
+    createSettingsTab(address = "about://settings", switchTo = true) {
+        let newTab = createSettingsTab(address);
 
         attachTabLifecycle(this, newTab);
         
@@ -318,13 +325,16 @@ class TabManager {
         return nextContentView;
     }
 
-    navigateTabToSettings(index) {
+    navigateTabToSettings(index, address = "about://settings") {
         const tab = this.tabs[index];
         if (!tab || tab.isSettingsTab) return null;
     
         return this.replaceTabContent(tab, createSettingsContentView(), {
             isSettingsTab: true,
-            loadContent: loadSettingsTabContent
+            loadContent: (targetTab) => {
+                targetTab.address = address;
+                loadSettingsTabContent(targetTab);
+            }
         });
     }
 

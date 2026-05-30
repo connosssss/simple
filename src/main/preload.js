@@ -76,4 +76,10 @@ contextBridge.exposeInMainWorld("electronAPI", {
     installExtension: (url) => ipcRenderer.invoke('installExtension', url),
     removeExtension: (extensionId) => ipcRenderer.invoke('removeExtension', extensionId),
     showExtensionsMenu: (bounds) => ipcRenderer.send('showExtensionsMenu', bounds),
+
+    // History
+    getHistory: () => ipcRenderer.invoke("getHistory"),
+    deleteHistoryItem: (id) => ipcRenderer.invoke("deleteHistoryItem", id),
+    clearHistory: () => ipcRenderer.invoke("clearHistory"),
+    onUpdateHistory: (callback) => ipcRenderer.on("updateHistory", (event, history) => callback(history)),
 })

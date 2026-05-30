@@ -105,6 +105,26 @@ class WindowManager {
         this.webContentsIds.delete(webContentsId);
     }
 
+    registerSettingsView(windowId, tabManager, settingsView) {
+        if (!settingsView?.webContents) return;
+
+        this.registerWebContents(settingsView.webContents.id, windowId);
+        settingsView.webContents.on('destroyed', () => {
+            this.unregisterWebContents(settingsView.webContents.id);
+        });
+
+        settingsView.webContents.once('did-finish-load', () => {
+            settingsView.webContents.send("initSettings", tabManager.getSettingsPayload());
+            try {
+                const historyManager = require('../history/history');
+                settingsView.webContents.send("updateHistory", historyManager.getAll());
+            } catch (err) {
+                console.error("Error sending initial history:", err);
+            }
+            tabManager.sendTabData();
+        });
+    }
+
 
     getActiveWindowData(browserWindow) {
         const win = browserWindow || BaseWindow.getFocusedWindow();
@@ -219,6 +239,19 @@ class WindowManager {
                                 const mainTab = data.tabManager.getMainTab();
                                 if (mainTab) {
                                     data.tabManager.togglePictureInPicture(mainTab);
+                                }
+                            }
+                        }
+                    },
+                    {
+                        label: 'History',
+                        accelerator: 'CmdOrCtrl+H',
+                        click: (menuItem, browserWindow) => {
+                            const data = this.getActiveWindowData(browserWindow);
+                            if (data) {
+                                const newTab = data.tabManager.createTab("about://history");
+                                if (newTab && newTab.isSettingsTab && newTab.contentView) {
+                                    this.registerSettingsView(data.window.id, data.tabManager, newTab.contentView);
                                 }
                             }
                         }
