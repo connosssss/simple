@@ -158,8 +158,12 @@ export const renderTabs = (tabs) => {
             stackContainer.appendChild(countBadge);
 
             const closeB = document.createElement("button");
-            closeB.className = `bg-slate-900/80 hover:bg-slate-800 transition-all duration-100 text-white rounded-sm text-xs font-bold flex-shrink-0 ml-2 px-1`;
-            closeB.textContent = "x";
+            closeB.className = `hover:bg-slate-700/60 p-0.5 rounded transition-all duration-100 text-slate-300 hover:text-white flex-shrink-0 ml-2 flex items-center justify-center w-4 h-4`;
+            closeB.innerHTML = `
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5" class="w-3 h-3">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M6 18 18 6M6 6l12 12" />
+              </svg>
+            `;
             closeB.onclick = (e) => {
                 e.stopPropagation();
                 window.electronAPI.closeStack(tab.stackId);
@@ -303,12 +307,69 @@ function createTabElement(tab, index, isInStack, tabs) {
 
         tabE.title = tab.title || "Tab";
 
-        if (tab.iconURL) {
-            const icon = document.createElement("img");
-            icon.src = tab.iconURL;
-            icon.className = "w-4 h-4 mr-0 pointer-events-none opacity-75";
-            tabE.appendChild(icon);
-        }
+        const appendTabIcon = () => {
+            if (tab.isSettingsTab || tab.address === "about://settings") {
+                const settingsSvg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+                settingsSvg.setAttribute("viewBox", "0 0 24 24");
+                settingsSvg.setAttribute("fill", "none");
+                settingsSvg.setAttribute("stroke", "currentColor");
+                settingsSvg.setAttribute("stroke-width", "1.5");
+                settingsSvg.setAttribute("class", "w-4 h-4 text-slate-400 flex-shrink-0 pointer-events-none");
+                settingsSvg.innerHTML = `<path stroke-linecap="round" stroke-linejoin="round" d="M9.594 3.94c.09-.542.56-.94 1.11-.94h2.593c.55 0 1.02.398 1.11.94l.213 1.281c.063.374.313.686.645.87.074.04.147.083.22.127.324.196.72.257 1.075.124l1.217-.456a1.125 1.125 0 0 1 1.37.49l1.296 2.247a1.125 1.125 0 0 1-.26 1.43l-1.003.828c-.293.241-.438.613-.43.992a7.723 7.723 0 0 1 0 .255c-.008.378.137.75.43.991l1.004.827c.424.35.534.954.26 1.43l-1.298 2.247a1.125 1.125 0 0 1-1.369.491l-1.217-.456c-.355-.133-.75-.072-1.076.124a6.57 6.57 0 0 1-.22.128c-.331.183-.581.495-.644.869l-.213 1.28c-.09.543-.56.941-1.11.941h-2.594c-.55 0-1.02-.398-1.11-.94l-.213-1.281c-.062-.374-.312-.686-.644-.87a6.52 6.52 0 0 1-.22-.127c-.325-.196-.72-.257-1.076-.124l-1.217.456a1.125 1.125 0 0 1-1.369-.49l-1.297-2.247a1.125 1.125 0 0 1 .26-1.43l1.004-.827c.292-.24.437-.613.43-.992a6.932 6.932 0 0 1 0-.255c.007-.378-.138-.75-.43-.991l-1.004-.827a1.125 1.125 0 0 1-.26-1.43l1.297-2.247a1.125 1.125 0 0 1 1.37-.491l1.216.456c.356.133.751.072 1.076-.124.072-.044.146-.087.22-.128c.332-.183.582-.495.645-.869L9.594 3.94ZM12.75 12a.75.75 0 1 1-1.5 0 .75.75 0 0 1 1.5 0Z" />`;
+                tabE.appendChild(settingsSvg);
+                return;
+            }
+
+            if (tab.address === "about://history") {
+                const historySvg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+                historySvg.setAttribute("viewBox", "0 0 24 24");
+                historySvg.setAttribute("fill", "none");
+                historySvg.setAttribute("stroke", "currentColor");
+                historySvg.setAttribute("stroke-width", "1.5");
+                historySvg.setAttribute("class", "w-4 h-4 text-slate-400 flex-shrink-0 pointer-events-none");
+                historySvg.innerHTML = `<path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />`;
+                tabE.appendChild(historySvg);
+                return;
+            }
+
+            let domain = "";
+            try {
+                if (tab.address && !tab.address.startsWith("about:")) {
+                    domain = new URL(tab.address).hostname;
+                }
+            } catch (e) {
+                domain = "";
+            }
+
+            const iconSrc = tab.iconURL || (domain ? `https://www.google.com/s2/favicons?sz=64&domain=${domain}` : "");
+
+            if (iconSrc) {
+                const icon = document.createElement("img");
+                icon.className = "w-4 h-4 flex-shrink-0 pointer-events-none opacity-75 rounded-sm";
+                icon.src = iconSrc;
+                icon.onerror = () => {
+                    const docSvg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+                    docSvg.setAttribute("viewBox", "0 0 24 24");
+                    docSvg.setAttribute("fill", "none");
+                    docSvg.setAttribute("stroke", "currentColor");
+                    docSvg.setAttribute("stroke-width", "1.5");
+                    docSvg.setAttribute("class", "w-4 h-4 text-slate-400 flex-shrink-0 pointer-events-none");
+                    docSvg.innerHTML = `<path stroke-linecap="round" stroke-linejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 0 0-3.375-3.375h-1.5A1.125 1.125 0 0 1 13.5 7.125v-1.5a3.375 3.375 0 0 0-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 0 0-9-9Z" />`;
+                    icon.replaceWith(docSvg);
+                };
+                tabE.appendChild(icon);
+            } else {
+                const docSvg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+                docSvg.setAttribute("viewBox", "0 0 24 24");
+                docSvg.setAttribute("fill", "none");
+                docSvg.setAttribute("stroke", "currentColor");
+                docSvg.setAttribute("stroke-width", "1.5");
+                docSvg.setAttribute("class", "w-4 h-4 text-slate-400 flex-shrink-0 pointer-events-none");
+                docSvg.innerHTML = `<path stroke-linecap="round" stroke-linejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 0 0-3.375-3.375h-1.5A1.125 1.125 0 0 1 13.5 7.125v-1.5a3.375 3.375 0 0 0-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 0 0-9-9Z" />`;
+                tabE.appendChild(docSvg);
+            }
+        };
+        appendTabIcon();
         
     
 
@@ -422,8 +483,12 @@ function createTabElement(tab, index, isInStack, tabs) {
   
         //displaying tabs
         const closeB = document.createElement("button");
-        closeB.className = `${tab.isMainTab ? `bg-slate-900 hover:bg-slate-800` : `bg-slate-900/80 hover:bg-slate-800`} transition-all duration-100 text-white rounded-sm text-xs font-bold  flex-shrink-0 ml-2 px-1`;
-        closeB.textContent = "x";
+        closeB.className = `hover:bg-slate-700/60 p-0.5 rounded transition-all duration-100 text-slate-300 hover:text-white flex-shrink-0 ml-2 flex items-center justify-center w-4 h-4`;
+        closeB.innerHTML = `
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5" class="w-3 h-3">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M6 18 18 6M6 6l12 12" />
+          </svg>
+        `;
         closeB.onclick = (e) => {
             e.stopPropagation();
             window.electronAPI.closeTab(index);
