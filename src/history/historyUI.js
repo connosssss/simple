@@ -83,7 +83,15 @@ const renderHistory = (historyItems) => {
 
 };
 
-
+const filterHistory = () => {
+  const query = searchInput.value.toLowerCase().trim();
+  const filtered = allHistory.filter(item => {
+    const title = (item.title || "").toLowerCase();
+    const url = (item.url || "").toLowerCase();
+    return title.includes(query) || url.includes(query);
+  });
+  renderHistory(filtered);
+};
 
 if (window.electronAPI) {
   window.electronAPI.onUpdateHistory((history) => {
