@@ -167,6 +167,13 @@ export const setupHibernationControls = () => {
     window.electronAPI.updateSearchEngine(event.target.value);
   });
 
+  const uiPositionSelect = document.getElementById("ui-position-select");
+  if (uiPositionSelect) {
+    uiPositionSelect.addEventListener("change", (event) => {
+      window.electronAPI.updateUiPosition(event.target.value);
+    });
+  }
+
   setInterval(() => {
     renderTabs(previousTabs);
   }, 1000);
@@ -190,6 +197,10 @@ export const setupHibernationControls = () => {
         closeAfter = settings.closeAfter;
         closeAfterSelect.value = closeAfter;
         localStorage.setItem("closeAfter", closeAfter);
+      }
+
+      if (settings.uiPosition && uiPositionSelect) {
+        uiPositionSelect.value = settings.uiPosition;
       }
     },
   };

@@ -35,21 +35,16 @@ class WindowManager {
             }
         });
         ui.setBackgroundColor('#00000000');
-
         mainWindow.contentView.addChildView(ui);
-        ui.webContents.loadFile(path.join(__dirname, '../index.html'));
-
-
 
         const tabManager = new TabManager(mainWindow, ui, curTab != null);
         const windowId = mainWindow.id;
         const windowData = { window: mainWindow, ui, tabManager };
 
-
-
-
         this.windows.set(windowId, windowData);
         this.webContentsIds.set(ui.webContents.id, windowId);
+
+        ui.webContents.loadFile(path.join(__dirname, '../index.html'));
 
 
 
@@ -82,6 +77,8 @@ class WindowManager {
         else if (tabManager.tabs.length == 0) {
             tabManager.createTab();
         }
+
+        this.startWindowControlsHoverTracking(mainWindow, tabManager);
 
         return windowData;
     }
@@ -262,6 +259,71 @@ class WindowManager {
 
         const menu = Menu.buildFromTemplate(template);
         Menu.setApplicationMenu(menu);
+    }
+
+    startWindowControlsHoverTracking(mainWindow, tabManager) {
+        const { screen } = require('electron');
+        let isHovered = false;
+
+        const intervalId = setInterval(() => {
+            if (mainWindow.isDestroyed()) {
+                clearInterval(intervalId);
+                return;
+            }
+
+            const uiPosition = tabManager.uiPosition || 'top';
+            if (uiPosition === 'top') {
+                if (!isHovered) {
+                    try {
+                        mainWindow.setTitleBarOverlay({ symbolColor: '#ffffff' });
+                    } catch (e) {}
+                    isHovered = true;
+                }
+                return;
+            }
+
+            if (!mainWindow.isFocused() || !mainWindow.isVisible()) {
+                if (isHovered) {
+                    try {
+                        mainWindow.setTitleBarOverlay({ symbolColor: '#00000000' });
+                    } catch (e) {}
+                    isHovered = false;
+                }
+                return;
+            }
+
+            const mousePoint = screen.getCursorScreenPoint();
+            const winBounds = mainWindow.getBounds();
+
+            const overlayX = winBounds.x + winBounds.width - 140;
+            const overlayY = winBounds.y;
+
+            const inOverlayRegion = 
+                mousePoint.x >= overlayX && 
+                mousePoint.x <= winBounds.x + winBounds.width &&
+                mousePoint.y >= overlayY &&
+                mousePoint.y <= winBounds.y + 35;
+
+            if (inOverlayRegion) {
+                if (!isHovered) {
+                    try {
+                        mainWindow.setTitleBarOverlay({ symbolColor: '#ffffff' });
+                    } catch (e) {}
+                    isHovered = true;
+                }
+            } else {
+                if (isHovered) {
+                    try {
+                        mainWindow.setTitleBarOverlay({ symbolColor: '#00000000' });
+                    } catch (e) {}
+                    isHovered = false;
+                }
+            }
+        }, 150);
+
+        mainWindow.on('closed', () => {
+            clearInterval(intervalId);
+        });
     }
 
     getAllWindows() {

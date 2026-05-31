@@ -64,32 +64,314 @@
 }
 
 
+/* --- Vivaldi-Inspired Floating Islands & Tab Styles --- */
+#tabs-list,
+#stack-tabs-list {
+  padding: 4px 8px !important;
+  gap: 6px !important;
+  align-items: center !important;
+}
+
+/* Tabs & Stack Containers */
+#tabs-list > div,
+#stack-tabs-list > div {
+  height: 28px !important;
+  border-top-left-radius: 6px !important; /* rounded-t-md */
+  border-top-right-radius: 6px !important;
+  border-bottom-left-radius: 0px !important;
+  border-bottom-right-radius: 0px !important;
+  padding: 0 14px !important;
+  font-size: 12.5px !important;
+  margin: 0 !important;
+  border: 1px solid rgba(255, 255, 255, 0.05) !important;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1) !important;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1) !important;
+  display: flex !important;
+  align-items: center !important;
+  gap: 6px !important;
+}
+
+/* Style for Tab Stack containers in primary bar */
+#tabs-list > div[data-stack-id] {
+  border-top-left-radius: 6px !important;
+  border-top-right-radius: 6px !important;
+  border-bottom-left-radius: 0px !important;
+  border-bottom-right-radius: 0px !important;
+  border: 1px dashed rgba(255, 255, 255, 0.25) !important;
+  background: rgba(255, 255, 255, 0.05) !important;
+}
+
+#tabs-list > div[data-stack-id][data-theme-state="active"] {
+  background: rgba(255, 255, 255, 0.15) !important;
+  border-style: solid !important;
+  border-color: var(--theme-border) !important;
+}
+
+/* Active Main Tab */
 #tabs-list > div[data-theme-state="main"],
 #stack-tabs-list > div[data-theme-state="main"] {
   background: var(--theme-accent-soft) !important;
-  color: var(--theme-text) !important;
-  filter: brightness(1.4);
+  color: #ffffff !important;
+  border-color: rgba(255, 255, 255, 0.2) !important;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2) !important;
+  filter: none !important;
+  font-weight: 500 !important;
 }
 
+/* Active Tab in Secondary / Stack list */
 #tabs-list > div[data-theme-state="active"],
 #stack-tabs-list > div[data-theme-state="active"] {
-  background: var(--theme-accent-soft) !important;
-  color: var(--theme-text) !important;
+  background: rgba(255, 255, 255, 0.15) !important;
+  color: #ffffff !important;
+  border-color: rgba(255, 255, 255, 0.1) !important;
 }
 
+/* Inactive/Idle State Tabs */
 #tabs-list > div[data-theme-state="idle"],
 #stack-tabs-list > div[data-theme-state="idle"] {
-  background: var(--theme-panel) !important;
-  color: var(--theme-muted) !important;
+  background: rgba(255, 255, 255, 0.05) !important;
+  color: rgba(255, 255, 255, 0.6) !important;
+  border-color: rgba(255, 255, 255, 0.05) !important;
 }
 
+/* Hibernating/Resting Tab State */
 #tabs-list > div[data-theme-state="resting"],
 #stack-tabs-list > div[data-theme-state="resting"] {
-  background: var(--theme-resting) !important;
-  color: var(--theme-faint) !important;
+  background: rgba(0, 0, 0, 0.2) !important;
+  color: rgba(255, 255, 255, 0.45) !important;
+  border-color: transparent !important;
+  opacity: 0.8 !important;
 }
 
+/* Inactive/Resting Tab Hover */
 #tabs-list > div:hover,
 #stack-tabs-list > div:hover {
-  filter: brightness(1.12);
+  background: rgba(255, 255, 255, 0.12) !important;
+  color: #ffffff !important;
+  border-color: rgba(255, 255, 255, 0.15) !important;
+  filter: none !important;
+  opacity: 1 !important;
 }
+
+/* Tab Close Button Styling */
+#tabs-list > div button,
+#stack-tabs-list > div button {
+  width: 16px !important;
+  height: 16px !important;
+  border-radius: 50% !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  opacity: 0;
+  transition: opacity 0.15s ease, background-color 0.15s ease, color 0.15s ease !important;
+  background: transparent !important;
+  border: none !important;
+  margin-left: 6px !important;
+  color: rgba(255, 255, 255, 0.6) !important;
+  padding: 0 !important;
+}
+
+#tabs-list > div:hover button,
+#stack-tabs-list > div:hover button {
+  opacity: 0.6;
+}
+
+#tabs-list > div button:hover,
+#stack-tabs-list > div button:hover {
+  opacity: 1 !important;
+  background: rgba(255, 255, 255, 0.2) !important;
+  color: #fff !important;
+}
+
+#tabs-list > div[data-theme-state="main"] button,
+#stack-tabs-list > div[data-theme-state="main"] button {
+  opacity: 0.65;
+}
+
+#tabs-list > div[data-theme-state="main"] button:hover,
+#stack-tabs-list > div[data-theme-state="main"] button:hover {
+  background: rgba(255, 255, 255, 0.25) !important;
+  opacity: 1 !important;
+}
+
+/* Floating New Tab / Stack Button */
+#new-tab,
+#new-stack-tab {
+  width: 28px !important;
+  height: 28px !important;
+  border-radius: 50% !important;
+  background: rgba(255, 255, 255, 0.05) !important;
+  border: 1px solid rgba(255, 255, 255, 0.08) !important;
+  color: rgba(255, 255, 255, 0.7) !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1) !important;
+  padding: 0 !important;
+  margin-right: 8px !important;
+}
+
+#new-tab:hover,
+#new-stack-tab:hover {
+  background: rgba(255, 255, 255, 0.12) !important;
+  border-color: rgba(255, 255, 255, 0.15) !important;
+  color: #fff !important;
+  transform: scale(1.05);
+}
+
+#new-tab:active,
+#new-stack-tab:active {
+  transform: scale(0.95);
+}
+
+/* Adaptive vertical sidebar layouts styling */
+body.layout-left #tabs-list > div,
+body.layout-left #stack-tabs-list > div,
+body.layout-right #tabs-list > div,
+body.layout-right #stack-tabs-list > div {
+  border-radius: 8px !important;
+  height: 32px !important;
+  margin: 2px 0 !important;
+}
+
+body.layout-left #new-tab,
+body.layout-right #new-tab {
+  width: calc(100% - 16px) !important;
+  border-radius: 8px !important;
+  margin: 8px !important;
+  height: 32px !important;
+}
+
+/* --- Vivaldi-Inspired Address Bar UI --- */
+#address-bar-part {
+  padding: 6px 12px !important;
+  gap: 8px !important;
+  background: var(--theme-shell) !important;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06) !important;
+}
+
+/* Circle Controls for Navigation & Utilities */
+#address-bar-part button,
+#address-actions-group button {
+  background: transparent !important;
+  border: none !important;
+  border-radius: 50% !important;
+  width: 28px !important;
+  height: 28px !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  color: rgba(255, 255, 255, 0.65) !important;
+  transition: all 0.2s ease !important;
+  padding: 0 !important;
+}
+
+#address-bar-part button:hover,
+#address-actions-group button:hover {
+  background: rgba(255, 255, 255, 0.08) !important;
+  color: #fff !important;
+}
+
+#address-bar-part button:active,
+#address-actions-group button:active {
+  background: rgba(255, 255, 255, 0.15) !important;
+  transform: scale(0.92);
+}
+
+#address-bar-part button svg,
+#address-actions-group button svg {
+  opacity: 1 !important;
+  width: 15px !important;
+  height: 15px !important;
+}
+
+/* Bookmark Inner Icon Positioning */
+#bookmark svg {
+  margin: auto !important;
+}
+
+/* Rounded URL Capsule Input */
+#address-bar {
+  border-radius: 9999px !important;
+  height: 28px !important;
+  background: rgba(0, 0, 0, 0.22) !important;
+  border: 1px solid rgba(255, 255, 255, 0.08) !important;
+  color: var(--theme-text) !important;
+  padding: 0 16px !important;
+  font-size: 13px !important;
+  outline: none !important;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1) !important;
+  box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.15) !important;
+}
+
+#address-bar:focus {
+  background: rgba(0, 0, 0, 0.35) !important;
+  border-color: var(--theme-border) !important;
+  box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.2), inset 0 1px 2px rgba(0, 0, 0, 0.15) !important;
+}
+
+/* Autocomplete Suggestion Dropdown Panel */
+#autocomplete-dropdown {
+  border-radius: 12px !important;
+  border: 1px solid rgba(255, 255, 255, 0.08) !important;
+  background: rgba(15, 23, 42, 0.88) !important;
+  backdrop-filter: blur(20px) !important;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5) !important;
+  overflow: hidden !important;
+  padding: 6px 0 !important;
+  margin-top: 6px !important;
+}
+
+#autocomplete-dropdown > div {
+  border: none !important;
+  padding: 6px 12px !important;
+  margin: 2px 6px !important;
+  border-radius: 8px !important;
+  transition: all 0.15s ease !important;
+  display: flex !important;
+  align-items: center !important;
+  height: 32px !important;
+  background: transparent !important;
+}
+
+#autocomplete-dropdown > div:hover,
+#autocomplete-dropdown > div[class*="theme-accent-soft"] {
+  background: rgba(255, 255, 255, 0.1) !important;
+  color: #fff !important;
+}
+
+
+
+/* --- Premium Custom Scrollbar Styling --- */
+::-webkit-scrollbar {
+  width: 8px !important;
+  height: 8px !important;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent !important;
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(148, 163, 184, 0.25) !important;
+  border: 2px solid transparent !important;
+  background-clip: padding-box !important;
+  border-radius: 9999px !important;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(148, 163, 184, 0.45) !important;
+  border: 2px solid transparent !important;
+  background-clip: padding-box !important;
+}
+
+/* Specific styling for scrollable containers in sidebars */
+body.layout-left #tabs-list,
+body.layout-right #tabs-list,
+body.layout-left #bookmark-bar,
+body.layout-right #bookmark-bar {
+  scrollbar-width: thin !important;
+  scrollbar-color: rgba(148, 163, 184, 0.25) transparent !important;
+}
+
+

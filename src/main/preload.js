@@ -40,6 +40,7 @@ contextBridge.exposeInMainWorld("electronAPI", {
     updateDefaultSite: (site) => ipcRenderer.send("updateDefaultSite", site),
     updateSearchEngine: (engine) => ipcRenderer.send("updateSearchEngine", engine),
     updateCloseAfter: (closeAfter) => ipcRenderer.send("updateCloseAfter", closeAfter),
+    updateUiPosition: (position) => ipcRenderer.send("updateUiPosition", position),
     updateShowBookmarkBar: (enabled) => ipcRenderer.send("updateShowBookmarkBar", enabled),
     getSettings: () => ipcRenderer.invoke("getSettings"),
     onInitSettings: (callback) => ipcRenderer.on('initSettings', (event, settings) => callback(settings)),

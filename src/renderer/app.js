@@ -64,7 +64,7 @@ const setupTabSubscription = () => {
 
       if (windowTitle) {
         windowTitle.textContent = mainTab.title || "simple";
-        windowTitle.className = "theme-text text-md max-w-[60%] truncate max-h-full";
+        windowTitle.className = "theme-text text-sm max-w-[60%] truncate max-h-full";
       }
 
 
@@ -91,3 +91,37 @@ setupBookmarkBarUI();
 setupFindBarUI();
 setupExtensionsUI();
 setupTabSubscription();
+
+const setupLayoutSubscription = () => {
+  let currentUiPosition = 'top';
+
+  const applyUiPosition = (position) => {
+    if (!position) position = 'top';
+    localStorage.setItem("uiPosition", position);
+    if (currentUiPosition === position) return;
+
+    document.body.classList.remove('layout-top', 'layout-bottom', 'layout-left', 'layout-right');
+    document.body.classList.add(`layout-${position}`);
+    currentUiPosition = position;
+  };
+
+  window.electronAPI.getSettings().then((settings) => {
+    if (settings && settings.uiPosition) {
+      applyUiPosition(settings.uiPosition);
+    }
+  });
+
+  window.electronAPI.onSettingsUpdated((settings) => {
+    if (settings && settings.uiPosition) {
+      applyUiPosition(settings.uiPosition);
+    }
+  });
+
+  window.electronAPI.onInitSettings((settings) => {
+    if (settings && settings.uiPosition) {
+      applyUiPosition(settings.uiPosition);
+    }
+  });
+};
+
+setupLayoutSubscription();

@@ -49,6 +49,7 @@ class TabManager {
         this.bookmarkBarVisible = false;
         this.saveTimer = null;
         this.dropdownVisible = false;
+        this.uiPosition = 'top';
         this.configPath = path.join(app.getPath('userData'), 'config.json');
 
         if (!skipConfig) {

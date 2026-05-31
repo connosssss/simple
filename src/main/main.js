@@ -134,6 +134,11 @@ const ipcSetup = () => {
       data.tabManager.updateCloseAfter(val);
     }
   });
+  onTabManager("updateUiPosition", (tabManager, event, position) => {
+    for (const data of WindowManager.getAllWindows()) {
+      data.tabManager.updateUiPosition(position);
+    }
+  });
   onTabManager("updateShowBookmarkBar", (tabManager, event, enabled) => {
     const nextValue = Boolean(enabled);
 

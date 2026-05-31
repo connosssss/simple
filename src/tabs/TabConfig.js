@@ -9,7 +9,8 @@ module.exports = {
             defaultSite: this.defaultSite,
             searchEngine: this.searchEngine,
             showBookmarkBar: this.showBookmarkBar,
-            closeAfter: this.closeAfter
+            closeAfter: this.closeAfter,
+            uiPosition: this.uiPosition || 'top'
         };
     },
 
@@ -48,6 +49,13 @@ module.exports = {
         this.broadcastSettings();
     },
 
+    updateUiPosition(position) {
+        this.uiPosition = position || 'top';
+        this.queueConfigSave();
+        this.broadcastSettings();
+        this.resizeWindow();
+    },
+
 
     serializeConfig() {
         const savedTabs = this.tabs.filter(tab => !(tab.isSettingsTab)).map(tab => ({
@@ -62,6 +70,7 @@ module.exports = {
             searchEngine: this.searchEngine,
             showBookmarkBar: this.showBookmarkBar,
             closeAfter: this.closeAfter,
+            uiPosition: this.uiPosition || 'top',
             tabs: savedTabs,
             stackNames: this.stackNames,
             nextStackNumber: this.nextStackNumber,
@@ -107,6 +116,12 @@ module.exports = {
 
                 if (config.closeAfter !== undefined) {
                     this.closeAfter = parseInt(config.closeAfter, 10);
+                }
+
+                if (config.uiPosition) {
+                    this.uiPosition = config.uiPosition;
+                } else {
+                    this.uiPosition = 'top';
                 }
 
                 if (config.stackNames) {

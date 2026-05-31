@@ -142,7 +142,7 @@ export const renderTabs = (tabs) => {
                 ? "bg-slate-700 hover:bg-slate-600 text-white"
                 : "bg-slate-800/50 hover:bg-slate-700/50 text-slate-400";
 
-            stackContainer.className = `flex items-center px-3 cursor-pointer ${bgClass} min-w-0 max-w-[10rem] mb-0 rounded-t-sm h-full transition-all duration-100 gap-1 flex-shrink-0`;
+            stackContainer.className = `flex items-center px-3 cursor-pointer ${bgClass} min-w-0 max-w-[10rem] mb-0 rounded-t-s h-8 transition-all duration-100 gap-1 flex-shrink-0 group-[.layout-left]:w-full group-[.layout-right]:w-full group-[.layout-left]:max-w-none group-[.layout-right]:max-w-none group-[.layout-left]:flex-none group-[.layout-right]:flex-none group-[.layout-left]:px-2 group-[.layout-right]:px-2`;
             stackContainer.setAttribute("data-stack-id", tab.stackId);
             stackContainer.dataset.themeState = isActiveStack ? "active" : "idle";
 
@@ -252,8 +252,32 @@ export const renderTabs = (tabs) => {
 
             tabsList.appendChild(stackContainer);
 
-            if (isActiveStack) {
-                renderStackTabsBar(stackTabs, tabs);
+            const isSidebar = document.body.classList.contains('layout-left') || document.body.classList.contains('layout-right');
+            if (isSidebar) {
+                if (isActiveStack) {
+                    stackTabs.forEach(({ tab: stTab, index: stIndex }) => {
+                        const tabE = createTabElement(stTab, stIndex, true, tabs);
+                        tabE.classList.add(
+                            'group-[.layout-left]:ml-[16px]',
+                            'group-[.layout-left]:w-[calc(100%-16px)]',
+                            'group-[.layout-left]:border-l-2',
+                            'group-[.layout-left]:border-[var(--theme-border)]',
+                            'group-[.layout-left]:rounded-l-none',
+                            'group-[.layout-right]:ml-[16px]',
+                            'group-[.layout-right]:w-[calc(100%-16px)]',
+                            'group-[.layout-right]:border-l-2',
+                            'group-[.layout-right]:border-[var(--theme-border)]',
+                            'group-[.layout-right]:rounded-l-none'
+                        );
+                        tabsList.appendChild(tabE);
+                    });
+                }
+            } 
+            
+            else {
+                if (isActiveStack) {
+                    renderStackTabsBar(stackTabs, tabs);
+                }
             }
         }
 
@@ -262,7 +286,8 @@ export const renderTabs = (tabs) => {
         }
     });
 
-    if (activeStackId) {
+    const isSidebar = document.body.classList.contains('layout-left') || document.body.classList.contains('layout-right');
+    if (activeStackId && !isSidebar) {
         stackTabsBar.classList.remove("hidden");
         stackTabsBar.classList.add("flex");
         window.electronAPI.stackBarVisible(true);
@@ -302,7 +327,7 @@ function createTabElement(tab, index, isInStack, tabs) {
         }
 
 
-        tabE.className = `flex items-center px-2 cursor-pointer ${bgClass} flex-1 min-w-0 max-w-[10rem] mb-0 rounded-t-sm h-full transition-all duration-100 gap-2`
+        tabE.className = `flex items-center px-2 cursor-pointer ${bgClass} flex-1 min-w-0 max-w-[10rem] mb-0 rounded-t-sm h-8 transition-all duration-100 gap-2 group-[.layout-left]:w-full group-[.layout-right]:w-full group-[.layout-left]:max-w-none group-[.layout-right]:max-w-none group-[.layout-left]:flex-none group-[.layout-right]:flex-none`
         tabE.dataset.themeState = tab.isMainTab ? "main" : tab.isActive ? "active" : "resting";
 
         tabE.title = tab.title || "Tab";
