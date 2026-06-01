@@ -706,8 +706,12 @@ const ipcSetup = () => {
 
 
 const userAgentString = (ua) => {
-  //keep ua for now
-  return 'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:130.0) Gecko/20100101 Firefox/130.0';
+  if (!ua) {
+    return 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130.0.0.0 Safari/537.36';
+  }
+  return ua.replace(/Electron\/[0-9\.]+\s?/g, '')
+           .replace(new RegExp(`${app.name || 'simple'}\/[0-9\.]+\s?`, 'ig'), '')
+           .trim();
 };
 
 const setSessionUserAgent = (ses) => {
