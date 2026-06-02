@@ -1,4 +1,4 @@
-const { app, BaseWindow, BrowserWindow, WebContentsView, ipcMain, Menu, session } = require('electron');
+const { app, BaseWindow, BrowserWindow, WebContentsView, ipcMain, Menu, session, dialog } = require('electron');
 const path = require('node:path');
 const fs = require('fs');
 
@@ -728,6 +728,34 @@ app.whenReady().then(async () => {
   // Changed to help fix bug of logging out of active account sessions when you close a window
   const mainSession = session.fromPartition('persist:main');
   setSessionUserAgent(mainSession);
+
+  const setupDownloadHandler = (ses) => {
+    ses.on('will-download', async (event, item, webContents) => {
+      let ownerWindow = null;
+      try {
+        ownerWindow = BrowserWindow.fromWebContents(webContents);
+      } catch (e) {
+        console.error('Failed to get owner window:', e);
+      }
+
+      try {
+        const { filePath, canceled } = await dialog.showSaveDialog(ownerWindow, {
+          defaultPath: item.getFilename()
+        });
+        if (canceled || !filePath) {
+          item.cancel();
+        } else {
+          item.setSavePath(filePath);
+        }
+      } catch (err) {
+        console.error('Download dialog error:', err);
+        item.cancel();
+      }
+    });
+  };
+
+  setupDownloadHandler(session.defaultSession);
+  setupDownloadHandler(mainSession);
 
   let flushTimer = null;
 

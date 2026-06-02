@@ -1,4 +1,5 @@
-const { Menu, clipboard } = require('electron');
+const { Menu, clipboard, dialog } = require('electron');
+const fs = require('fs');
 
 module.exports = {
 
@@ -33,6 +34,39 @@ module.exports = {
                 menuTemplate.push({
                     label: 'Open Image in New Tab',
                     click: () => this.createTab(params.srcURL, false)
+                });
+
+                menuTemplate.push({
+                    label: 'Save Image As...',
+                    click: async () => {
+                        if (params.srcURL) {
+                            if (params.srcURL.startsWith('data:')) {
+                                const ext = params.srcURL.split(';')[0].split('/')[1] || 'png';
+
+
+                                try {
+                                    const { filePath, canceled } = await dialog.showSaveDialog(this.window, {
+                                        defaultPath: `image.${ext}`,
+                                    });
+
+
+                                    if (!canceled && filePath) {
+                                        const base64Data = params.srcURL.split(',')[1];
+                                        const buffer = Buffer.from(base64Data, 'base64');
+                                        fs.writeFileSync(filePath, buffer);
+                                    }
+
+                                }
+                                 catch (err) {
+                                    console.error('Error saving base64 image:', err);
+                                }
+                            } 
+                            
+                            else {
+                                webContents.downloadURL(params.srcURL);
+                            }
+                        }
+                    }
                 });
 
                 menuTemplate.push({
