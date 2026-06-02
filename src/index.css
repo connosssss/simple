@@ -320,35 +320,8 @@ body.layout-right #new-tab {
   box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.15) !important;
 }
 
-/* Autocomplete Suggestion Dropdown Panel */
-#autocomplete-dropdown {
-  border-radius: 12px !important;
-  border: 1px solid rgba(255, 255, 255, 0.08) !important;
-  background: rgba(15, 23, 42, 0.88) !important;
-  backdrop-filter: blur(20px) !important;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5) !important;
-  overflow: hidden !important;
-  padding: 6px 0 !important;
-  margin-top: 6px !important;
-}
 
-#autocomplete-dropdown > div {
-  border: none !important;
-  padding: 6px 12px !important;
-  margin: 2px 6px !important;
-  border-radius: 8px !important;
-  transition: all 0.15s ease !important;
-  display: flex !important;
-  align-items: center !important;
-  height: 32px !important;
-  background: transparent !important;
-}
 
-#autocomplete-dropdown > div:hover,
-#autocomplete-dropdown > div[class*="theme-accent-soft"] {
-  background: rgba(255, 255, 255, 0.1) !important;
-  color: #fff !important;
-}
 
 
 

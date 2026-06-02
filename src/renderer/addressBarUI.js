@@ -1,10 +1,11 @@
+import { getSuggestions, setHistory, banUrl, shortenAddress } from "../addressBar/autocomplete.js";
+
 const addressBar = document.getElementById("address-bar");
 const bookmarkBtn = document.getElementById("bookmark");
 const dropdown = document.getElementById("autocomplete-dropdown");
 
 let currentAddress = "";
 let bookmarkedUrls = new Set();
-let allHistory = [];
 let suggestionItems = [];
 
 let selectedIndex = -1;
@@ -36,83 +37,6 @@ export const updateAddressBar = (address) => {
   updateBookmarkButton();
 };
 
-const getMatchableUrl = (url) => {
-  if (!url) return "";
-  return url.replace(/^(https?:\/\/)?(www\.)?/i, "").toLowerCase();
-};
-
-const getRankedHistory = () => {
-  const urlMap = new Map();
-
-
-  for (const item of allHistory) {
-
-    if (!item.url) continue;
-    const matchable = getMatchableUrl(item.url);
-    if (!matchable) continue;
-
-    if (urlMap.has(item.url)) {
-      const existing = urlMap.get(item.url);
-      existing.count += 1;
-      if (item.visitedAt > existing.visitedAt) {
-        existing.title = item.title || existing.title;
-        existing.visitedAt = item.visitedAt;
-        existing.iconURL = item.iconURL || existing.iconURL;
-      }
-    } 
-    
-    else {
-      urlMap.set(item.url, {
-        url: item.url,
-        matchable: matchable,
-        title: item.title || item.url,
-        iconURL: item.iconURL || "",
-        visitedAt: item.visitedAt,
-        count: 1
-      });
-    }
-  }
-
-  return Array.from(urlMap.values());
-};
-
-const getSuggestions = (query) => {
-  const queryClean = query.trim().toLowerCase();
-  if (!queryClean) return [];
-
-  const ranked = getRankedHistory();
-  const startsWithMatches = [];
-  const containsMatches = [];
-
-  for (const item of ranked) {
-    if (item.url.startsWith("about:")) continue;
-
-    const matchable = item.matchable;
-    const title = item.title.toLowerCase();
-
-
-    if (matchable.startsWith(queryClean)) {
-      startsWithMatches.push(item);
-    } 
-    
-    else if (matchable.includes(queryClean) || title.includes(queryClean)) {
-      containsMatches.push(item);
-    }
-  }
-
-  const sortByScore = (a, b) => {
-    if (b.count !== a.count) {
-      return b.count - a.count;
-    }
-
-    return b.visitedAt - a.visitedAt;
-  };
-
-  startsWithMatches.sort(sortByScore);
-  containsMatches.sort(sortByScore);
-
-  return [...startsWithMatches, ...containsMatches].slice(0, 5);
-};
 
 const performInlineCompletion = (topMatch, query) => {
   const matchable = topMatch.matchable;
@@ -140,13 +64,42 @@ const hideDropdown = () => {
 };
 
 const updateInputFromSelection = () => {
+
   if (selectedIndex >= 0 && selectedIndex < suggestionItems.length) {
-    addressBar.value = suggestionItems[selectedIndex].url;
+    const item = suggestionItems[selectedIndex];
+    addressBar.value = item.isSearch ? item.matchable : item.url;
   } 
   
   else {
     addressBar.value = originalInputValue;
   }
+};
+
+const escapeHtml = (str) => {
+  if (!str) return "";
+  return str
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#039;");
+};
+
+const highlightMatch = (text, query) => {
+  if (!text) return "";
+  if (!query) return escapeHtml(text);
+  
+  const queryClean = query.trim().toLowerCase();
+  if (!queryClean) return escapeHtml(text);
+  
+  const index = text.toLowerCase().indexOf(queryClean);
+  if (index === -1) return escapeHtml(text);
+  
+  const before = text.substring(0, index);
+  const match = text.substring(index, index + queryClean.length);
+  const after = text.substring(index + queryClean.length);
+  
+  return `${escapeHtml(before)}<strong class="font-extrabold text-white">${escapeHtml(match)}</strong>${escapeHtml(after)}`;
 };
 
 const renderDropdown = () => {
@@ -158,8 +111,6 @@ const renderDropdown = () => {
     if (window.electronAPI && window.electronAPI.setDropdownVisible) {
       window.electronAPI.setDropdownVisible(false);
     }
-
-
     return;
   }
 
@@ -171,32 +122,42 @@ const renderDropdown = () => {
   suggestionItems.forEach((item, index) => {
 
     const row = document.createElement("div");
-    let rowClasses = "flex items-center h-8 px-3 cursor-pointer transition-colors duration-100 select-none border-b border-white/5 last:border-b-0 overflow-hidden hover:bg-[var(--theme-accent-soft)] hover:brightness-110";
+    let rowClasses = "flex items-center h-10 px-4 cursor-pointer transition-colors duration-150 select-none border-b border-white/5 last:border-b-0 overflow-hidden group hover:bg-[rgba(128,128,128,0.12)]";
     if (index === selectedIndex) {
-      rowClasses += " bg-[var(--theme-accent-soft)] brightness-110";
+      rowClasses += " bg-[var(--theme-accent-soft)]";
     }
+    
     row.className = rowClasses;
 
     const icon = document.createElement("img");
-    icon.className = "w-4 h-4 mr-2 shrink-0";
-    const cleanDomain = item.matchable.split("/")[0];
-
-
-    icon.src = item.iconURL || `https://www.google.com/s2/favicons?sz=64&domain=${cleanDomain}`;
-    icon.onerror = () => {
-      icon.src = "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='white'><path d='M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 17.93c-3.95-.49-7-3.85-7-7.93 0-.62.08-1.21.21-1.79L9 15v1c0 1.1.9 2 2 2v1.93zm6.9-2.53c-.26-.81-1-1.4-1.9-1.4h-1v-3c0-.55-.45-1-1-1h-6v-2h2c.55 0 1-.45 1-1V7h2c1.1 0 2-.9 2-2v-.41c2.93 1.19 5 4.06 5 7.41 0 2.08-.8 3.97-2.1 5.4z'/></svg>";
-    };
+    icon.className = "w-4 h-4 mr-2.5 shrink-0";
+    
+    if (item.isSearch) {
+      icon.src = "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'><circle cx='11' cy='11' r='8'></circle><line x1='21' y1='21' x2='16.65' y2='16.65'></line></svg>";
+    }
+    
+    else {
+      const cleanDomain = item.matchable.split("/")[0];
+      icon.src = item.iconURL || `https://www.google.com/s2/favicons?sz=64&domain=${cleanDomain}`;
+      icon.onerror = () => {
+        icon.src = "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='white'><path d='M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 17.93c-3.95-.49-7-3.85-7-7.93 0-.62.08-1.21.21-1.79L9 15v1c0 1.1.9 2 2 2v1.93zm6.9-2.53c-.26-.81-1-1.4-1.9-1.4h-1v-3c0-.55-.45-1-1-1h-6v-2h2c.55 0 1-.45 1-1V7h2c1.1 0 2-.9 2-2v-.41c2.93 1.19 5 4.06 5 7.41 0 2.08-.8 3.97-2.1 5.4z'/></svg>";
+      };
+    }
 
     const details = document.createElement("div");
-    details.className = "flex items-center gap-2 overflow-hidden w-full";
+    details.className = "flex items-center gap-2 overflow-hidden grow mr-2";
 
     const title = document.createElement("span");
-    title.className = "text-[13px] font-medium text-[var(--theme-text)] truncate shrink-0 max-w-[45%]";
-    title.textContent = item.title || item.url;
+    title.className = index === selectedIndex
+      ? "text-[12px] font-medium text-white opacity-100 truncate shrink-0 max-w-[45%]"
+      : "text-[12px] font-medium text-[var(--theme-text)] opacity-85 truncate shrink-0 max-w-[45%]";
+    title.innerHTML = highlightMatch(item.title || item.url, addressBar.value);
 
     const url = document.createElement("span");
-    url.className = "text-[11px] text-[var(--theme-muted)] opacity-65 truncate grow";
-    url.textContent = item.url;
+    url.className = index === selectedIndex
+      ? "text-[12px] text-white opacity-100 truncate grow"
+      : "text-[12px] text-[var(--theme-muted)] opacity-60 truncate grow";
+    url.innerHTML = item.isSearch ? "" : highlightMatch(item.url, addressBar.value);
 
     details.appendChild(title);
     details.appendChild(url);
@@ -204,14 +165,67 @@ const renderDropdown = () => {
     row.appendChild(icon);
     row.appendChild(details);
 
+    let hasBadge = false;
+    if (item.isSearch || bookmarkedUrls.has(item.url)) {
+      hasBadge = true;
+      const badge = document.createElement("span");
+      badge.className = index === selectedIndex
+        ? "suggestion-badge text-[10px] font-medium tracking-wide text-white opacity-90 bg-white/20 px-1.5 py-0.5 rounded ml-auto mr-1 shrink-0 select-none"
+        : "suggestion-badge text-[10px] font-medium tracking-wide text-[var(--theme-muted)] opacity-50 bg-white/5 px-1.5 py-0.5 rounded ml-auto mr-1 shrink-0 select-none";
+      if (item.isSearch) {
+        badge.textContent = "Search";
+      } else {
+        badge.textContent = "Bookmark";
+        if (index !== selectedIndex) {
+          badge.style.color = "#f59e0b";
+        }
+      }
+      row.appendChild(badge);
+    }
+
+    if (!item.isSearch) {
+      const deleteBtn = document.createElement("button");
+      deleteBtn.className = `w-5 h-5 flex items-center justify-center rounded-full hover:bg-white/15 text-white/40 hover:text-white/80 transition-colors shrink-0 opacity-0 group-hover:opacity-100 ${hasBadge ? "ml-1" : "ml-auto"}`;
+      deleteBtn.innerHTML = `
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-3 h-3">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M6 18 18 6M6 6l12 12" />
+        </svg>`;
+
+        
+      deleteBtn.addEventListener("mousedown", (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+      });
+
+      deleteBtn.addEventListener("click", (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        
+        banUrl(item.url);
+        
+        suggestionItems = getSuggestions(addressBar.value);
+        selectedIndex = -1;
+        renderDropdown();
+      });
+
+      row.appendChild(deleteBtn);
+    }
+
     row.addEventListener("mousedown", (e) => {
       e.preventDefault();
     });
 
     row.addEventListener("click", () => {
-      currentAddress = item.url;
-      addressBar.value = item.url;
-      window.electronAPI.search(item.url);
+      if (item.isSearch) {
+        currentAddress = item.url;
+        addressBar.value = item.matchable;
+        window.electronAPI.search(item.url);
+      } 
+      else {
+        currentAddress = item.url;
+        addressBar.value = item.url;
+        window.electronAPI.search(item.url);
+      }
       hideDropdown();
     });
 
@@ -345,16 +359,9 @@ export const setupAddressBarUI = () => {
   });
 
   const updateHistoryCache = (history) => {
-    allHistory = history || [];
+    setHistory(history);
   };
   
   window.electronAPI.getHistory().then(updateHistoryCache);
   window.electronAPI.onUpdateHistory(updateHistoryCache);
-};
-
-const shortenAddress = (address) => {
-  if (!address) return "";
-
-  const queryIndex = address.indexOf("?");
-  return queryIndex === -1 ? address : address.substring(0, queryIndex);
 };
