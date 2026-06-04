@@ -8,6 +8,14 @@ simple is an electron based browser focused around giving users more features ar
 The list is mainly just a way to track semi big features or updates as they come out, with it not covering things like bug fixes
 
 ---
+6.2 UI redesign
+
+5.29 Unix based OS support 
+
+5.17 Bookmarks + Bookmarks bar UI
+
+5.5 - 5.28 Small bug fixes and tiny additions across the app
+
 5.3 Chrome extension support added
 
 4.28 Customizable themes/colors added
