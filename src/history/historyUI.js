@@ -19,38 +19,72 @@ const renderHistory = (historyItems) => {
 
   const sorted = [...historyItems].sort((a, b) => b.visitedAt - a.visitedAt);
 
+  const startOfToday = (() => { const d = new Date(); d.setHours(0, 0, 0, 0); return d.getTime(); })();
+  const startOfThisWeek = startOfToday - 6 * 24 * 60 * 60 * 1000;
+  const startOfThisMonth = startOfToday - 29 * 24 * 60 * 60 * 1000;
+
+  const groups = [
+    { title: "Today", items: [] },
+    { title: "This Week", items: [] },
+    { title: "This Month", items: [] },
+    { title: "Earlier", items: [] }
+  ];
+
   sorted.forEach(item => {
-    const row = document.createElement("div");
-    row.className = "py-2 border-b border-slate-800 flex items-center justify-between text-slate-200 text-sm gap-4 cursor-pointer hover:bg-slate-900/40 px-2 rounded-sm";
+    if (item.visitedAt >= startOfToday) groups[0].items.push(item);
+    else if (item.visitedAt >= startOfThisWeek) groups[1].items.push(item);
+    else if (item.visitedAt >= startOfThisMonth) groups[2].items.push(item);
+    else groups[3].items.push(item);
+  });
 
-    row.addEventListener("click", (e) => {
-      if (e.target.tagName.toLowerCase() === "button" || e.target.closest("button")) {
-        return;
+  groups.forEach(group => {
+    if (group.items.length === 0) return;
+
+    const header = document.createElement("div");
+    header.className = "text-xs font-semibold text-slate-400 uppercase tracking-wider pt-6 pb-2 select-none border-b border-slate-800/40 mt-4 mb-2 first:mt-2";
+    header.textContent = group.title;
+    historyList.appendChild(header);
+
+    group.items.forEach(item => {
+      const row = document.createElement("div");
+      row.className = "py-2 border-b border-slate-800 flex items-center justify-between text-slate-200 text-sm gap-4 cursor-pointer hover:bg-slate-900/40 px-2 rounded-sm";
+
+      row.addEventListener("click", (e) => {
+        if (e.target.tagName.toLowerCase() === "button" || e.target.closest("button")) {
+          return;
+        }
+
+        if (window.electronAPI && window.electronAPI.openBookmark) {
+          window.electronAPI.openBookmark(item.url);
+        }
+      });
+
+      const info = document.createElement("div");
+      info.className = "flex-1 min-w-0";
+
+      const titleContainer = document.createElement("div");
+      titleContainer.className = "flex items-center gap-2";
+
+      const title = document.createElement("span");
+      title.className = "font-medium text-slate-100 truncate";
+      title.textContent = item.title || item.url;
+      titleContainer.appendChild(title);
+
+      const timeSpan = document.createElement("span");
+      timeSpan.className = "text-xs text-slate-500 flex-shrink-0";
+      if (group.title === "Today") {
+        timeSpan.textContent = new Date(item.visitedAt).toLocaleTimeString(undefined, {
+          hour: '2-digit', minute: '2-digit'
+        });
+      } 
+      
+      else {
+        timeSpan.textContent = new Date(item.visitedAt).toLocaleString(undefined, {
+          month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit'
+        });
       }
-
-
-      if (window.electronAPI && window.electronAPI.openBookmark) {
-        window.electronAPI.openBookmark(item.url);
-      }
-    });
-
-    const info = document.createElement("div");
-    info.className = "flex-1 min-w-0";
-
-    const titleContainer = document.createElement("div");
-    titleContainer.className = "flex items-center gap-2";
-
-    const title = document.createElement("span");
-    title.className = "font-medium text-slate-100 truncate";
-    title.textContent = item.title || item.url;
-    titleContainer.appendChild(title);
-
-    const timeSpan = document.createElement("span");
-    timeSpan.className = "text-xs text-slate-500 flex-shrink-0";
-    timeSpan.textContent = new Date(item.visitedAt).toLocaleString(undefined, {
-      month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit'
-    });
-    titleContainer.appendChild(timeSpan);
+      
+      titleContainer.appendChild(timeSpan);
 
     const url = document.createElement("div");
     url.className = "text-xs text-slate-500 truncate max-w-xl";
@@ -79,7 +113,7 @@ const renderHistory = (historyItems) => {
     row.appendChild(removeBtn);
     historyList.appendChild(row);
   });
-
+});
 
 };
 
