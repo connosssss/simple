@@ -51,7 +51,7 @@ module.exports = {
         this.stackNames[stackId] = `Stack ${this.nextStackNumber}`;
         this.nextStackNumber++;
 
-        this.sendTabData();
+        this.sendTabData(true);
     },
 
     updateStack(stackId, tabIndex) {
@@ -64,7 +64,7 @@ module.exports = {
 
         tab.stackId = stackId;
         tab.isStacked = true;
-        this.sendTabData();
+        this.sendTabData(true);
     },
 
     removeFromStack(tabIndex) {
@@ -74,7 +74,7 @@ module.exports = {
         const oldStackId = tab.stackId;
         this.clearStackState(tab);
         this.cleanupStack(oldStackId);
-        this.sendTabData();
+        this.sendTabData(true);
     },
 
 
@@ -88,7 +88,7 @@ module.exports = {
 
         delete this.stackNames[stackId];
         this.recalculateStackNumber();
-        this.sendTabData();
+        this.sendTabData(true);
 
     },
 
@@ -124,7 +124,7 @@ module.exports = {
             delete this.stackNames[stackId];
             this.recalculateStackNumber();
         }
-        this.sendTabData();
+        this.sendTabData(true);
     },
 
 };

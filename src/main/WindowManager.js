@@ -62,9 +62,12 @@ class WindowManager {
 
 
         mainWindow.on('closed', () => {
+            if (tabManager && typeof tabManager.flushConfigSave === 'function') {
+                tabManager.flushConfigSave();
+            }
             this.windows.delete(windowId);
             this.webContentsIds.delete(ui.webContents.id);
-            // Flush the persistent cookie store immediately on window close
+
             session.fromPartition('persist:main').cookies.flushStore().catch(err => {
                 console.error("Failed to flush cookie store on window close:", err);
             });

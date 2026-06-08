@@ -115,7 +115,7 @@ class TabManager {
             this.switchTab(this.tabs.length - 1);
         }
 
-        this.sendTabData();
+        this.sendTabData(true);
         return newTab;
     }
 
@@ -131,7 +131,7 @@ class TabManager {
             this.switchTab(this.tabs.length - 1);
         }
 
-        this.sendTabData();
+        this.sendTabData(true);
 
         return newTab.contentView;
     }
@@ -166,7 +166,7 @@ class TabManager {
         this.currentIndex = tabID;
 
         this.resizeWindow();
-        this.sendTabData();
+        this.sendTabData(true);
     }
 
     closeTab(tabID) {
@@ -214,7 +214,7 @@ class TabManager {
         else if (tabID < this.currentIndex) {
             this.currentIndex--;
         }
-        this.sendTabData();
+        this.sendTabData(true);
     }
 
     sleep(index) {
@@ -238,7 +238,7 @@ class TabManager {
 
         destroyContentView(tab.contentView);
         tab.contentView = null;
-        this.sendTabData();
+        this.sendTabData(true);
         this.resizeWindow();
     }
 
@@ -271,7 +271,7 @@ class TabManager {
         if (this.mainTab) {
             this.currentIndex = this.tabs.indexOf(this.mainTab);
         }
-        this.sendTabData();
+        this.sendTabData(true);
     }
 
     reorderStack(stackId, toIndex) {
@@ -287,10 +287,10 @@ class TabManager {
         if (this.mainTab) {
             this.currentIndex = this.tabs.indexOf(this.mainTab);
         }
-        this.sendTabData();
+        this.sendTabData(true);
     }
 
-    sendTabData() {
+    sendTabData(forceSave = false) {
         const tabData = this.tabs.map((tab, index) => ({
             index: index,
             isMainTab: index === this.currentIndex,
@@ -308,7 +308,7 @@ class TabManager {
         }));
 
         this.ui.webContents.send("updateTabs", tabData);
-        this.saveConfig();
+        this.saveConfig(forceSave);
 
         const settingsTabs = this.getSettingsTabs();
       
@@ -347,7 +347,7 @@ class TabManager {
 
         destroyContentView(oldContentView);
         
-        this.sendTabData();
+        this.sendTabData(true);
         return nextContentView;
     }
 
@@ -395,7 +395,7 @@ class TabManager {
     toggleKeepActive(index) {
         if (this.tabs[index]) {
             this.tabs[index].keepActive = !this.tabs[index].keepActive;
-            this.sendTabData();
+            this.sendTabData(true);
         }
     }
 
@@ -443,7 +443,7 @@ class TabManager {
             this.currentIndex--;
         }
 
-        this.sendTabData();
+        this.sendTabData(true);
         return tab;
     }
 
@@ -456,7 +456,7 @@ class TabManager {
         this.tabs.push(tab);
         this.lastOpenedTabs.push(tab);
         this.switchTab(this.tabs.length - 1);
-        this.sendTabData();
+        this.sendTabData(true);
     }
 
     togglePictureInPicture(tab, x = null, y = null) {

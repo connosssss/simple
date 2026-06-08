@@ -144,7 +144,7 @@ const ipcSetup = () => {
 
     for (const data of WindowManager.getAllWindows()) {
       data.tabManager.showBookmarkBar = nextValue;
-      data.tabManager.queueConfigSave();
+      data.tabManager.saveConfig(true);
       data.tabManager.broadcastSettings();
       data.tabManager.resizeWindow();
     }
@@ -804,6 +804,16 @@ app.on('window-all-closed', () => {
 });
 
 app.on('will-quit', async () => {
+  try {
+    for (const data of WindowManager.getAllWindows()) {
+      if (data.tabManager && typeof data.tabManager.flushConfigSave === 'function') {
+        data.tabManager.flushConfigSave();
+      }
+    }
+  } catch (err) {
+    console.error('Failed to flush configuration on will-quit:', err);
+  }
+
   try {
     await session.fromPartition('persist:main').cookies.flushStore();
   }

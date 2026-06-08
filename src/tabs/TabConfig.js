@@ -33,25 +33,25 @@ module.exports = {
 
     updateDefaultSite(site) {
         this.defaultSite = site;
-        this.queueConfigSave();
+        this.saveConfig(true);
         this.broadcastSettings();
     },
 
     updateSearchEngine(engine) {
         this.searchEngine = engine;
-        this.queueConfigSave();
+        this.saveConfig(true);
         this.broadcastSettings();
     },
 
     updateCloseAfter(closeAfter) {
         this.closeAfter = parseInt(closeAfter, 10);
-        this.queueConfigSave();
+        this.saveConfig(true);
         this.broadcastSettings();
     },
 
     updateUiPosition(position) {
         this.uiPosition = position || 'top';
-        this.queueConfigSave();
+        this.saveConfig(true);
         this.broadcastSettings();
         this.resizeWindow();
     },
@@ -90,8 +90,23 @@ module.exports = {
         }, SAVE_DELAY_MS);
     },
 
-    saveConfig() {
-        this.queueConfigSave();
+    saveConfig(force = false) {
+        if (force) {
+            this.flushConfigSave();
+        } else {
+            this.queueConfigSave();
+        }
+    },
+
+    flushConfigSave() {
+        if (this.isLoading) return;
+        clearTimeout(this.saveTimer);
+        this.saveTimer = null;
+        try {
+            fs.writeFileSync(this.configPath, JSON.stringify(this.serializeConfig()));
+        } catch (error) {
+            console.error("Error flushing config save:", error);
+        }
     },
 
     loadConfig() {
