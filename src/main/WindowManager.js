@@ -166,6 +166,22 @@ class WindowManager {
                             }
                         }
                     },
+                    {
+                        label: 'Print',
+                        accelerator: 'CmdOrCtrl+P',
+                        click: (menuItem, browserWindow) => {
+                            const data = this.getActiveWindowData(browserWindow);
+
+                            if (data) {
+
+                                const mainTab = data.tabManager.getMainTab();
+                                
+                                if (mainTab && mainTab.contentView && mainTab.contentView.webContents) {
+                                    mainTab.contentView.webContents.print();
+                                }
+                            }
+                        }
+                    },
                     { type: 'separator' },
                     { role: 'quit' }
                 ]
