@@ -127,12 +127,12 @@
   font-weight: 500 !important;
 }
 
-/* Active Tab in Secondary / Stack list */
+
 #tabs-list > div[data-theme-state="active"],
 #stack-tabs-list > div[data-theme-state="active"] {
-  background: rgba(255, 255, 255, 0.15) !important;
-  color: #ffffff !important;
-  border-color: rgba(255, 255, 255, 0.1) !important;
+  background: rgba(255, 255, 255, 0.1) !important;
+  color: rgba(255, 255, 255, 0.8) !important;
+  border-color: rgba(255, 255, 255, 0.06) !important;
 }
 
 /* Inactive/Idle State Tabs */

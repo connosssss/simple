@@ -242,6 +242,40 @@ class TabManager {
         this.resizeWindow();
     }
 
+    hibernateTabs(indices) {
+        const isActiveSelected = indices.includes(this.currentIndex);
+        
+        if (isActiveSelected) {
+            const fallbackIndex = this.tabs.findIndex((_, idx) => !indices.includes(idx));
+            if (fallbackIndex !== -1) {
+                this.switchTab(fallbackIndex);
+            }
+        }
+
+        indices.forEach(idx => {
+            if (idx === this.currentIndex) return;
+            const tab = this.tabs[idx];
+            if (tab && tab.isActive && tab.contentView) {
+                tab.isActive = false;
+                if (typeof tab.lifecycleCleanup === 'function') {
+                    tab.lifecycleCleanup();
+                }
+                destroyContentView(tab.contentView);
+                tab.contentView = null;
+            }
+        });
+
+        this.sendTabData(true);
+        this.resizeWindow();
+    }
+
+    closeTabs(indices) {
+        const sortedIndices = [...indices].sort((a, b) => b - a);
+        sortedIndices.forEach(idx => {
+            this.closeTab(idx);
+        });
+    }
+
     wake(index) {
         const tab = this.tabs[index];
         if (!tab || tab.contentView) return;
@@ -292,6 +326,7 @@ class TabManager {
 
     sendTabData(forceSave = false) {
         const tabData = this.tabs.map((tab, index) => ({
+            id: tab.id || (tab.id = require('crypto').randomUUID()),
             index: index,
             isMainTab: index === this.currentIndex,
             title: tab.title || "",

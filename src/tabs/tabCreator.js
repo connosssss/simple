@@ -1,5 +1,6 @@
 const { WebContentsView, ipcMain } = require("electron");
 const path = require("node:path");
+const crypto = require("node:crypto");
 const historyManager = require("../history/history");
 
 const SETTINGS_ADDRESS = "about://settings";
@@ -12,6 +13,7 @@ const HISTORY_FILE = path.join(__dirname, "../history/history.html");
 const PRELOAD_FILE = path.join(__dirname, "../main/preload.js");
 
 const createBaseTab = (overrides = {}) => ({
+  id: crypto.randomUUID(),
   contentView: null,
   address: "",
   title: "",

@@ -6,6 +6,11 @@ const newStackTabButton = document.getElementById("new-stack-tab");
 let activeStackId = null;
 const lastActiveStackTab = new Map();
 
+
+const selectedTabIds = new Set();
+let lastClickedTabId = null;
+let prevActiveTabId = null;
+
 newStackTabButton?.addEventListener("click", (event) => {
     event.stopPropagation();
 
@@ -110,12 +115,37 @@ window.electronAPI.onPromptStackName((data) => {
 
 export const renderTabs = (tabs) => {
     latestTabs = tabs;
+
+    const currentIds = new Set(tabs.map(t => t.id));
+    for (const id of selectedTabIds) {
+        if (!currentIds.has(id)) {
+            selectedTabIds.delete(id);
+        }
+    }
+
+    const mainTab = tabs.find(t => t.isMainTab);
+    const mainTabId = mainTab ? mainTab.id : null;
+
+    if (mainTabId) {
+
+        if (mainTabId !== prevActiveTabId) {
+            if (!selectedTabIds.has(mainTabId)) {
+                selectedTabIds.clear();
+                selectedTabIds.add(mainTabId);
+            }
+            prevActiveTabId = mainTabId;
+        }
+    }
+
+
+    if (selectedTabIds.size === 0 && mainTabId) {
+        selectedTabIds.add(mainTabId);
+    }
+
     tabsList.innerHTML = "";
     stackTabsList.innerHTML = "";
 
     const renderedStacks = new Set();
-
-    const mainTab = tabs.find(t => t.isMainTab);
     const currentStackId = mainTab && mainTab.isStacked ? mainTab.stackId : null;
 
     if (currentStackId) {
@@ -312,9 +342,14 @@ function renderStackTabsBar(stackTabs, allTabs) {
 function createTabElement(tab, index, isInStack, tabs) {
         const tabE = document.createElement("div");
         let bgClass = "bg-slate-800/50 hover:bg-slate-700/50 text-slate-400";
+        const isSelected = selectedTabIds.has(tab.id);
+        const iconColor = "text-slate-400";
 
-
-        if (tab.isMainTab) {
+        if (isSelected) {
+            bgClass = "bg-white/35 hover:bg-white/45 text-white";
+        }
+        
+        else if (tab.isMainTab) {
             bgClass = "bg-slate-700/50 hover:bg-slate-600 text-white";
         }
 
@@ -327,8 +362,8 @@ function createTabElement(tab, index, isInStack, tabs) {
         }
 
 
-        tabE.className = `flex items-center px-2 cursor-pointer ${bgClass} flex-1 min-w-0 max-w-[10rem] mb-0 rounded-t-sm h-8 transition-all duration-100 gap-2 group-[.layout-left]:w-full group-[.layout-right]:w-full group-[.layout-left]:max-w-none group-[.layout-right]:max-w-none group-[.layout-left]:flex-none group-[.layout-right]:flex-none`
-        tabE.dataset.themeState = tab.isMainTab ? "main" : tab.isActive ? "active" : "resting";
+        tabE.className = `flex items-center px-2 cursor-pointer ${bgClass} flex-1 min-w-0 max-w-[10rem] mb-0 rounded-t-sm h-8 transition-all duration-100 gap-2 group-[.layout-left]:w-full group-[.layout-right]:w-full group-[.layout-left]:max-w-none group-[.layout-right]:max-w-none group-[.layout-left]:flex-none group-[.layout-right]:flex-none`;
+        tabE.dataset.themeState = isSelected ? "selected" : tab.isMainTab ? "main" : tab.isActive ? "active" : "resting";
 
         tabE.title = tab.title || "Tab";
 
@@ -339,7 +374,7 @@ function createTabElement(tab, index, isInStack, tabs) {
                 settingsSvg.setAttribute("fill", "none");
                 settingsSvg.setAttribute("stroke", "currentColor");
                 settingsSvg.setAttribute("stroke-width", "1.5");
-                settingsSvg.setAttribute("class", "tab-icon w-4 h-4 text-slate-400 flex-shrink-0 pointer-events-none");
+                settingsSvg.setAttribute("class", `tab-icon w-4 h-4 ${iconColor} flex-shrink-0 pointer-events-none`);
                 settingsSvg.innerHTML = `<path stroke-linecap="round" stroke-linejoin="round" d="M9.594 3.94c.09-.542.56-.94 1.11-.94h2.593c.55 0 1.02.398 1.11.94l.213 1.281c.063.374.313.686.645.87.074.04.147.083.22.127.324.196.72.257 1.075.124l1.217-.456a1.125 1.125 0 0 1 1.37.49l1.296 2.247a1.125 1.125 0 0 1-.26 1.43l-1.003.828c-.293.241-.438.613-.43.992a7.723 7.723 0 0 1 0 .255c-.008.378.137.75.43.991l1.004.827c.424.35.534.954.26 1.43l-1.298 2.247a1.125 1.125 0 0 1-1.369.491l-1.217-.456c-.355-.133-.75-.072-1.076.124a6.57 6.57 0 0 1-.22.128c-.331.183-.581.495-.644.869l-.213 1.28c-.09.543-.56.941-1.11.941h-2.594c-.55 0-1.02-.398-1.11-.94l-.213-1.281c-.062-.374-.312-.686-.644-.87a6.52 6.52 0 0 1-.22-.127c-.325-.196-.72-.257-1.076-.124l-1.217.456a1.125 1.125 0 0 1-1.369-.49l-1.297-2.247a1.125 1.125 0 0 1 .26-1.43l1.004-.827c.292-.24.437-.613.43-.992a6.932 6.932 0 0 1 0-.255c.007-.378-.138-.75-.43-.991l-1.004-.827a1.125 1.125 0 0 1-.26-1.43l1.297-2.247a1.125 1.125 0 0 1 1.37-.491l1.216.456c.356.133.751.072 1.076-.124.072-.044.146-.087.22-.128c.332-.183.582-.495.645-.869L9.594 3.94ZM12.75 12a.75.75 0 1 1-1.5 0 .75.75 0 0 1 1.5 0Z" />`;
                 tabE.appendChild(settingsSvg);
                 return;
@@ -351,7 +386,7 @@ function createTabElement(tab, index, isInStack, tabs) {
                 historySvg.setAttribute("fill", "none");
                 historySvg.setAttribute("stroke", "currentColor");
                 historySvg.setAttribute("stroke-width", "1.5");
-                historySvg.setAttribute("class", "tab-icon w-4 h-4 text-slate-400 flex-shrink-0 pointer-events-none");
+                historySvg.setAttribute("class", `tab-icon w-4 h-4 ${iconColor} flex-shrink-0 pointer-events-none`);
                 historySvg.innerHTML = `<path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />`;
                 tabE.appendChild(historySvg);
                 return;
@@ -378,7 +413,7 @@ function createTabElement(tab, index, isInStack, tabs) {
                     docSvg.setAttribute("fill", "none");
                     docSvg.setAttribute("stroke", "currentColor");
                     docSvg.setAttribute("stroke-width", "1.5");
-                    docSvg.setAttribute("class", "tab-icon w-4 h-4 text-slate-400 flex-shrink-0 pointer-events-none");
+                    docSvg.setAttribute("class", `tab-icon w-4 h-4 ${iconColor} flex-shrink-0 pointer-events-none`);
                     docSvg.innerHTML = `<path stroke-linecap="round" stroke-linejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 0 0-3.375-3.375h-1.5A1.125 1.125 0 0 1 13.5 7.125v-1.5a3.375 3.375 0 0 0-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 0 0-9-9Z" />`;
                     icon.replaceWith(docSvg);
                 };
@@ -389,7 +424,7 @@ function createTabElement(tab, index, isInStack, tabs) {
                 docSvg.setAttribute("fill", "none");
                 docSvg.setAttribute("stroke", "currentColor");
                 docSvg.setAttribute("stroke-width", "1.5");
-                docSvg.setAttribute("class", "tab-icon w-4 h-4 text-slate-400 flex-shrink-0 pointer-events-none");
+                docSvg.setAttribute("class", `tab-icon w-4 h-4 ${iconColor} flex-shrink-0 pointer-events-none`);
                 docSvg.innerHTML = `<path stroke-linecap="round" stroke-linejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 0 0-3.375-3.375h-1.5A1.125 1.125 0 0 1 13.5 7.125v-1.5a3.375 3.375 0 0 0-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 0 0-9-9Z" />`;
                 tabE.appendChild(docSvg);
             }
@@ -495,13 +530,28 @@ function createTabElement(tab, index, isInStack, tabs) {
   
 
         tabE.addEventListener("contextmenu", (event) => {
-            event.preventDefault()
+            event.preventDefault();
+            event.stopPropagation();
+            
+            const tabId = tab.id;
+            if (!selectedTabIds.has(tabId)) {
+                selectedTabIds.clear();
+                selectedTabIds.add(tabId);
+                lastClickedTabId = tabId;
+                window.electronAPI.switchTab(index);
+            }
+            
+            const selectedIndices = tabs
+                .map((t, idx) => selectedTabIds.has(t.id) ? idx : -1)
+                .filter(idx => idx !== -1);
+                
             window.electronAPI.showContextMenu({
                 x: event.clientX,
                 y: event.clientY,
-                tabIndex: index
+                tabIndex: index,
+                selectedIndices: selectedIndices
             });
-        })
+        });
 
   
   
@@ -523,8 +573,54 @@ function createTabElement(tab, index, isInStack, tabs) {
 
         //
         tabE.onclick = (e) => {
-            window.electronAPI.switchTab(index);
-        }
+            const tabId = tab.id;
+            
+            if (e.ctrlKey || e.metaKey) {
+                if (selectedTabIds.has(tabId)) {
+                    if (selectedTabIds.size > 1) {
+                        selectedTabIds.delete(tabId);
+                        if (tab.isMainTab) {
+                            const otherId = Array.from(selectedTabIds)[0];
+                            const otherIndex = tabs.findIndex(t => t.id === otherId);
+                            if (otherIndex !== -1) {
+                                window.electronAPI.switchTab(otherIndex);
+                            }
+                        }
+                    }
+                } else {
+                    selectedTabIds.add(tabId);
+                }
+                renderTabs(tabs);
+            } 
+            
+            else if (e.shiftKey) {
+                // Range selection
+                let fromIndex = tabs.findIndex(t => t.id === lastClickedTabId);
+                if (fromIndex === -1) {
+                    fromIndex = tabs.findIndex(t => t.isMainTab);
+                }
+                if (fromIndex !== -1) {
+                    const toIndex = index;
+                    const start = Math.min(fromIndex, toIndex);
+                    const end = Math.max(fromIndex, toIndex);
+                    
+                    selectedTabIds.clear();
+                    for (let i = start; i <= end; i++) {
+                        selectedTabIds.add(tabs[i].id);
+                    }
+                }
+                lastClickedTabId = tabId;
+                window.electronAPI.switchTab(index);
+            } 
+            
+            else {
+                // Normal click
+                selectedTabIds.clear();
+                selectedTabIds.add(tabId);
+                lastClickedTabId = tabId;
+                window.electronAPI.switchTab(index);
+            }
+        };
 
         return tabE;
 }

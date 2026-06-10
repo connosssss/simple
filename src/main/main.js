@@ -428,42 +428,76 @@ const ipcSetup = () => {
 
   onWindowData('showContextMenu', (data, event, vars) => {
     const { tabManager, window } = data;
+    const selectedIndices = vars.selectedIndices || [];
 
-    const targetTab = tabManager.tabs[vars.tabIndex];
+    let cmTemplate;
 
-    const cmTemplate = [
-      {
-        label: 'Close Tab',
-        click: () => {
-
-          tabManager.closeTab(vars.tabIndex);
-
+    if (selectedIndices.length > 1) {
+      cmTemplate = [
+        {
+          label: `Close Selected Tabs (${selectedIndices.length})`,
+          click: () => {
+            tabManager.closeTabs(selectedIndices);
+          }
+        },
+        {
+          label: `Reload Selected Tabs (${selectedIndices.length})`,
+          click: () => {
+            selectedIndices.forEach(idx => tabManager.reloadTab(idx));
+          }
+        },
+        { type: 'separator' },
+        {
+          label: `Hibernate Selected Tabs (${selectedIndices.length})`,
+          click: () => {
+            tabManager.hibernateTabs(selectedIndices);
+          }
+        },
+        {
+          label: `Stack Selected Tabs (${selectedIndices.length})`,
+          click: () => {
+            tabManager.createStack(selectedIndices);
+          }
         }
-      },
+      ];
+    } 
+    
+    else {
+      const targetTab = tabManager.tabs[vars.tabIndex];
+      if (!targetTab) return;
 
-      {
-        label: 'Reload Tab',
-        click: () => {
-          tabManager.reloadTab(vars.tabIndex);
+      cmTemplate = [
+        {
+          label: 'Close Tab',
+          click: () => {
+            tabManager.closeTab(vars.tabIndex);
+          }
+        },
+        {
+          label: 'Reload Tab',
+          click: () => {
+            tabManager.reloadTab(vars.tabIndex);
+          }
+        },
+        { type: 'separator' },
+        {
+          label: 'Put Tab to Sleep',
+          click: () => {
+            tabManager.sleep(vars.tabIndex);
+          }
+        },
+        {
+          label: targetTab.keepActive ? "Dont Keep Tab Active" : "Keep Tab Active",
+          click: () => { tabManager.toggleKeepActive(vars.tabIndex); }
+        },
+        {
+          label: 'Stack Tab',
+          click: () => {
+            tabManager.createStack([vars.tabIndex]);
+          }
         }
-      },
-      { type: 'separator' },
-      {
-
-        label: 'Put Tab to Sleep',
-
-        click: () => {
-          tabManager.sleep(vars.tabIndex)
-        }
-      },
-      {
-
-        label: targetTab.keepActive ? "Dont Keep Tab Active" : "Keep Tab Active",
-
-        click: () => { tabManager.toggleKeepActive(vars.tabIndex); }
-      },
-
-    ];
+      ];
+    }
 
     const menu = Menu.buildFromTemplate(cmTemplate);
 
