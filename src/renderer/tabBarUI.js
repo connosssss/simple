@@ -11,6 +11,9 @@ const selectedTabIds = new Set();
 let lastClickedTabId = null;
 let prevActiveTabId = null;
 
+const previousLoadingState = new Map();
+const finishedLoadingTabIds = new Set();
+
 newStackTabButton?.addEventListener("click", (event) => {
     event.stopPropagation();
 
@@ -172,20 +175,25 @@ export const renderTabs = (tabs) => {
                 ? "bg-slate-700 hover:bg-slate-600 text-white"
                 : "bg-slate-800/50 hover:bg-slate-700/50 text-slate-400";
 
-            stackContainer.className = `flex items-center px-3 cursor-pointer ${bgClass} min-w-0 max-w-[10rem] mb-0 rounded-t-s h-8 transition-all duration-100 gap-1 flex-shrink-0 group-[.layout-left]:w-full group-[.layout-right]:w-full group-[.layout-left]:max-w-none group-[.layout-right]:max-w-none group-[.layout-left]:flex-none group-[.layout-right]:flex-none group-[.layout-left]:px-2 group-[.layout-right]:px-2`;
+            stackContainer.className = `relative flex items-center px-3 cursor-pointer ${bgClass} min-w-0 max-w-[10rem] mb-0 rounded-t-s h-8 transition-all duration-100 gap-1 flex-shrink-0 group-[.layout-left]:w-full group-[.layout-right]:w-full group-[.layout-left]:max-w-none group-[.layout-right]:max-w-none group-[.layout-left]:flex-none group-[.layout-right]:flex-none group-[.layout-left]:px-2 group-[.layout-right]:px-2`;
             stackContainer.setAttribute("data-stack-id", tab.stackId);
             stackContainer.dataset.themeState = isActiveStack ? "active" : "idle";
 
+            const isStackLoading = stackTabs.some(st => st.tab.isLoading);
 
             const nameSpan = document.createElement("span");
             nameSpan.className = "truncate flex-1 overflow-hidden text-sm";
             nameSpan.textContent = tab.stackName || "Stack";
             stackContainer.appendChild(nameSpan);
 
+
+
             const countBadge = document.createElement("span");
             countBadge.className = "text-[10px] opacity-50 flex-shrink-0 pointer-events-none";
             countBadge.textContent = stackTabs.length;
             stackContainer.appendChild(countBadge);
+
+
 
             const closeB = document.createElement("button");
             closeB.className = `hover:bg-slate-700/60 p-0.5 rounded transition-all duration-100 text-slate-300 hover:text-white flex-shrink-0 ml-2 flex items-center justify-center w-4 h-4`;
@@ -326,6 +334,52 @@ export const renderTabs = (tabs) => {
         stackTabsBar.classList.remove("flex");
         window.electronAPI.stackBarVisible(false);
     }
+
+    const activeTab = tabs.find(t => t.isMainTab);
+    const globalProgressBar = document.getElementById("global-progress-bar");
+
+    if (globalProgressBar && activeTab) {
+        if (activeTab.isLoading) {
+            finishedLoadingTabIds.delete("global-progress");
+            globalProgressBar.style.transition = "none";
+            globalProgressBar.style.width = "0%";
+            globalProgressBar.style.opacity = "1";
+            globalProgressBar.style.backgroundColor = "var(--theme-accent)";
+            void globalProgressBar.offsetWidth;
+            globalProgressBar.style.animation = "simulate-loading 5s cubic-bezier(0.1, 0.8, 0.2, 1) forwards";
+        } 
+        
+        else {
+            if (previousLoadingState.get("global-progress") === true) {
+                // finished loading a page
+                globalProgressBar.style.animation = "none";
+                globalProgressBar.style.transition = "width 300ms ease-out, opacity 300ms ease-out 200ms";
+                globalProgressBar.style.width = "100%";
+                globalProgressBar.style.opacity = "0";
+                finishedLoadingTabIds.add("global-progress");
+
+                setTimeout(() => {
+                    finishedLoadingTabIds.delete("global-progress");
+                    const bar = document.getElementById("global-progress-bar");
+
+                    if (bar) {
+                        bar.style.transition = "none";
+                        bar.style.width = "0%";
+                        bar.style.opacity = "0";
+                        bar.style.animation = "none";
+                    }
+                }, 600);
+            } 
+            
+            else if (!finishedLoadingTabIds.has("global-progress")) {
+                globalProgressBar.style.transition = "none";
+                globalProgressBar.style.width = "0%";
+                globalProgressBar.style.opacity = "0";
+                globalProgressBar.style.animation = "none";
+            }
+        }
+        previousLoadingState.set("global-progress", activeTab.isLoading);
+    }
 };
 
 
@@ -362,12 +416,14 @@ function createTabElement(tab, index, isInStack, tabs) {
         }
 
 
-        tabE.className = `flex items-center px-2 cursor-pointer ${bgClass} flex-1 min-w-0 max-w-[10rem] mb-0 rounded-t-sm h-8 transition-all duration-100 gap-2 group-[.layout-left]:w-full group-[.layout-right]:w-full group-[.layout-left]:max-w-none group-[.layout-right]:max-w-none group-[.layout-left]:flex-none group-[.layout-right]:flex-none`;
+        tabE.className = `relative flex items-center px-2 cursor-pointer ${bgClass} flex-1 min-w-0 max-w-[10rem] mb-0 rounded-t-sm h-8 transition-all duration-100 gap-2 group-[.layout-left]:w-full group-[.layout-right]:w-full group-[.layout-left]:max-w-none group-[.layout-right]:max-w-none group-[.layout-left]:flex-none group-[.layout-right]:flex-none`;
         tabE.dataset.themeState = isSelected ? "selected" : tab.isMainTab ? "main" : tab.isActive ? "active" : "resting";
 
         tabE.title = tab.title || "Tab";
 
         const appendTabIcon = () => {
+
+
             if (tab.isSettingsTab || tab.address === "about://settings") {
                 const settingsSvg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
                 settingsSvg.setAttribute("viewBox", "0 0 24 24");
@@ -621,6 +677,8 @@ function createTabElement(tab, index, isInStack, tabs) {
                 window.electronAPI.switchTab(index);
             }
         };
+
+        tabE.setAttribute("data-tab-id", tab.id);
 
         return tabE;
 }

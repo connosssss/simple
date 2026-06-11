@@ -339,7 +339,8 @@ class TabManager {
             stackId: tab.stackId,
             stackName: tab.stackId ? (this.stackNames[tab.stackId] || null) : null,
             isSettingsTab: Boolean(tab.isSettingsTab),
-            isNewTab: Boolean(tab.isNewTab)
+            isNewTab: Boolean(tab.isNewTab),
+            isLoading: Boolean(tab.isLoading)
         }));
 
         this.ui.webContents.send("updateTabs", tabData);

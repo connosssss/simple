@@ -24,6 +24,7 @@ const createBaseTab = (overrides = {}) => ({
   lastActiveAt: Date.now(),
   keepActive: false,
   isSettingsTab: false,
+  isLoading: false,
   lifecycleCleanup: null,
   contextMenuHandler: null,
   isNewTab: false,
@@ -146,6 +147,8 @@ const attachTabLifecycle = (manager, tab) => {
 
   const { webContents } = tab.contentView;
   
+  tab.isLoading = webContents.isLoading();
+
   const syncAndBroadcast = () => {
     applyZoomLimits(webContents);
     syncTabState(tab);
@@ -188,12 +191,24 @@ const attachTabLifecycle = (manager, tab) => {
     }
   };
 
+  const handleDidStartLoading = () => {
+    tab.isLoading = true;
+    manager.sendTabData();
+  };
+
+  const handleDidStopLoading = () => {
+    tab.isLoading = false;
+    manager.sendTabData();
+  };
+
   const listeners = [
     ["page-title-updated", handlePageTitleUpdated],
     ["did-navigate", handleDidNavigate],
     ["did-navigate-in-page", handleDidNavigateInPage],
     ["page-favicon-updated", handlePageFaviconUpdated],
     ["did-finish-load", syncAndBroadcast],
+    ["did-start-loading", handleDidStartLoading],
+    ["did-stop-loading", handleDidStopLoading],
     ["will-navigate", () => {
         tab.isNewTab = false;
         manager.sendTabData();
