@@ -64,7 +64,6 @@
 }
 
 
-/* --- Vivaldi-Inspired Floating Islands & Tab Styles --- */
 .tab-icon {
   width: 16px !important;
   height: 16px !important;
@@ -75,17 +74,16 @@
 }
 
 #tabs-list,
-#stack-tabs-list {
+.stack-tabs-list {
   padding: 4px 8px !important;
   gap: 6px !important;
   align-items: center !important;
 }
 
-/* Tabs & Stack Containers */
 #tabs-list > div,
-#stack-tabs-list > div {
+.stack-tabs-list > div {
   height: 28px !important;
-  border-top-left-radius: 6px !important; /* rounded-t-md */
+  border-top-left-radius: 6px !important; 
   border-top-right-radius: 6px !important;
   border-bottom-left-radius: 0px !important;
   border-bottom-right-radius: 0px !important;
@@ -100,7 +98,6 @@
   gap: 6px !important;
 }
 
-/* Style for Tab Stack containers in primary bar */
 #tabs-list > div[data-stack-id] {
   border-top-left-radius: 6px !important;
   border-top-right-radius: 6px !important;
@@ -116,9 +113,8 @@
   border-color: var(--theme-border) !important;
 }
 
-/* Active Main Tab */
 #tabs-list > div[data-theme-state="main"],
-#stack-tabs-list > div[data-theme-state="main"] {
+.stack-tabs-list > div[data-theme-state="main"] {
   background: var(--theme-accent-soft) !important;
   color: #ffffff !important;
   border-color: rgba(255, 255, 255, 0.2) !important;
@@ -129,32 +125,29 @@
 
 
 #tabs-list > div[data-theme-state="active"],
-#stack-tabs-list > div[data-theme-state="active"] {
+.stack-tabs-list > div[data-theme-state="active"] {
   background: rgba(255, 255, 255, 0.1) !important;
   color: rgba(255, 255, 255, 0.8) !important;
   border-color: rgba(255, 255, 255, 0.06) !important;
 }
 
-/* Inactive/Idle State Tabs */
 #tabs-list > div[data-theme-state="idle"],
-#stack-tabs-list > div[data-theme-state="idle"] {
+.stack-tabs-list > div[data-theme-state="idle"] {
   background: rgba(255, 255, 255, 0.05) !important;
   color: rgba(255, 255, 255, 0.6) !important;
   border-color: rgba(255, 255, 255, 0.05) !important;
 }
 
-/* Hibernating/Resting Tab State */
 #tabs-list > div[data-theme-state="resting"],
-#stack-tabs-list > div[data-theme-state="resting"] {
+.stack-tabs-list > div[data-theme-state="resting"] {
   background: rgba(0, 0, 0, 0.2) !important;
   color: rgba(255, 255, 255, 0.45) !important;
   border-color: transparent !important;
   opacity: 0.8 !important;
 }
 
-/* Inactive/Resting Tab Hover */
 #tabs-list > div:hover,
-#stack-tabs-list > div:hover {
+.stack-tabs-list > div:hover {
   background: rgba(255, 255, 255, 0.12) !important;
   color: #ffffff !important;
   border-color: rgba(255, 255, 255, 0.15) !important;
@@ -162,9 +155,8 @@
   opacity: 1 !important;
 }
 
-/* Tab Close Button Styling */
 #tabs-list > div button,
-#stack-tabs-list > div button {
+.stack-tabs-list > div button {
   width: 16px !important;
   height: 16px !important;
   border-radius: 50% !important;
@@ -181,31 +173,30 @@
 }
 
 #tabs-list > div:hover button,
-#stack-tabs-list > div:hover button {
+.stack-tabs-list > div:hover button {
   opacity: 0.6;
 }
 
 #tabs-list > div button:hover,
-#stack-tabs-list > div button:hover {
+.stack-tabs-list > div button:hover {
   opacity: 1 !important;
   background: rgba(255, 255, 255, 0.2) !important;
   color: #fff !important;
 }
 
 #tabs-list > div[data-theme-state="main"] button,
-#stack-tabs-list > div[data-theme-state="main"] button {
+.stack-tabs-list > div[data-theme-state="main"] button {
   opacity: 0.65;
 }
 
 #tabs-list > div[data-theme-state="main"] button:hover,
-#stack-tabs-list > div[data-theme-state="main"] button:hover {
+.stack-tabs-list > div[data-theme-state="main"] button:hover {
   background: rgba(255, 255, 255, 0.25) !important;
   opacity: 1 !important;
 }
 
-/* Floating New Tab / Stack Button */
 #new-tab,
-#new-stack-tab {
+.new-stack-tab {
   width: 28px !important;
   height: 28px !important;
   border-radius: 50% !important;
@@ -221,7 +212,7 @@
 }
 
 #new-tab:hover,
-#new-stack-tab:hover {
+.new-stack-tab:hover {
   background: rgba(255, 255, 255, 0.12) !important;
   border-color: rgba(255, 255, 255, 0.15) !important;
   color: #fff !important;
@@ -229,15 +220,14 @@
 }
 
 #new-tab:active,
-#new-stack-tab:active {
+.new-stack-tab:active {
   transform: scale(0.95);
 }
 
-/* Adaptive vertical sidebar layouts styling */
 body.layout-left #tabs-list > div,
-body.layout-left #stack-tabs-list > div,
+body.layout-left .stack-tabs-list > div,
 body.layout-right #tabs-list > div,
-body.layout-right #stack-tabs-list > div {
+body.layout-right .stack-tabs-list > div {
   border-radius: 8px !important;
   height: 32px !important;
   margin: 2px 0 !important;
@@ -251,7 +241,6 @@ body.layout-right #new-tab {
   height: 32px !important;
 }
 
-/* --- Vivaldi-Inspired Address Bar UI --- */
 #address-bar-part {
   padding: 6px 12px !important;
   gap: 8px !important;
@@ -259,7 +248,6 @@ body.layout-right #new-tab {
   border-bottom: 1px solid rgba(255, 255, 255, 0.06) !important;
 }
 
-/* Circle Controls for Navigation & Utilities */
 #address-bar-part button,
 #address-actions-group button {
   background: transparent !important;
@@ -294,12 +282,10 @@ body.layout-right #new-tab {
   height: 15px !important;
 }
 
-/* Bookmark Inner Icon Positioning */
 #bookmark svg {
   margin: auto !important;
 }
 
-/* Rounded URL Capsule Input */
 #address-bar {
   border-radius: 4px !important;
   height: 28px !important;

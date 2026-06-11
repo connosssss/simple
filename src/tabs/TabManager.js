@@ -45,7 +45,7 @@ class TabManager {
         this.closeAfter = 10;
         this.stackNames = {};
         this.nextStackNumber = 1;
-        this.stackBarVisible = false;
+        this.stackBarsVisible = 0;
         this.bookmarkBarVisible = false;
         this.saveTimer = null;
         this.dropdownVisible = false;
@@ -60,8 +60,8 @@ class TabManager {
 
     }
 
-    setStackBarVisible(visible) {
-        this.stackBarVisible = visible;
+    setStackBarsVisible(count) {
+        this.stackBarsVisible = count;
     }
 
     setDropdownVisible(visible) {
@@ -71,7 +71,7 @@ class TabManager {
 
 
     resizeWindow() {
-        WindowResizing.resize(this.mainWindow, this.ui, this, this.stackBarVisible);
+        WindowResizing.resize(this.mainWindow, this.ui, this, this.stackBarsVisible);
     }
 
     removeContentView(contentView) {
@@ -84,13 +84,14 @@ class TabManager {
         }
     }
 
-    createTab(newAddress = "", switchTo = true, isStacked = false, stackId = null) {
+    createTab(newAddress = "", switchTo = true, isStacked = false, stackId = null, stackIds = null) {
         if (typeof newAddress === "object" && newAddress !== null) {
             ({
                 address: newAddress = "",
                 switchTo = true,
                 isStacked = false,
-                stackId = null
+                stackId = null,
+                stackIds = null
             } = newAddress);
         }
 
@@ -103,8 +104,14 @@ class TabManager {
             address: newAddress,
             defaultSite: this.defaultSite,
             isStacked: isStacked,
-            stackId: stackId
+            stackId: stackId,
+            stackIds: stackIds
         });
+
+        // Migration for new stackIds structure
+        if (!newTab.stackIds) {
+            newTab.stackIds = newTab.stackId ? [newTab.stackId] : [];
+        }
 
         attachTabLifecycle(this, newTab);
         
@@ -121,6 +128,8 @@ class TabManager {
 
     createSettingsTab(address = "about://settings", switchTo = true) {
         let newTab = createSettingsTab(address);
+
+        if (!newTab.stackIds) newTab.stackIds = [];
 
         attachTabLifecycle(this, newTab);
         
@@ -178,12 +187,13 @@ class TabManager {
         }
 
         let tabToClose = this.tabs[tabID];
-        const oldStackId = tabToClose.stackId;
+        const oldStackIds = tabToClose.stackIds ? [...tabToClose.stackIds] : [];
 
         this.lastOpenedTabs = this.lastOpenedTabs.filter(t => t !== tabToClose);
         
         this.tabs.splice(tabID, 1);
-        this.cleanupStack(oldStackId);
+        
+        oldStackIds.forEach(id => this.cleanupStack(id));
 
         if (typeof tabToClose.lifecycleCleanup === 'function') {
             tabToClose.lifecycleCleanup();
@@ -309,10 +319,10 @@ class TabManager {
     }
 
     reorderStack(stackId, toIndex) {
-        const stackTabs = this.tabs.filter(t => t.stackId === stackId);
+        const stackTabs = this.tabs.filter(t => t.stackIds && t.stackIds.includes(stackId));
         if (stackTabs.length === 0) return;
 
-        const nonStackTabs = this.tabs.filter(t => t.stackId !== stackId);
+        const nonStackTabs = this.tabs.filter(t => !t.stackIds || !t.stackIds.includes(stackId));
         const boundedIndex = Math.max(0, Math.min(toIndex, nonStackTabs.length));
 
         nonStackTabs.splice(boundedIndex, 0, ...stackTabs);
@@ -335,9 +345,11 @@ class TabManager {
             iconURL: tab.iconURL || "",
             lastActiveAt: tab.lastActiveAt,
             keepActive: tab.keepActive,
-            isStacked: tab.isStacked,
-            stackId: tab.stackId,
-            stackName: tab.stackId ? (this.stackNames[tab.stackId] || null) : null,
+            isStacked: tab.stackIds && tab.stackIds.length > 0,
+            stackId: tab.stackIds && tab.stackIds.length > 0 ? tab.stackIds[0] : null,
+            stackIds: tab.stackIds || [],
+            stackName: (tab.stackIds && tab.stackIds.length > 0) ? (this.stackNames[tab.stackIds[0]] || null) : null,
+            stackNames: (tab.stackIds || []).map(id => this.stackNames[id] || null),
             isSettingsTab: Boolean(tab.isSettingsTab),
             isNewTab: Boolean(tab.isNewTab),
             isLoading: Boolean(tab.isLoading)
@@ -445,12 +457,12 @@ class TabManager {
         if (index < 0 || index >= this.tabs.length) return null;
 
         const tab = this.tabs[index];
-        const oldStackId = tab.stackId;
+        const oldStackIds = tab.stackIds ? [...tab.stackIds] : [];
 
         this.tabs.splice(index, 1);
         this.lastOpenedTabs = this.lastOpenedTabs.filter(t => t !== tab);
         
-        this.cleanupStack(oldStackId);
+        oldStackIds.forEach(id => this.cleanupStack(id));
 
         if (typeof tab.lifecycleCleanup === 'function') {
             tab.lifecycleCleanup();

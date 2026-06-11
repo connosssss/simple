@@ -6,15 +6,31 @@ module.exports = {
         if (!tab) return;
         tab.isStacked = false;
         tab.stackId = null;
+        tab.stackIds = [];
     },
 
     cleanupStack(stackId, excludedTab = null) {
         if (!stackId) return;
 
-        const remainingTabs = this.tabs.filter(tab => tab.stackId === stackId && tab !== excludedTab);
+        const remainingTabs = this.tabs.filter(tab => tab.stackIds && tab.stackIds.includes(stackId) && tab !== excludedTab);
+
+
         if (remainingTabs.length >= 2) return;
 
-        remainingTabs.forEach(tab => this.clearStackState(tab));
+        remainingTabs.forEach(tab => {
+            if (tab.stackIds) {
+                tab.stackIds = tab.stackIds.filter(id => id !== stackId);
+                if (tab.stackIds.length === 0) {
+                    this.clearStackState(tab);
+                } else {
+                    tab.stackId = tab.stackIds[0];
+                }
+            }
+            
+            else {
+                this.clearStackState(tab);
+            }
+        });
         delete this.stackNames[stackId];
         this.recalculateStackNumber();
     },
@@ -36,16 +52,26 @@ module.exports = {
         this.nextStackNumber = max + 1;
     },
 
-    createStack(tabIndices) {
+    createStack(tabIndices, parentStackIds = []) {
         const stackId = crypto.randomUUID();
 
         tabIndices.forEach(index => {
             const tab = this.tabs[index];
             if (!tab) return;
 
-            this.cleanupStack(tab.stackId, tab);
+            if (tab.stackIds) {
+                 const oldIds = [...tab.stackIds];
+
+                 oldIds.forEach(id => {
+                     if (!parentStackIds.includes(id)) {
+                         this.cleanupStack(id, tab);
+                     }
+                 });
+            }
+
             tab.isStacked = true;
-            tab.stackId = stackId;
+            tab.stackIds = [...parentStackIds, stackId];
+            tab.stackId = tab.stackIds[0];
         });
 
         this.stackNames[stackId] = `Stack ${this.nextStackNumber}`;
@@ -54,34 +80,67 @@ module.exports = {
         this.sendTabData(true);
     },
 
-    updateStack(stackId, tabIndex) {
+    updateStack(targetStackIds, tabIndex) {
+        if (!Array.isArray(targetStackIds)) {
+            targetStackIds = [targetStackIds];
+        }
+
         const tab = this.tabs[tabIndex];
         if (!tab) return;
 
-        if (tab.stackId && tab.stackId !== stackId) {
-            this.cleanupStack(tab.stackId, tab);
+        if (tab.stackIds) {
+            const oldIds = [...tab.stackIds];
+            oldIds.forEach(id => {
+                if (!targetStackIds.includes(id)) {
+                    this.cleanupStack(id, tab);
+                }
+            });
         }
 
-        tab.stackId = stackId;
+        tab.stackIds = [...targetStackIds];
+        tab.stackId = tab.stackIds[0];
         tab.isStacked = true;
         this.sendTabData(true);
     },
 
-    removeFromStack(tabIndex) {
+    removeFromStack(tabIndex, depth = null) {
         const tab = this.tabs[tabIndex];
-        if (!tab) return;
+        if (!tab || !tab.stackIds || tab.stackIds.length === 0) return;
 
-        const oldStackId = tab.stackId;
-        this.clearStackState(tab);
-        this.cleanupStack(oldStackId);
+        if (depth !== null && depth < tab.stackIds.length) {
+            const oldIds = [...tab.stackIds];
+            const removedIds = oldIds.slice(depth);
+            removedIds.forEach(id => this.cleanupStack(id, tab));
+            
+            tab.stackIds = oldIds.slice(0, depth);
+            if (tab.stackIds.length === 0) {
+                this.clearStackState(tab);
+            } else {
+                tab.stackId = tab.stackIds[0];
+            }
+        } 
+        else {
+            const oldStackIds = [...tab.stackIds];
+            this.clearStackState(tab);
+            oldStackIds.forEach(id => this.cleanupStack(id));
+        }
+
         this.sendTabData(true);
     },
 
 
     deleteStack(stackId) {
         this.tabs.forEach(tab => {
-            if (tab.stackId === stackId) {
-                this.clearStackState(tab);
+            if (tab.stackIds && tab.stackIds.includes(stackId)) {
+                const idx = tab.stackIds.indexOf(stackId);
+                tab.stackIds = tab.stackIds.slice(0, idx);
+                if (tab.stackIds.length === 0) {
+                    this.clearStackState(tab);
+                } 
+                
+                else {
+                    tab.stackId = tab.stackIds[0];
+                }
             }
 
         });
@@ -93,7 +152,7 @@ module.exports = {
     },
 
     closeStack(stackId) {
-        let tabsToClose = this.tabs.filter(t => t.stackId == stackId);
+        let tabsToClose = this.tabs.filter(t => t.stackIds && t.stackIds.includes(stackId));
 
         for (let i = tabsToClose.length - 1; i >= 0; i--) {
 
@@ -105,7 +164,7 @@ module.exports = {
     },
 
     hibernateStack(stackId){
-        let tabsToHibernate = this.tabs.filter(t => t.stackId == stackId);
+        let tabsToHibernate = this.tabs.filter(t => t.stackIds && t.stackIds.includes(stackId));
 
         for (let i = tabsToHibernate.length - 1; i >= 0; i--) {
 
@@ -120,7 +179,9 @@ module.exports = {
     renameStack(stackId, name) {
         if (name && name.trim()) {
             this.stackNames[stackId] = name.trim();
-        } else {
+        } 
+        
+        else {
             delete this.stackNames[stackId];
             this.recalculateStackNumber();
         }

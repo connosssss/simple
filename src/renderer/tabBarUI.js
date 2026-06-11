@@ -1,9 +1,7 @@
 const tabsList = document.getElementById("tabs-list");
-const stackTabsBar = document.getElementById("stack-tabs-bar");
-const stackTabsList = document.getElementById("stack-tabs-list");
-const newStackTabButton = document.getElementById("new-stack-tab");
+const stackBarsContainer = document.getElementById("stack-bars-container");
 
-let activeStackId = null;
+let activeStackIds = [];
 const lastActiveStackTab = new Map();
 
 
@@ -14,42 +12,7 @@ let prevActiveTabId = null;
 const previousLoadingState = new Map();
 const finishedLoadingTabIds = new Set();
 
-newStackTabButton?.addEventListener("click", (event) => {
-    event.stopPropagation();
-
-    if (!activeStackId) return;
-
-    window.electronAPI.createTab({
-        switchTo: true,
-        isStacked: true,
-        stackId: activeStackId
-    });
-});
-
 tabsList.ondragover = (e) => { e.preventDefault(); };
-
-
-stackTabsBar.ondragover = (e) => {
-    if (activeStackId) e.preventDefault();
-};
-
-stackTabsBar.ondrop = (e) => {
-    e.preventDefault();
-    e.stopPropagation();
-    if (!activeStackId) return;
-
-    const dragStackId = e.dataTransfer.getData("application/stack-id");
-    
-    if (dragStackId) return; 
-
-    const startingIndex = parseInt(e.dataTransfer.getData("text/plain"));
-    if (!Number.isNaN(startingIndex) && latestTabs) {
-        const startingTab = latestTabs[startingIndex];
-        if (startingTab && startingTab.stackId !== activeStackId) {
-            window.electronAPI.updateStack(activeStackId, startingIndex);
-        }
-    }
-};
 
 tabsList.ondrop = (e) => {
     e.preventDefault();
@@ -62,7 +25,7 @@ tabsList.ondrop = (e) => {
 
     const startingIndex = parseInt(e.dataTransfer.getData("text/plain"));
     if (!isNaN(startingIndex)) {
-        window.electronAPI.removeFromStack(startingIndex);
+        window.electronAPI.removeFromStack(startingIndex, 0);
         window.electronAPI.reorderTabs(startingIndex, 1000);
     }
 };
@@ -146,193 +109,261 @@ export const renderTabs = (tabs) => {
     }
 
     tabsList.innerHTML = "";
-    stackTabsList.innerHTML = "";
+    if (stackBarsContainer) {
+        stackBarsContainer.innerHTML = "";
+    }
 
-    const renderedStacks = new Set();
-    const currentStackId = mainTab && mainTab.isStacked ? mainTab.stackId : null;
-
-    if (currentStackId) {
-        activeStackId = currentStackId;
-        lastActiveStackTab.set(currentStackId, mainTab.index);
+    if (mainTab && mainTab.isStacked && mainTab.stackIds) {
+        activeStackIds = [...mainTab.stackIds];
+        lastActiveStackTab.set(activeStackIds[activeStackIds.length - 1], mainTab.index);
     }
     
     else {
-        activeStackId = null;
+        activeStackIds = [];
     }
 
-    tabs.forEach((tab, index) => {
+    const isSidebar = document.body.classList.contains('layout-left') || document.body.classList.contains('layout-right');
 
-        if (tab.isStacked && renderedStacks.has(tab.stackId)) return;
+    const renderLevel = (level, container, parentStackIds) => {
+        const renderedStacks = new Set();
+        const currentActiveStackId = activeStackIds.length > level ? activeStackIds[level] : null;
 
-        if (tab.isStacked) {
-            renderedStacks.add(tab.stackId);
+        const tabsAtLevel = tabs.filter(t => {
+            for (let i = 0; i < level; i++) {
+                if (!t.stackIds || t.stackIds[i] !== parentStackIds[i]) return false;
+            }
+            return true;
+        });
 
-            const stackTabs = tabs.map((t, i) => ({ tab: t, index: i })).filter(entry => entry.tab.stackId === tab.stackId);
-            const isActiveStack = tab.stackId === activeStackId;
+        tabsAtLevel.forEach((tab) => {
+            const globalIndex = tabs.indexOf(tab);
+            const stackIdAtLevel = tab.stackIds && tab.stackIds.length > level ? tab.stackIds[level] : null;
 
-            const stackContainer = document.createElement("div");
-            const bgClass = isActiveStack
-                ? "bg-slate-700 hover:bg-slate-600 text-white"
-                : "bg-slate-800/50 hover:bg-slate-700/50 text-slate-400";
+            if (stackIdAtLevel) {
+                if (renderedStacks.has(stackIdAtLevel)) return;
+                renderedStacks.add(stackIdAtLevel);
 
-            stackContainer.className = `relative flex items-center px-3 cursor-pointer ${bgClass} min-w-0 max-w-[10rem] mb-0 rounded-t-s h-8 transition-all duration-100 gap-1 flex-shrink-0 group-[.layout-left]:w-full group-[.layout-right]:w-full group-[.layout-left]:max-w-none group-[.layout-right]:max-w-none group-[.layout-left]:flex-none group-[.layout-right]:flex-none group-[.layout-left]:px-2 group-[.layout-right]:px-2`;
-            stackContainer.setAttribute("data-stack-id", tab.stackId);
-            stackContainer.dataset.themeState = isActiveStack ? "active" : "idle";
+                const stackTabs = tabsAtLevel.filter(t => t.stackIds && t.stackIds[level] === stackIdAtLevel);
+                const isActiveStack = stackIdAtLevel === currentActiveStackId;
 
-            const isStackLoading = stackTabs.some(st => st.tab.isLoading);
+                const stackContainer = document.createElement("div");
+                const bgClass = isActiveStack
+                    ? "bg-slate-700 hover:bg-slate-600 text-white"
+                    : "bg-slate-800/50 hover:bg-slate-700/50 text-slate-400";
 
-            const nameSpan = document.createElement("span");
-            nameSpan.className = "truncate flex-1 overflow-hidden text-sm";
-            nameSpan.textContent = tab.stackName || "Stack";
-            stackContainer.appendChild(nameSpan);
+                stackContainer.className = `relative flex items-center px-3 cursor-pointer ${bgClass} min-w-0 max-w-[10rem] mb-0 rounded-t-s h-8 transition-all duration-100 gap-1 flex-shrink-0 group-[.layout-left]:w-full group-[.layout-right]:w-full group-[.layout-left]:max-w-none group-[.layout-right]:max-w-none group-[.layout-left]:flex-none group-[.layout-right]:flex-none group-[.layout-left]:px-2 group-[.layout-right]:px-2`;
+                stackContainer.setAttribute("data-stack-id", stackIdAtLevel);
+                stackContainer.dataset.themeState = isActiveStack ? "active" : "idle";
+
+                const isStackLoading = stackTabs.some(st => st.isLoading);
+
+                const nameSpan = document.createElement("span");
+                nameSpan.className = "truncate flex-1 overflow-hidden text-sm";
+                let sName = tab.stackNames && tab.stackNames[level] ? tab.stackNames[level] : "Stack";
+                nameSpan.textContent = sName;
+                stackContainer.appendChild(nameSpan);
 
 
 
-            const countBadge = document.createElement("span");
-            countBadge.className = "text-[10px] opacity-50 flex-shrink-0 pointer-events-none";
-            countBadge.textContent = stackTabs.length;
-            stackContainer.appendChild(countBadge);
+                const countBadge = document.createElement("span");
+                countBadge.className = "text-[10px] opacity-50 flex-shrink-0 pointer-events-none";
+                countBadge.textContent = stackTabs.length;
+                stackContainer.appendChild(countBadge);
 
 
 
-            const closeB = document.createElement("button");
-            closeB.className = `hover:bg-slate-700/60 p-0.5 rounded transition-all duration-100 text-slate-300 hover:text-white flex-shrink-0 ml-2 flex items-center justify-center w-4 h-4`;
-            closeB.innerHTML = `
-              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5" class="w-3 h-3">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M6 18 18 6M6 6l12 12" />
-              </svg>
-            `;
-            closeB.onclick = (e) => {
-                e.stopPropagation();
-                window.electronAPI.closeStack(tab.stackId);
-            };
-            stackContainer.appendChild(closeB);
+                const closeB = document.createElement("button");
+                closeB.className = `hover:bg-slate-700/60 p-0.5 rounded transition-all duration-100 text-slate-300 hover:text-white flex-shrink-0 ml-2 flex items-center justify-center w-4 h-4`;
 
-            stackContainer.draggable = true;
-            stackContainer.ondragstart = (e) => {
-                e.dataTransfer.setData("application/stack-id", tab.stackId);
-            };
+                closeB.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5" class="w-3 h-3">
+                                                <path stroke-linecap="round" stroke-linejoin="round" d="M6 18 18 6M6 6l12 12" /> </svg>`;
 
-            stackContainer.ondragover = (e) => { e.preventDefault(); };
+                closeB.onclick = (e) => {
+                    e.stopPropagation();
+                    window.electronAPI.closeStack(stackIdAtLevel);
+                };
+                stackContainer.appendChild(closeB);
 
-            stackContainer.ondrop = (e) => {
-                e.preventDefault();
-                e.stopPropagation();
+                stackContainer.draggable = true;
+                stackContainer.ondragstart = (e) => {
+                    e.dataTransfer.setData("application/stack-id", stackIdAtLevel);
+                };
 
-              const dragStackId = e.dataTransfer.getData("application/stack-id");
-              
-                if (dragStackId) {
-                    if (dragStackId !== tab.stackId) {
-                         window.electronAPI.reorderStack(dragStackId, index);
+                stackContainer.ondragover = (e) => { e.preventDefault(); };
+
+                stackContainer.ondrop = (e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+
+                  const dragStackId = e.dataTransfer.getData("application/stack-id");
+                  
+                    if (dragStackId) {
+                        if (dragStackId !== stackIdAtLevel) {
+                             window.electronAPI.reorderStack(dragStackId, globalIndex);
+                        }
+                      
+                        return;
                     }
-                  
-                    return;
-                }
 
-                const startingIndex = parseInt(e.dataTransfer.getData("text/plain"));
-                if (!isNaN(startingIndex)) {
-                     const startingTab = tabs && tabs[startingIndex] ? tabs[startingIndex] : null;
-
-                     if (startingTab && startingTab.stackId !== tab.stackId) {
-                         window.electronAPI.updateStack(tab.stackId, startingIndex);
-                     }
-                  
-                }
-            };
-
-            let clickTimer = null;
-
-            stackContainer.addEventListener("click", (e) => {
-              e.stopPropagation();
-              if (clickTimer) return;
-
-              clickTimer = setTimeout(() => {
-                clickTimer = null;
-
-                if (activeStackId === tab.stackId) {
-                    activeStackId = null;
-                    renderTabs(tabs);
-                }
-
-                else {
-                    const rememberedIndex = lastActiveStackTab.get(tab.stackId);
-                    const targetTab = rememberedIndex != null ? stackTabs.find(st => st.index === rememberedIndex): null;
-                    const tabToSwitch = targetTab || stackTabs[0];
-                  
-                    if (tabToSwitch) {
-                        window.electronAPI.switchTab(tabToSwitch.index);
+                    const startingIndex = parseInt(e.dataTransfer.getData("text/plain"));
+                    if (!isNaN(startingIndex)) {
+                         const targetPath = [...parentStackIds, stackIdAtLevel];
+                         window.electronAPI.updateStack(targetPath, startingIndex);
                     }
-                  
-                }
-              }, 250);
-            });
+                };
 
-            stackContainer.addEventListener("dblclick", (e) => {
-              e.stopPropagation();
-              if (clickTimer) {
-                clearTimeout(clickTimer);
-                clickTimer = null;
-              }
-              startInlineStackRename(stackContainer, tab.stackId, tab.stackName);
-            });
+                let clickTimer = null;
 
-            stackContainer.addEventListener("contextmenu", (e) => {
-                e.preventDefault();
-                e.stopPropagation();
+                stackContainer.addEventListener("click", (e) => {
+                  e.stopPropagation();
+                  if (clickTimer) return;
 
-                window.electronAPI.showStackContextMenu({
-                    x: e.clientX,
-                    y: e.clientY,
-                    stackId: tab.stackId
+                  clickTimer = setTimeout(() => {
+                    clickTimer = null;
+
+                    if (isActiveStack) {
+                        activeStackIds = [...parentStackIds];
+                        renderTabs(tabs);
+                    }
+
+                    else {
+                        const rememberedIndex = lastActiveStackTab.get(stackIdAtLevel);
+                        const targetTab = rememberedIndex != null ? tabs.find((_, i) => i === rememberedIndex) : null;
+                        const tabToSwitch = (targetTab && targetTab.stackIds && targetTab.stackIds[level] === stackIdAtLevel) ? targetTab : stackTabs[0];
+                      
+                        if (tabToSwitch) {
+                            window.electronAPI.switchTab(tabs.indexOf(tabToSwitch));
+                        }
+                      
+                    }
+                  }, 250);
                 });
 
-            });
+                stackContainer.addEventListener("dblclick", (e) => {
+                  e.stopPropagation();
+                  if (clickTimer) {
+                    clearTimeout(clickTimer);
+                    clickTimer = null;
+                  }
+                  startInlineStackRename(stackContainer, stackIdAtLevel, sName);
+                });
 
-            tabsList.appendChild(stackContainer);
+                stackContainer.addEventListener("contextmenu", (e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
 
-            const isSidebar = document.body.classList.contains('layout-left') || document.body.classList.contains('layout-right');
-            if (isSidebar) {
-                if (isActiveStack) {
-                    stackTabs.forEach(({ tab: stTab, index: stIndex }) => {
-                        const tabE = createTabElement(stTab, stIndex, true, tabs);
-                        tabE.classList.add(
-                            'group-[.layout-left]:ml-[16px]',
-                            'group-[.layout-left]:w-[calc(100%-16px)]',
-                            'group-[.layout-left]:border-l-2',
-                            'group-[.layout-left]:border-[var(--theme-border)]',
-                            'group-[.layout-left]:rounded-l-none',
-                            'group-[.layout-right]:ml-[16px]',
-                            'group-[.layout-right]:w-[calc(100%-16px)]',
-                            'group-[.layout-right]:border-l-2',
-                            'group-[.layout-right]:border-[var(--theme-border)]',
-                            'group-[.layout-right]:rounded-l-none'
-                        );
-                        tabsList.appendChild(tabE);
+                    window.electronAPI.showStackContextMenu({
+                        x: e.clientX,
+                        y: e.clientY,
+                        stackId: stackIdAtLevel
                     });
-                }
-            } 
-            
-            else {
-                if (isActiveStack) {
-                    renderStackTabsBar(stackTabs, tabs);
-                }
+
+                });
+
+                container.appendChild(stackContainer);
+
+                if (isSidebar) {
+                    if (isActiveStack) {
+                        stackTabs.forEach((stTab) => {
+                            const stIndex = tabs.indexOf(stTab);
+                            const tabE = createTabElement(stTab, stIndex, true, tabs, level + 1);
+                            
+                            const indent = (level + 1) * 16;
+                            
+                            tabE.classList.add(
+                                `group-[.layout-left]:ml-[${indent}px]`,
+                                `group-[.layout-left]:w-[calc(100%-${indent}px)]`,
+                                'group-[.layout-left]:border-l-2',
+                                'group-[.layout-left]:border-[var(--theme-border)]',
+                                'group-[.layout-left]:rounded-l-none',
+                                `group-[.layout-right]:ml-[${indent}px]`,
+                                `group-[.layout-right]:w-[calc(100%-${indent}px)]`,
+                                'group-[.layout-right]:border-l-2',
+                                'group-[.layout-right]:border-[var(--theme-border)]',
+                                'group-[.layout-right]:rounded-l-none'
+                            );
+                            container.appendChild(tabE);
+                        });
+                    }
+                } 
             }
-        }
 
-        else {
-            tabsList.appendChild(createTabElement(tab, index, false, tabs));
-        }
-    });
+            else {
+                container.appendChild(createTabElement(tab, globalIndex, level > 0, tabs, level));
+            }
+        });
 
-    const isSidebar = document.body.classList.contains('layout-left') || document.body.classList.contains('layout-right');
-    if (activeStackId && !isSidebar) {
-        stackTabsBar.classList.remove("hidden");
-        stackTabsBar.classList.add("flex");
-        window.electronAPI.stackBarVisible(true);
-    } else {
-        stackTabsBar.classList.add("hidden");
-        stackTabsBar.classList.remove("flex");
-        window.electronAPI.stackBarVisible(false);
+        if (!isSidebar && currentActiveStackId) {
+            return currentActiveStackId;
+        }
+        return null;
+    };
+
+    renderLevel(0, tabsList, []);
+
+    if (!isSidebar && stackBarsContainer) {
+        let currentParentIds = [];
+        let rowsRendered = 0;
+
+        for (let i = 0; i < activeStackIds.length; i++) {
+            const nextStackId = activeStackIds[i];
+            
+            const newBar = document.createElement("div");
+            newBar.className = "theme-shell theme-border w-screen flex flex-row backdrop-blur-md h-[40px] items-center justify-start gap-1 border-b border-black/20 stack-tabs-bar transition-all duration-100 group-[.layout-bottom]:order-3 group-[.layout-bottom]:border-b group-[.layout-bottom]:border-[var(--theme-border)] group-[.layout-left]:hidden group-[.layout-right]:hidden";
+            
+            const newList = document.createElement("div");
+            newList.className = "stack-tabs-list flex flex-row overflow-x-hidden gap-1 h-8 items-center ml-1";
+            
+            const newBtn = document.createElement("button");
+            newBtn.className = "new-stack-tab theme-button w-8 h-8 flex items-center justify-center text-white rounded transition-all duration-100 mr-2 active:scale-95";
+            newBtn.innerHTML = `
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5" class="w-4 h-4">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+              </svg>
+            `;
+            
+            const currentPath = [...currentParentIds, nextStackId];
+            newBtn.addEventListener("click", (event) => {
+                event.stopPropagation();
+                window.electronAPI.createTab({
+                    switchTo: true,
+                    isStacked: true,
+                    stackIds: currentPath
+                });
+            });
+            
+            newBar.ondragover = (e) => { e.preventDefault(); };
+            newBar.ondrop = (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+
+                const dragStackId = e.dataTransfer.getData("application/stack-id");
+                if (dragStackId) return; 
+
+                const startingIndex = parseInt(e.dataTransfer.getData("text/plain"));
+                if (!Number.isNaN(startingIndex) && latestTabs) {
+                    const startingTab = latestTabs[startingIndex];
+                    if (startingTab) {
+                        window.electronAPI.updateStack(currentPath, startingIndex);
+                    }
+                }
+            };
+            
+            newBar.appendChild(newList);
+            newBar.appendChild(newBtn);
+            
+            currentParentIds.push(nextStackId);
+            renderLevel(i + 1, newList, currentParentIds);
+            
+            stackBarsContainer.appendChild(newBar);
+            rowsRendered++;
+        }
+        
+        window.electronAPI.stackBarsVisible(rowsRendered);
+    } 
+    
+    else {
+        window.electronAPI.stackBarsVisible(0);
     }
 
     const activeTab = tabs.find(t => t.isMainTab);
@@ -383,17 +414,7 @@ export const renderTabs = (tabs) => {
 };
 
 
-function renderStackTabsBar(stackTabs, allTabs) {
-    stackTabsList.innerHTML = "";
-
-    stackTabs.forEach(({ tab, index }) => {
-        const tabE = createTabElement(tab, index, true, allTabs);
-        stackTabsList.appendChild(tabE);
-    });
-}
-
-
-function createTabElement(tab, index, isInStack, tabs) {
+function createTabElement(tab, index, isInStack, tabs, level = 0) {
         const tabE = document.createElement("div");
         let bgClass = "bg-slate-800/50 hover:bg-slate-700/50 text-slate-400";
         const isSelected = selectedTabIds.has(tab.id);
@@ -533,19 +554,32 @@ function createTabElement(tab, index, isInStack, tabs) {
               if (x > rect.width * 0.25 && x < rect.width * 0.75) {
 
                     if (tab.isStacked){
-                        window.electronAPI.updateStack(tab.stackId, startingIndex);
+                        const targetPath = tab.stackIds ? [...tab.stackIds] : [tab.stackId];
+                        const startingTab = tabs && tabs[startingIndex] ? tabs[startingIndex] : null;
+                        const startingPath = startingTab ? (startingTab.stackIds ? [...startingTab.stackIds] : (startingTab.stackId ? [startingTab.stackId] : [])) : [];
+                        const inSameStack = JSON.stringify(targetPath) === JSON.stringify(startingPath);
+
+                        if (inSameStack) {
+                            window.electronAPI.createStack([startingIndex, index], targetPath);
+                        } else {
+                            window.electronAPI.updateStack(targetPath, startingIndex);
+                        }
                     }
 
                     else{
-                        window.electronAPI.createStack([startingIndex, index]);
+                        let currentPath = [];
+                        if (isInStack && activeStackIds && activeStackIds.length > level) {
+                            currentPath = activeStackIds.slice(0, level + 1);
+                        }
+                        window.electronAPI.createStack([startingIndex, index], currentPath);
                     }
 
                 }
                 else {
                     const startingTab = tabs && tabs[startingIndex] ? tabs[startingIndex] : null;
 
-                    if (startingTab && startingTab.isStacked && startingTab.stackId !== tab.stackId) {
-                        window.electronAPI.removeFromStack(startingIndex);
+                    if (startingTab && startingTab.isStacked && (!tab.stackIds || JSON.stringify(startingTab.stackIds) !== JSON.stringify(tab.stackIds))) {
+                        window.electronAPI.removeFromStack(startingIndex, level);
                     }
 
                     window.electronAPI.reorderTabs(startingIndex, index);
@@ -561,22 +595,6 @@ function createTabElement(tab, index, isInStack, tabs) {
                 e.screenY < window.screenY || e.screenY > window.screenY + window.outerHeight) {
                 window.electronAPI.tabTransfer(index, e.screenX, e.screenY);
                 return;
-            }
-
-          if (activeStackId && !isInStack) {
-              
-              const stackBarRect = stackTabsBar.getBoundingClientRect();
-            const clientY = e.clientY;
-            
-              if (clientY >= stackBarRect.top && clientY <= stackBarRect.bottom &&
-                e.clientX >= stackBarRect.left && e.clientX <= stackBarRect.right) {
-                
-                const tab = latestTabs && latestTabs[index];
-                
-                if (tab && tab.stackId !== activeStackId) {
-                  window.electronAPI.updateStack(activeStackId, index);
-                 }
-                }
             }
         };
 

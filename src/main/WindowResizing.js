@@ -1,13 +1,13 @@
 let mainWindow, ui, tabManager = null;
-let isStackBarVisible = false;
+let isStackBarsVisible = 0;
 
 module.exports = {
 
-  resize: (mainWindow, ui, tabManager, stackBarVisible) => {
+  resize: (mainWindow, ui, tabManager, stackBarsVisible) => {
     if (!mainWindow || !ui) return;
     
-    if (stackBarVisible !== undefined) {
-      isStackBarVisible = stackBarVisible;
+    if (stackBarsVisible !== undefined) {
+      isStackBarsVisible = stackBarsVisible;
     }
 
 
@@ -15,7 +15,7 @@ module.exports = {
     const isFullscreen = mainWindow.isFullScreen();
     const mainTab = tabManager ?  tabManager.getMainTab() : null;
 
-    const stackBarHeight = isStackBarVisible ? 40 : 0;
+    const stackBarHeight = isStackBarsVisible * 40;
     const bookmarkBarHeight = tabManager?.bookmarkBarVisible ? 38 : 0;
     const topBarHeight = 110 + stackBarHeight + bookmarkBarHeight;
 

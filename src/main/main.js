@@ -151,17 +151,17 @@ const ipcSetup = () => {
   });
 
   // Tab stacking
-  onTabManager("createStack", (tabManager, event, tabIndices) => tabManager.createStack(tabIndices));
-  onTabManager("updateStack", (tabManager, event, stackId, tabIndex) => tabManager.updateStack(stackId, tabIndex));
+  onTabManager("createStack", (tabManager, event, tabIndices, parentStackIds) => tabManager.createStack(tabIndices, parentStackIds));
+  onTabManager("updateStack", (tabManager, event, stackIds, tabIndex) => tabManager.updateStack(stackIds, tabIndex));
   onTabManager("deleteStack", (tabManager, event, stackId) => tabManager.deleteStack(stackId));
   onTabManager("closeStack", (tabManager, event, stackId) => tabManager.closeStack(stackId));
-  onTabManager("removeFromStack", (tabManager, event, tabIndex) => tabManager.removeFromStack(tabIndex));
+  onTabManager("removeFromStack", (tabManager, event, tabIndex, depth) => tabManager.removeFromStack(tabIndex, depth));
   onTabManager("renameStack", (tabManager, event, stackId, name) => tabManager.renameStack(stackId, name));
   onTabManager("reorderStack", (tabManager, event, stackId, toIndex) => tabManager.reorderStack(stackId, toIndex));
 
-  onWindowData("stackBarVisible", (data, event, visible) => {
+  onWindowData("stackBarsVisible", (data, event, count) => {
 
-    data.tabManager.setStackBarVisible(visible);
+    data.tabManager.setStackBarsVisible(count);
     data.tabManager.resizeWindow();
 
   });

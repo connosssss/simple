@@ -60,16 +60,16 @@ contextBridge.exposeInMainWorld("electronAPI", {
     clearThirdPartyCookies: () => ipcRenderer.invoke("clearThirdPartyCookies"),
     setBlockTrackers: (enabled) => ipcRenderer.send("setBlockTrackers", enabled),
 
-    createStack: (tabIndices) => ipcRenderer.send("createStack", tabIndices),
-    updateStack: (stackId, tabIndex) => ipcRenderer.send("updateStack", stackId, tabIndex),
+    createStack: (tabIndices, parentStackIds) => ipcRenderer.send("createStack", tabIndices, parentStackIds),
+    updateStack: (stackIds, tabIndex) => ipcRenderer.send("updateStack", stackIds, tabIndex),
     deleteStack: (stackId) => ipcRenderer.send("deleteStack", stackId),
     closeStack: (stackId) => ipcRenderer.send("closeStack", stackId),
-    removeFromStack: (tabIndex) => ipcRenderer.send("removeFromStack", tabIndex),
+    removeFromStack: (tabIndex, depth) => ipcRenderer.send("removeFromStack", tabIndex, depth),
     showStackContextMenu: (vars) => ipcRenderer.send("showStackContextMenu", vars),
     renameStack: (stackId, name) => ipcRenderer.send("renameStack", stackId, name),
     reorderStack: (stackId, toIndex) => ipcRenderer.send("reorderStack", stackId, toIndex),
     onPromptStackName: (callback) => ipcRenderer.on('promptStackName', (event, data) => callback(data)),
-    stackBarVisible: (visible) => ipcRenderer.send("stackBarVisible", visible),
+    stackBarsVisible: (count) => ipcRenderer.send("stackBarsVisible", count),
     bookmarkBarVisible: (visible) => ipcRenderer.send("bookmarkBarVisible", visible),
 
     // Extensions
