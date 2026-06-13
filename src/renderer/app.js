@@ -1,7 +1,7 @@
 import { setupAddressBarUI, updateAddressBar } from "./addressBarUI.js";
 import { setupBookmarkBarUI } from "./bookmarkBarUI.js";
 import { setupFindBarUI } from "./findBarUI.js";
-import { renderTabs } from "./tabBarUI.js";
+import { renderTabs, rerenderCurrentTabs } from "./tabBarUI.js";
 import { setupExtensionsUI } from "./extensionsUI.js";
 import { setupDownloadsUI } from "./downloadsUI.js";
 
@@ -105,6 +105,9 @@ const setupLayoutSubscription = () => {
     document.body.classList.remove('layout-top', 'layout-bottom', 'layout-left', 'layout-right');
     document.body.classList.add(`layout-${position}`);
     currentUiPosition = position;
+    if (typeof rerenderCurrentTabs === 'function') {
+      rerenderCurrentTabs();
+    }
   };
 
   window.electronAPI.getSettings().then((settings) => {

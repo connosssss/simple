@@ -282,6 +282,14 @@ body.layout-right #new-tab {
   height: 15px !important;
 }
 
+body.layout-left #address-bar-part button:not(#downloads-dropdown *),
+body.layout-left #address-actions-group button:not(#downloads-dropdown *),
+body.layout-right #address-bar-part button:not(#downloads-dropdown *),
+body.layout-right #address-actions-group button:not(#downloads-dropdown *) {
+  width: 26px !important;
+  height: 26px !important;
+}
+
 #bookmark svg {
   margin: auto !important;
 }

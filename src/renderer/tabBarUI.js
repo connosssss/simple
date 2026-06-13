@@ -260,30 +260,20 @@ export const renderTabs = (tabs) => {
 
                 });
 
+                if (isSidebar && level > 0) {
+                    const indent = level * 16;
+                    stackContainer.style.setProperty('margin-left', `${indent}px`, 'important');
+                    stackContainer.style.setProperty('width', `calc(100% - ${indent}px)`, 'important');
+                    stackContainer.style.setProperty('border-left', '2px solid var(--theme-border)', 'important');
+                    stackContainer.style.setProperty('border-top-left-radius', '0px', 'important');
+                    stackContainer.style.setProperty('border-bottom-left-radius', '0px', 'important');
+                }
+
                 container.appendChild(stackContainer);
 
                 if (isSidebar) {
                     if (isActiveStack) {
-                        stackTabs.forEach((stTab) => {
-                            const stIndex = tabs.indexOf(stTab);
-                            const tabE = createTabElement(stTab, stIndex, true, tabs, level + 1);
-                            
-                            const indent = (level + 1) * 16;
-                            
-                            tabE.classList.add(
-                                `group-[.layout-left]:ml-[${indent}px]`,
-                                `group-[.layout-left]:w-[calc(100%-${indent}px)]`,
-                                'group-[.layout-left]:border-l-2',
-                                'group-[.layout-left]:border-[var(--theme-border)]',
-                                'group-[.layout-left]:rounded-l-none',
-                                `group-[.layout-right]:ml-[${indent}px]`,
-                                `group-[.layout-right]:w-[calc(100%-${indent}px)]`,
-                                'group-[.layout-right]:border-l-2',
-                                'group-[.layout-right]:border-[var(--theme-border)]',
-                                'group-[.layout-right]:rounded-l-none'
-                            );
-                            container.appendChild(tabE);
-                        });
+                        renderLevel(level + 1, container, [...parentStackIds, stackIdAtLevel]);
                     }
                 } 
             }
@@ -698,5 +688,19 @@ function createTabElement(tab, index, isInStack, tabs, level = 0) {
 
         tabE.setAttribute("data-tab-id", tab.id);
 
+        const isSidebar = document.body.classList.contains('layout-left') || document.body.classList.contains('layout-right');
+        if (isSidebar && level > 0) {
+            const indent = level * 16;
+            tabE.style.setProperty('margin-left', `${indent}px`, 'important');
+            tabE.style.setProperty('width', `calc(100% - ${indent}px)`, 'important');
+            tabE.style.setProperty('border-left', '2px solid var(--theme-border)', 'important');
+            tabE.style.setProperty('border-top-left-radius', '0px', 'important');
+            tabE.style.setProperty('border-bottom-left-radius', '0px', 'important');
+        }
+
         return tabE;
 }
+
+export const rerenderCurrentTabs = () => {
+    if (latestTabs) renderTabs(latestTabs);
+};
