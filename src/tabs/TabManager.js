@@ -49,6 +49,7 @@ class TabManager {
         this.bookmarkBarVisible = false;
         this.saveTimer = null;
         this.dropdownVisible = false;
+        this.downloadsDropdownVisible = false;
         this.uiPosition = 'top';
         this.configPath = path.join(app.getPath('userData'), 'config.json');
 
@@ -66,6 +67,11 @@ class TabManager {
 
     setDropdownVisible(visible) {
         this.dropdownVisible = !!visible;
+        this.resizeWindow();
+    }
+
+    setDownloadsDropdownVisible(visible) {
+        this.downloadsDropdownVisible = !!visible;
         this.resizeWindow();
     }
 

@@ -248,8 +248,8 @@ body.layout-right #new-tab {
   border-bottom: 1px solid rgba(255, 255, 255, 0.06) !important;
 }
 
-#address-bar-part button,
-#address-actions-group button {
+#address-bar-part button:not(#downloads-dropdown *),
+#address-actions-group button:not(#downloads-dropdown *) {
   background: transparent !important;
   border: none !important;
   border-radius: 50% !important;

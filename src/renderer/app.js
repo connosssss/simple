@@ -3,6 +3,7 @@ import { setupBookmarkBarUI } from "./bookmarkBarUI.js";
 import { setupFindBarUI } from "./findBarUI.js";
 import { renderTabs } from "./tabBarUI.js";
 import { setupExtensionsUI } from "./extensionsUI.js";
+import { setupDownloadsUI } from "./downloadsUI.js";
 
 const addressBar = document.getElementById("address-bar");
 
@@ -90,6 +91,7 @@ setupAddressBarUI();
 setupBookmarkBarUI();
 setupFindBarUI();
 setupExtensionsUI();
+setupDownloadsUI();
 setupTabSubscription();
 
 const setupLayoutSubscription = () => {

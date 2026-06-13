@@ -64,6 +64,7 @@
     root.style.setProperty("--theme-border", rgba(theme.accent, 0.55));
     root.style.setProperty("--theme-text", rgba(theme.text, 0.70));
     root.style.setProperty("--theme-accent", theme.accent);
+    root.style.setProperty("--theme-bg-opaque", theme.color);
 
     return theme;
   };

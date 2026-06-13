@@ -22,6 +22,7 @@ const { registerCookieAndTrackerIPC } = require('./cookiesAndTrackers');
 const extensionManager = require('../extensions/extensionManager');
 const bookmarkManager = require('../bookmarks/bookmarks');
 const historyManager = require('../history/history');
+const downloadsManager = require('../downloads/downloadsManager');
 
 const INTERNAL_PAGES = new Set(["about://settings", "about://history"]);
 
@@ -733,6 +734,21 @@ const ipcSetup = () => {
       y: Math.round(bounds.y + 10),
     });
   });
+
+  // Downloads IPC
+  ipcMain.handle('getDownloads', () => downloadsManager.getDownloads());
+  ipcMain.on('pauseDownload', (event, id) => downloadsManager.pauseDownload(id));
+  ipcMain.on('resumeDownload', (event, id) => downloadsManager.resumeDownload(id));
+  ipcMain.on('cancelDownload', (event, id) => downloadsManager.cancelDownload(id));
+  ipcMain.on('removeDownload', (event, id) => downloadsManager.removeDownload(id));
+  ipcMain.on('showInFolder', (event, id) => downloadsManager.showInFolder(id));
+  ipcMain.on('openDownloadedFile', (event, id) => downloadsManager.openFile(id));
+  ipcMain.on('setDownloadsDropdownVisible', (event, visible) => {
+    const tabManager = getTabManager(event);
+    if (tabManager && tabManager.setDownloadsDropdownVisible) {
+      tabManager.setDownloadsDropdownVisible(visible);
+    }
+  });
 }
 
 
@@ -763,28 +779,24 @@ app.whenReady().then(async () => {
   const mainSession = session.fromPartition('persist:main');
   setSessionUserAgent(mainSession);
 
-  const setupDownloadHandler = (ses) => {
-    ses.on('will-download', async (event, item, webContents) => {
-      let ownerWindow = null;
-      try {
-        ownerWindow = BrowserWindow.fromWebContents(webContents);
-      } catch (e) {
-        console.error('Failed to get owner window:', e);
+  // Set up downloads broadcast callback to notify all windows
+  downloadsManager.setBroadcastCallback((type, data) => {
+    for (const winData of WindowManager.getAllWindows()) {
+      if (winData.ui && !winData.ui.webContents.isDestroyed()) {
+        winData.ui.webContents.send(type, data);
       }
+    }
+  });
 
-      try {
-        const { filePath, canceled } = await dialog.showSaveDialog(ownerWindow, {
-          defaultPath: item.getFilename()
-        });
-        if (canceled || !filePath) {
-          item.cancel();
-        } else {
-          item.setSavePath(filePath);
-        }
-      } catch (err) {
-        console.error('Download dialog error:', err);
-        item.cancel();
-      }
+  const setupDownloadHandler = (ses) => {
+    ses.on('will-download', (event, item, webContents) => {
+      // Configure default save dialog options synchronously
+      item.setSaveDialogOptions({
+        defaultPath: item.getFilename()
+      });
+      
+      const downloadId = 'dl_' + require('crypto').randomUUID();
+      downloadsManager.registerDownload(downloadId, item);
     });
   };
 

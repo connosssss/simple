@@ -84,4 +84,18 @@ contextBridge.exposeInMainWorld("electronAPI", {
     clearHistory: () => ipcRenderer.invoke("clearHistory"),
     onUpdateHistory: (callback) => ipcRenderer.on("updateHistory", (event, history) => callback(history)),
     setDropdownVisible: (visible) => ipcRenderer.send("setDropdownVisible", visible),
+
+    // Downloads
+    getDownloads: () => ipcRenderer.invoke("getDownloads"),
+    pauseDownload: (id) => ipcRenderer.send("pauseDownload", id),
+    resumeDownload: (id) => ipcRenderer.send("resumeDownload", id),
+    cancelDownload: (id) => ipcRenderer.send("cancelDownload", id),
+    removeDownload: (id) => ipcRenderer.send("removeDownload", id),
+    showInFolder: (id) => ipcRenderer.send("showInFolder", id),
+    openDownloadedFile: (id) => ipcRenderer.send("openDownloadedFile", id),
+    setDownloadsDropdownVisible: (visible) => ipcRenderer.send("setDownloadsDropdownVisible", visible),
+    onDownloadStarted: (callback) => ipcRenderer.on("download-started", (event, data) => callback(data)),
+    onDownloadUpdated: (callback) => ipcRenderer.on("download-updated", (event, data) => callback(data)),
+    onDownloadDone: (callback) => ipcRenderer.on("download-done", (event, data) => callback(data)),
+    onDownloadRemoved: (callback) => ipcRenderer.on("download-removed", (event, data) => callback(data)),
 })

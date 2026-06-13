@@ -77,12 +77,38 @@
         <button class="theme-button group w-[2.0rem] h-[2.0rem] text-slate-400 hover:text-slate-200 rounded-sm transition-all duration-100 flex items-center justify-center active:scale-95"
           id="bookmark" title="Bookmark page">
         </button>
+
+        <button class="theme-button group relative w-[2.0rem] h-[2.0rem] text-slate-400 hover:text-slate-200 rounded-sm transition-all duration-100 flex items-center justify-center active:scale-95" id="downloads-btn" title="Downloads">
+          <svg class="absolute inset-0 w-full h-full -rotate-90 pointer-events-none hidden" id="downloads-progress-ring" viewBox="0 0 32 32">
+            <circle class="text-slate-700/60" stroke="currentColor" stroke-width="2.5" fill="transparent" r="12" cx="16" cy="16" />
+            <circle class="transition-all duration-300" id="downloads-progress-bar-circle" stroke="var(--theme-accent)" stroke-width="2.5" fill="transparent" r="12" cx="16" cy="16" stroke-dasharray="75.4" stroke-dashoffset="75.4" stroke-linecap="round" />
+          </svg>
+
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5" class="w-4 h-4" id="downloads-icon">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75V16.5M16.5 12 12 16.5m0 0L7.5 12m4.5 4.5V3" />
+          </svg>
+
+          <span class="absolute -top-1 -right-1 text-white text-[9px] font-bold rounded-none h-4 min-w-4 px-1 flex items-center justify-center border border-slate-900 shadow-md hidden" id="downloads-count-badge" style="background-color: var(--theme-accent);">0</span>
+        </button>
         
         <button class="theme-button group w-[2.0rem] h-[2.0rem] text-slate-400 hover:text-slate-200 rounded-sm transition-all duration-100 flex items-center justify-center active:scale-95" id="settings" title="Settings">
           <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.2" class="w-4 h-4">
             <path stroke-linecap="round" stroke-linejoin="round" d="M9.594 3.94c.09-.542.56-.94 1.11-.94h2.593c.55 0 1.02.398 1.11.94l.213 1.281c.063.374.313.686.645.87.074.04.147.083.22.127.324.196.72.257 1.075.124l1.217-.456a1.125 1.125 0 0 1 1.37.49l1.296 2.247a1.125 1.125 0 0 1-.26 1.43l-1.003.828c-.293.241-.438.613-.43.992a7.723 7.723 0 0 1 0 .255c-.008.378.137.75.43.991l1.004.827c.424.35.534.954.26 1.43l-1.298 2.247a1.125 1.125 0 0 1-1.369.491l-1.217-.456c-.355-.133-.75-.072-1.076.124a6.57 6.57 0 0 1-.22.128c-.331.183-.581.495-.644.869l-.213 1.28c-.09.543-.56.941-1.11.941h-2.594c-.55 0-1.02-.398-1.11-.94l-.213-1.281c-.062-.374-.312-.686-.644-.87a6.52 6.52 0 0 1-.22-.127c-.325-.196-.72-.257-1.076-.124l-1.217.456a1.125 1.125 0 0 1-1.369-.49l-1.297-2.247a1.125 1.125 0 0 1 .26-1.43l1.004-.827c.292-.24.437-.613.43-.992a6.932 6.932 0 0 1 0-.255c.007-.378-.138-.75-.43-.991l-1.004-.827a1.125 1.125 0 0 1-.26-1.43l1.297-2.247a1.125 1.125 0 0 1 1.37-.491l1.216.456c.356.133.751.072 1.076-.124.072-.044.146-.087.22-.128c.332-.183.582-.495.645-.869L9.594 3.94ZM12.75 12a.75.75 0 1 1-1.5 0 .75.75 0 0 1 1.5 0Z" />
           </svg>
         </button>
+      </div>
+ 
+
+      <div id="downloads-dropdown" class="absolute right-2 top-full mt-1.5 w-[380px] hidden z-50 rounded-none border border-[var(--theme-border)] shadow-[0_10px_30px_rgba(0,0,0,0.6)] bg-[var(--theme-bg-opaque)] p-3 text-[var(--theme-text)] flex flex-col gap-2 max-h-[300px] overflow-y-auto group-[.layout-bottom]:top-auto group-[.layout-bottom]:bottom-full group-[.layout-bottom]:mt-0 group-[.layout-bottom]:mb-1.5 group-[.layout-left]:w-[calc(100%-12px)] group-[.layout-left]:left-1.5 group-[.layout-left]:right-1.5 group-[.layout-right]:w-[calc(100%-12px)] group-[.layout-right]:left-1.5 group-[.layout-right]:right-1.5">
+
+        <div class="flex items-center justify-between border-b border-[var(--theme-border)] pb-2 mb-1">
+          <span class="font-bold text-sm">Downloads</span>
+          <button id="clear-downloads-btn" class="text-xs text-[var(--theme-text)] opacity-70 hover:opacity-100">Clear all</button>
+        </div>
+
+        <div id="downloads-list-container" class="flex flex-col gap-2.5 overflow-y-auto max-h-[220px]">
+
+        </div>
       </div>
     </div>
 
