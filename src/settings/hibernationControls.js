@@ -1,4 +1,4 @@
-const tabsList = document.getElementById("tabs-list");
+const tabsList = document.getElementById("hibernation-tabs-list");
 const closeAfterSelect = document.getElementById("close-after-select");
 const siteChoiceBar = document.getElementById("siteChoiceBar");
 const searchEngineSelect = document.getElementById("search-engine-select");
@@ -17,63 +17,88 @@ export const setupHibernationControls = () => {
 
   const renderTabRow = (tab, index, container) => {
     const tabDiv = document.createElement("div");
-    tabDiv.className = "flex flex-row items-center justify-between";
+    tabDiv.className = "flex flex-row items-center justify-between p-2 px-3 rounded-md border border-slate-700/30 bg-black/10 hover:bg-black/25 transition-all duration-150 gap-4 mb-1";
 
-      const tabInfo = document.createElement("div");
-      tabInfo.className = "flex flex-row gap-2";
+    const tabInfo = document.createElement("div");
+    tabInfo.className = "flex flex-row items-center gap-3.5 min-w-0 flex-1";
 
-      const tabIndex = document.createElement("div");
-      tabIndex.className = "text-white font-light text-sm min-h-full flex items-center justify-center border-r border-slate-600 max-w-10 min-w-10 py-2";
-      tabIndex.textContent = index + 1;
+    const tabIndex = document.createElement("div");
+    tabIndex.className = "text-xs font-mono font-bold text-slate-500 w-5 text-center flex-shrink-0";
+    tabIndex.textContent = index + 1;
 
-      const tabTitle = document.createElement("div");
-      tabTitle.className = "text-white font-medium min-h-full flex items-center justify-center";
-      tabTitle.textContent = tab.title || "New Tab";
+    const tabTitle = document.createElement("div");
+    tabTitle.className = "text-xs font-semibold text-slate-200 truncate flex-shrink-0";
+    tabTitle.textContent = tab.title || "New Tab";
 
-      const tabStatus = document.createElement("div");
-      tabStatus.className = `text-sm min-h-full ${tab.isActive ? "text-slate-100" : "text-slate-500"} flex items-center justify-center`;
-      tabStatus.textContent = tab.isActive ? "Active" : "Hibernated";
+    const icon = document.createElement("img");
+    icon.className = "w-4 h-4 flex-shrink-0 rounded-sm";
+    
+    let domain = "";
+    try {
+      domain = new URL(tab.address).hostname;
+    } catch (e) {
+      domain = "";
+    }
+    
+    icon.src = tab.iconURL || (domain ? `https://www.google.com/s2/favicons?sz=64&domain=${domain}` : "");
+    
+    icon.onerror = () => {
+      const fallbackSvg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+      fallbackSvg.setAttribute("viewBox", "0 0 24 24");
+      fallbackSvg.setAttribute("fill", "none");
+      fallbackSvg.setAttribute("stroke", "currentColor");
+      fallbackSvg.setAttribute("stroke-width", "1.5");
+      fallbackSvg.setAttribute("class", "w-4 h-4 text-slate-500 flex-shrink-0");
+      fallbackSvg.innerHTML = `<path stroke-linecap="round" stroke-linejoin="round" d="M12 21a9.004 9.004 0 0 0 8.716-6.747M12 21a9.004 9.004 0 0 1-8.716-6.747M12 21c2.485 0 4.5-4.03 4.5-9S14.485 3 12 3m0 18c-2.485 0-4.5-4.03-4.5-9S9.515 3 12 3m0 0a8.997 8.997 0 0 1 7.843 4.582M12 3a8.997 8.997 0 0 0-7.843 4.582m15.686 0A11.953 11.953 0 0 1 12 10.5c-2.998 0-5.74-1.1-7.843-2.918m15.686 0A8.959 8.959 0 0 1 21 12c0 .778-.099 1.533-.284 2.253m0 0A17.919 17.919 0 0 1 12 16.5c-3.162 0-6.133-.815-8.716-2.247m0 0A9.015 9.015 0 0 1 3 12c0-1.605.42-3.113 1.157-4.418" />`;
+      icon.replaceWith(fallbackSvg);
+    };
 
-      const tabDuration = document.createElement("div");
-      tabDuration.className = "text-sm font-light text-slate-400/80 min-h-full flex items-center justify-center";
+    const tabAddress = document.createElement("div");
+    tabAddress.className = "text-[10px] text-slate-500 font-mono truncate min-w-0 flex-1";
+    tabAddress.textContent = tab.address || "about:blank";
+    tabAddress.title = tab.address || "about:blank";
 
-      const activeMinutes = getTimeTabActiveMinutes(tab.lastActiveAt);
-      tabDuration.textContent = activeMinutes;
+    tabInfo.appendChild(tabIndex);
+    tabInfo.appendChild(tabTitle);
+    tabInfo.appendChild(icon);
+    tabInfo.appendChild(tabAddress);
 
-      tabInfo.appendChild(tabIndex);
-      tabInfo.appendChild(tabTitle);
-      tabInfo.appendChild(tabStatus);
-      tabInfo.appendChild(tabDuration);
+    const rightSide = document.createElement("div");
+    rightSide.className = "flex items-center gap-3 flex-shrink-0";
 
+    if (tab.isActive) {
       const hibernateButton = document.createElement("button");
-      hibernateButton.className = `rounded-sm text-sm font-light ${tab.isActive ? "bg-red-700/40" : "bg-slate-700/40"} transition-all duration-100 px-4 py-1 text-white`;
-      hibernateButton.textContent = tab.isActive ? "Hibernate" : "Hibernated";
-      hibernateButton.disabled = !tab.isActive;
-
-      if (tab.isActive) {
-        hibernateButton.addEventListener("click", () => {
-          window.electronAPI.hibernateTab(index);
-        });
-      }
+      hibernateButton.className = "px-3 py-1 text-xs rounded font-medium bg-slate-800/40 border border-slate-700/60 text-slate-300 hover:bg-slate-700/50 hover:text-white hover:border-slate-500 active:scale-95 transition-all duration-100 flex-shrink-0 cursor-pointer shadow-sm";
+      hibernateButton.textContent = "Hibernate";
+      hibernateButton.addEventListener("click", () => {
+        window.electronAPI.hibernateTab(index);
+      });
+      rightSide.appendChild(hibernateButton);
+    } else {
+      const tabStatus = document.createElement("span");
+      tabStatus.className = "text-xs text-slate-400 font-medium px-3 py-1 border border-transparent flex-shrink-0";
+      tabStatus.textContent = "Hibernated";
+      rightSide.appendChild(tabStatus);
+    }
 
     tabDiv.appendChild(tabInfo);
-    tabDiv.appendChild(hibernateButton);
+    tabDiv.appendChild(rightSide);
     container.appendChild(tabDiv);
   };
 
   const createStackHeader = (stackId, stackName, stackTabs) => {
     const header = document.createElement("div");
-    header.className = "flex items-center justify-between mb-1 mt-3 pb-1 border-b border-slate-700/60";
+    header.className = "flex items-center justify-between mb-2 mt-4 pb-2 border-b border-slate-700/50";
 
     const headerLeft = document.createElement("div");
-    headerLeft.className = "flex items-center gap-2";
+    headerLeft.className = "flex items-center gap-2.5";
 
     const nameEl = document.createElement("div");
-    nameEl.className = "text-sm font-semibold text-slate-200";
-    nameEl.textContent = stackName || "Unnamed Stack";
+    nameEl.className = "text-xs font-bold uppercase tracking-wider text-slate-300";
+    nameEl.textContent = stackName || "Tab Stack";
 
-    const countEl = document.createElement("div");
-    countEl.className = "text-xs text-slate-500";
+    const countEl = document.createElement("span");
+    countEl.className = "text-[10px] px-1.5 py-0.5 rounded bg-slate-800/50 border border-slate-700/40 text-slate-400 font-semibold";
     countEl.textContent = `${stackTabs.length} tab${stackTabs.length !== 1 ? "s" : ""}`;
 
     headerLeft.appendChild(nameEl);
@@ -82,14 +107,16 @@ export const setupHibernationControls = () => {
     const hasActiveTabs = stackTabs.some((t) => t.isActive);
 
     const hibernateStackBtn = document.createElement("button");
-    hibernateStackBtn.className = `rounded-sm text-sm font-light ${hasActiveTabs ? "bg-red-700/40" : "bg-slate-700/40"} transition-all duration-100 px-4 py-1 text-white`;
-    hibernateStackBtn.textContent = hasActiveTabs ? "Hibernate Stack" : "All Hibernated";
-    hibernateStackBtn.disabled = !hasActiveTabs;
-
     if (hasActiveTabs) {
+      hibernateStackBtn.className = "px-3 py-1 text-xs rounded font-medium bg-slate-800/40 border border-slate-700/60 text-slate-300 hover:bg-slate-700/50 hover:text-white hover:border-slate-500 active:scale-95 transition-all duration-100 cursor-pointer shadow-sm";
+      hibernateStackBtn.textContent = "Hibernate Stack";
       hibernateStackBtn.addEventListener("click", () => {
         window.electronAPI.hibernateStack(stackId);
       });
+    } else {
+      hibernateStackBtn.className = "px-3 py-1 text-xs rounded font-medium bg-transparent border border-slate-700/50 text-slate-500 cursor-not-allowed";
+      hibernateStackBtn.textContent = "All Hibernated";
+      hibernateStackBtn.disabled = true;
     }
 
     header.appendChild(headerLeft);
@@ -101,8 +128,7 @@ export const setupHibernationControls = () => {
     tabsList.innerHTML = "";
 
     if (tabs.length < 2) {
-
-      tabsList.innerHTML = '<div class="text-slate-400">Must have at least 2 tabs open</div>';
+      tabsList.innerHTML = '<div class="text-slate-500 text-xs py-2">Must have at least 2 tabs open</div>';
       return;
 
     }
@@ -138,8 +164,12 @@ export const setupHibernationControls = () => {
     if (ungrouped.length > 0 && stacks.size > 0) {
 
       const header = document.createElement("div");
-      header.className = "text-sm font-semibold text-slate-400 mb-1 mt-3 pb-1 border-b border-slate-700/60";
-      header.textContent = "Ungrouped";
+      header.className = "text-xs font-bold uppercase tracking-wider text-slate-400 mb-2 mt-4 pb-2 border-b border-slate-700/50 flex items-center gap-2";
+      
+      const textSpan = document.createElement("span");
+      textSpan.textContent = "Ungrouped Tabs";
+      
+      header.appendChild(textSpan);
       tabsList.appendChild(header);
 
     }

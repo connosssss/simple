@@ -2,199 +2,357 @@
 <html>
 <head>
   <meta charset="UTF-8" />
-  <title>Hello World!</title>
+  <title>Settings</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="stylesheet" href="../index.css" />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="./settings.css" />
 </head>
 
-<body class="overflow-y-auto m-0 p-0 bg-slate-950">
-  <div class="w-full h-full p-6">
-    <div class="text-2xl font-bold text-white mb-6">Settings</div>
-
-    <div class="rounded-md p-4 mb-4 text-slate-200">
-      <div class="flex justify-between items-center mb-4 border-b border-slate-600 pb-2">
-        <span class="text-lg font-semibold text-slate-200">Theme</span>
-        <button id="reset-theme-btn" class="px-3 py-1 text-xs font-medium rounded border border-slate-700 bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white transition-all duration-150 shadow-sm flex items-center gap-1 active:scale-95">
-          <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" viewBox="0 0 20 20" fill="currentColor">
-            <path fill-rule="evenodd" d="M4 2a1 1 0 011 1v2.101a7.002 7.002 0 0111.601 2.566 1 1 0 11-1.885.666A5.002 5.002 0 005.999 7H9a1 1 0 110 2H4a1 1 0 01-1-1V3a1 1 0 011-1zm.008 9.057a1 1 0 011.276.61A5.002 5.002 0 0014.001 13H11a1 1 0 110-2h5a1 1 0 011 1v5a1 1 0 11-2 0v-2.101a7.002 7.002 0 01-11.601-2.566 1 1 0 01.61-1.276z" clip-rule="evenodd" />
-          </svg>
-          Reset to default
-        </button>
-      </div>
-      
-      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <div class="flex flex-col gap-2 text-sm">
-            
-            <div class="text-slate-100">Theme color</div>
-          
-          <div class="flex items-center gap-3">
-            <input type="color" id="theme-color" class="" />
-            <span id="theme-color-value" class=" text-xs uppercase"></span>
-          </div>
-        </div>
-
-        <div class="flex flex-col gap-2 text-sm">
-          <div class="text-slate-100">Accent color</div>
-          <div class="flex items-center gap-3">
-            <input type="color" id="theme-accent" class="theme-swatch" />
-            <span id="theme-accent-value" class="text-xs uppercase"></span>
-          </div>
-        </div>
-        
-        <div class="flex flex-col gap-2 text-sm">
-          <div class="text-slate-100">Text color</div>
-          <div class="flex items-center gap-3">
-            <input type="color" id="theme-text" class="theme-swatch" />
-            <span id="theme-text-value" class="text-xs uppercase"></span>
-          </div>
-        </div>
-
-      </div>
-
-      <div class="flex flex-col gap-2 text-sm mt-4">
-        <span class="">Overall opacity</span>
-        <input type="range" id="theme-overall-opacity" min="0.02" max="1" step="0.02" class="w-full accent-slate-400" />
-        <span id="theme-overall-opacity-value" class=" text-xs"></span>
-      </div>
-
-      <div class="flex flex-col gap-2 text-sm mt-4">
-        <span class="">Accent opacity</span>
-        <input type="range" id="theme-accent-opacity" min="0.02" max="1" step="0.02" class="w-full accent-slate-400" />
-        <span id="theme-accent-opacity-value" class="text-xs"></span>
-      </div>
-
-    </div>
-
-    <div class="rounded-md p-4 mb-4 text-slate-200">
-      <div class="text-lg font-semibold mb-4 border-b border-slate-600 text-slate-200">Bookmarks</div>
-      <label class="flex items-center gap-2 text-sm text-slate-300 mb-4 cursor-pointer select-none w-fit">
-        <input type="checkbox" id="show-bookmark-bar" class="w-3.5 h-3.5" />
-        <span>Show bookmark bar</span>
-      </label>
-      <div id="bookmarks-list"></div>
-    </div>
-
-    <div class="rounded-md p-4 mb-4 text-slate-200">
-      <div class="text-lg font-semibold mb-4 border-b border-slate-600 text-slate-200">Extensions</div>
-      
-      <div class="flex flex-col gap-3 mb-4">
-        <label class="text-slate-300 text-sm">Install from Chrome Web Store:</label>
-        
-        <div class="flex gap-2">
-          <input id="extension-url-input"
-            placeholder="Paste Chrome Web Store URL..."
-            class="flex-1 bg-slate-800 p-2 outline-none text-slate-100/80 text-sm rounded-sm " />
-          <button id="extension-install-btn"
-            class="bg-emerald-700/60 text-white text-sm px-4 py-2 rounded-sm">
-            Install
-          </button>
-        </div>
-        <div id="extension-status" class="text-xs hidden"></div>
-        <div class="text-slate-500 text-xs">
-          Electron supports a subset of Chrome APIs. Some extensions may not work correctly.
-        </div>
-      </div>
-
-      <div class="text-sm font-medium text-slate-300 mb-2">Installed Extensions</div>
-      <div id="extensions-list" class="space-y-1">
-        <div class="text-slate-500 text-sm">No extensions installed.</div>
-      </div>
-    </div>
-
-
+<body class="overflow-hidden m-0 p-0 h-screen w-screen">
+  <div class="flex h-screen w-screen overflow-hidden">
     
 
-    <div class="rounded-lg p-4 mb-2">
-      <div class="text-lg font-semibold text-white mb-4 border-b border-slate-600">Manually Hibernate Tabs</div>
-      <div id="tabs-list" class="space-y-2"></div>
-    </div>
+    <div class="w-64 sidebar-bg flex flex-col flex-shrink-0">
+      
 
-    <div class="text-lg font-semibold text-white mb-4 border-b border-slate-600">Automatic Hibernation</div>
-
-    <div class="flex flex-col gap-2 mb-6">
-      <label for="close-after-select" class="text-slate-300 text-sm">Hibernate background tabs after:</label>
-      <select id="close-after-select"
-        class="bg-slate-900 text-white p-2 rounded-sm border border-slate-600 outline-none focus:outline-none">
-        <option value="5">5 Minutes</option>
-        <option value="10">10 Minutes</option>
-        <option value="30">30 Minutes</option>
-        <option value="60">1 Hour</option>
-        <option value="120">2 Hours</option>
-        <option value="240">4 Hours</option>
-        <option value="480">8 Hours</option>
-        <option value="1440">1 Day</option>
-        <option value="-1">Never</option>
-      </select>
-
-      <label class="text-slate-300 text-sm mt-2">Default site on new tab:</label>
-      <input class="w-full bg-slate-800 p-2 outline-none text-slate-100/80 text-sm rounded-sm selection:bg-slate-700" id="siteChoiceBar" onfocus="this.select()"/>
-
-      <label class="text-slate-300 text-sm mt-2">Search engine:</label>
-      <select id="search-engine-select"
-        class="bg-slate-900 text-white p-2 rounded-sm border border-slate-600 outline-none focus:outline-none">
-        <option value="https://www.google.com/search?q=">Google</option>
-        <option value="https://search.brave.com/search?q=">Brave</option>
-        <option value="https://duckduckgo.com/?q=">DuckDuckGo</option>
-        <option value="https://www.bing.com/search?q=">Bing</option>
-        <option value="https://search.yahoo.com/search?p=">Yahoo</option>
-        
-      </select>
-    </div>
-
-    <div class="text-lg font-semibold text-white mb-4 border-b border-slate-600">Layout</div>
-    <div class="flex flex-col gap-2 mb-6">
-      <label for="ui-position-select" class="text-slate-300 text-sm">UI Position:</label>
-      <select id="ui-position-select"
-        class="bg-slate-900 text-white p-2 rounded-sm border border-slate-600 outline-none focus:outline-none">
-        
-        <option value="top">Top</option>
-        <option value="bottom">Bottom</option>
-        <option value="left">Left Sidebar</option>
-        <option value="right">Right Sidebar</option>
-      </select>
-    </div>
-
-    <div class="border-b border-slate-600 mb-3 pb-2">
-      <div class="flex items-center justify-between mb-2">
-        <div class="text-lg font-semibold text-white">Cookies</div>
-        <div class="flex gap-2 items-center flex-wrap justify-end">
-          <input id="cookie-search" placeholder="Filter by domain or name..." class="bg-slate-800 text-white text-sm px-3 py-1 rounded-sm outline-none border border-slate-700 focus:border-slate-500 transition-colors w-48" />
-
-          <button id="clear-third-party"
-            class="bg-orange-900/50  text-orange-200 text-sm px-3 py-1 rounded-sm transition-all duration-100">
-            Clear Trackers
-          </button>
-
-          <label class="flex flex-row items-center gap-1.5 bg-slate-800 text-white text-sm px-3 py-1 rounded-sm transition-all duration-100 cursor-pointer select-none">
-            <input type="checkbox" id="block-trackers" checked class="w-3.5 h-3.5" />
-            Block trackers
-          </label>
-
-
-
-          <button id="clear-all-cookies"
-            class="bg-red-800/60  text-white text-sm px-3 py-1 rounded-sm transition-all duration-100">
-            Clear All Cookies
-          </button>
-
-
+      <div class="p-4 flex flex-col gap-3 flex-shrink-0">
+        <div class="relative">
+          <input type="text" id="settings-search" placeholder="Search Settings..." 
+            class="w-full text-xs transition-all placeholder-slate-500 input-theme rounded-md pl-9 pr-3 py-1.5" />
+          <svg class="w-3.5 h-3.5 text-slate-500 absolute left-3 top-2.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+          </svg>
         </div>
       </div>
-      <label class="flex items-center gap-2 cursor-pointer select-none w-fit">
-        <input type="checkbox" id="toggle-third-party" class=" w-3.5 h-3.5" />
-        <span class="text-slate-400 text-xs">Hide third-party tracker cookies</span>
-      </label>
-    </div>
 
-    <div id="cookie-count" class="text-slate-500 text-xs mb-3"></div>
-    <div id="cookies-list" class="space-y-1 mb-10">
-      <div class="text-slate-500 text-sm">Loading cookies...</div>
+
+      <div class="flex-1 overflow-y-auto px-2 pb-4 space-y-0.5">
+        
+        <button data-target="appearance" class="sidebar-item active w-full flex items-center gap-3 px-3 py-2 text-xs rounded-md text-left">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>
+          Appearance
+        </button>
+
+        <button data-target="themes" class="sidebar-item w-full flex items-center gap-3 px-3 py-2 text-xs rounded-md text-left">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zm0 0h12a2 2 0 002-2v-4a2 2 0 00-2-2h-2.343M11 7.343l1.657-1.657a2 2 0 012.828 0l2.829 2.829a2 2 0 010 2.828l-8.486 8.485M7 17h.01"/></svg>
+          Themes
+        </button>
+
+        <button data-target="startpage" class="sidebar-item w-full flex items-center gap-3 px-3 py-2 text-xs rounded-md text-left">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"/></svg>
+          Start Page
+        </button>
+
+        <button data-target="tabs" class="sidebar-item w-full flex items-center gap-3 px-3 py-2 text-xs rounded-md text-left">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4 5a1 1 0 011-1h14a1 1 0 011 1v2a1 1 0 01-1 1H5a1 1 0 01-1-1V5zM4 13a1 1 0 011-1h14a1 1 0 011 1v2a1 1 0 01-1 1H5a1 1 0 01-1-1v-2z"/></svg>
+          Tabs
+        </button>
+
+        <button data-target="bookmarks" class="sidebar-item w-full flex items-center gap-3 px-3 py-2 text-xs rounded-md text-left">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z"/></svg>
+          Bookmarks
+        </button>
+
+        <button data-target="search" class="sidebar-item w-full flex items-center gap-3 px-3 py-2 text-xs rounded-md text-left">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+          Search
+        </button>
+
+        <button data-target="privacy" class="sidebar-item w-full flex items-center gap-3 px-3 py-2 text-xs rounded-md text-left">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg>
+          Privacy & Security
+        </button>
+
+        <button data-target="extensions" class="sidebar-item w-full flex items-center gap-3 px-3 py-2 text-xs rounded-md text-left">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M11 4a2 2 0 114 0v1a1 1 0 001 1h3a1 1 0 011 1v3a1 1 0 01-1 1h-1a2 2 0 100 4h1a1 1 0 011 1v3a1 1 0 01-1 1h-3a1 1 0 01-1-1v-1a2 2 0 10-4 0v1a1 1 0 01-1 1H7a1 1 0 01-1-1v-3a1 1 0 00-1-1H4a2 2 0 110-4h1a1 1 0 001-1V7a1 1 0 011-1h3a1 1 0 001-1V4z"/></svg>
+          Extensions
+        </button>
+
+        <div class="h-px bg-slate-700/30 my-2 mx-3"></div>
+
+        <button data-target="all" class="sidebar-item w-full flex items-center gap-3 px-3 py-2 text-xs rounded-md text-left">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16"/></svg>
+          Display All
+        </button>
+
+      </div>
+    </div>
+    <div class="flex-1 content-bg flex flex-col h-full overflow-hidden">
+      <span id="settings-page-title" class="hidden"></span>
+
+      <div id="settings-content-area" class="flex-1 overflow-y-auto p-6 space-y-6">
+        
+        <div data-section="appearance" class="settings-section space-y-6">
+          <div class="settings-card card-bg p-5 space-y-4">
+            <h2 class="text-sm font-bold tracking-wide uppercase border-b border-slate-700/50 pb-2">Layout</h2>
+            
+            <div class="text-xs space-y-3">
+              <div class="flex flex-col gap-2">
+                <label for="ui-position-select" class="text-slate-300 text-sm">UI Position</label>
+                <select id="ui-position-select"
+                  class="p-2 rounded outline-none text-xs w-48 input-theme">
+                  <option value="top">Top</option>
+                  <option value="bottom">Bottom</option>
+                  <option value="left">Left Sidebar</option>
+                  <option value="right">Right Sidebar</option>
+                </select>
+                <span class="text-[10px] text-slate-500">Controls the location of the tab strip and address navigation bar.</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div data-section="themes" class="settings-section space-y-6">
+          
+          <div class="settings-card card-bg p-5 space-y-4">
+            <div class="flex justify-between items-center border-b border-slate-700/50 pb-2">
+              <h2 class="text-sm font-bold tracking-wide uppercase">Pre-configured Themes</h2>
+              <button id="reset-theme-btn" class="px-3 py-1 text-[11px] font-medium rounded transition-colors flex items-center gap-1 btn-theme">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5" viewBox="0 0 20 20" fill="currentColor">
+                  <path fill-rule="evenodd" d="M4 2a1 1 0 011 1v2.101a7.002 7.002 0 0111.601 2.566 1 1 0 11-1.885.666A5.002 5.002 0 005.999 7H9a1 1 0 110 2H4a1 1 0 01-1-1V3a1 1 0 011-1zm.008 9.057a1 1 0 011.276.61A5.002 5.002 0 0014.001 13H11a1 1 0 110-2h5a1 1 0 011 1v5a1 1 0 11-2 0v-2.101a7.002 7.002 0 01-11.601-2.566 1 1 0 01.61-1.276z" clip-rule="evenodd" />
+                </svg>
+                Reset Theme
+              </button>
+            </div>
+
+            
+          </div>
+
+
+          <div class="settings-card card-bg p-5 space-y-4">
+            <h2 class="text-sm font-bold tracking-wide uppercase border-b border-slate-700/50 pb-2">Custom Color Palette</h2>
+            
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 text-xs">
+              <div class="flex items-center justify-between p-3 rounded-lg border input-theme">
+                <div class="space-y-0.5">
+                  <div class="font-semibold text-slate-200">Theme Base</div>
+                  <div class="text-[10px] text-slate-400 uppercase font-mono" id="theme-color-value"></div>
+                </div>
+                <input type="color" id="theme-color" />
+              </div>
+
+              <div class="flex items-center justify-between p-3 rounded-lg border input-theme">
+                <div class="space-y-0.5">
+                  <div class="font-semibold text-slate-200">Accent</div>
+                  <div class="text-[10px] text-slate-400 uppercase font-mono" id="theme-accent-value"></div>
+                </div>
+                <input type="color" id="theme-accent" />
+              </div>
+
+              <div class="flex items-center justify-between p-3 rounded-lg border input-theme">
+                <div class="space-y-0.5">
+                  <div class="font-semibold text-slate-200">Text Color</div>
+                  <div class="text-[10px] text-slate-400 uppercase font-mono" id="theme-text-value"></div>
+                </div>
+                <input type="color" id="theme-text" />
+              </div>
+            </div>
+
+            <div class="h-px bg-slate-700/40"></div>
+
+            <div class="space-y-4 text-xs">
+              <div class="flex flex-col gap-1.5">
+                <div class="flex justify-between font-semibold">
+                  <span>Overall theme opacity</span>
+                  <span id="theme-overall-opacity-value" class="font-mono"></span>
+                </div>
+                <input type="range" id="theme-overall-opacity" min="0.02" max="1" step="0.02" class="w-full accent-[var(--theme-accent)]" />
+              </div>
+
+              <div class="flex flex-col gap-1.5">
+                <div class="flex justify-between font-semibold">
+                  <span>Accent color opacity</span>
+                  <span id="theme-accent-opacity-value" class="font-mono"></span>
+                </div>
+                <input type="range" id="theme-accent-opacity" min="0.02" max="1" step="0.02" class="w-full accent-[var(--theme-accent)]" />
+              </div>
+            </div>
+          </div>
+        </div>
+
+
+        <div data-section="startpage" class="settings-section space-y-6">
+          <div class="settings-card card-bg p-5 space-y-4">
+            <h2 class="text-sm font-bold tracking-wide uppercase border-b border-slate-700/50 pb-2">Start Page Customization</h2>
+            
+            <div class="text-xs space-y-3">
+              <div class="flex flex-col gap-2">
+                <label for="siteChoiceBar" class="text-slate-300 text-sm">Default New Tab Site URL</label>
+                <input id="siteChoiceBar" placeholder="https://example.com" onfocus="this.select()"
+                  class="w-full md:w-80 p-2 text-xs rounded outline-none input-theme" />
+                <span class="text-[10px] text-slate-500">Type URL and press <kbd class="font-mono bg-black/20 px-1 rounded text-slate-400">Enter</kbd> to save.</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+
+        <div data-section="tabs" class="settings-section space-y-6">
+          
+          <div class="settings-card card-bg p-5 space-y-4">
+            <h2 class="text-sm font-bold tracking-wide uppercase border-b border-slate-700/50 pb-2">Automatic Hibernation</h2>
+            <div class="text-xs space-y-2">
+              <label for="close-after-select" class="text-slate-300 text-sm">Hibernate background tabs after:</label>
+              <select id="close-after-select"
+                class="p-2 rounded outline-none text-xs w-48 input-theme">
+                <option value="5">5 Minutes</option>
+                <option value="10">10 Minutes</option>
+                <option value="30">30 Minutes</option>
+                <option value="60">1 Hour</option>
+                <option value="120">2 Hours</option>
+                <option value="240">4 Hours</option>
+                <option value="480">8 Hours</option>
+                <option value="1440">1 Day</option>
+                <option value="-1">Never</option>
+              </select>
+              <p class="text-[10px] text-slate-500">Saves system memory by automatically unloading tabs that haven't been viewed in a while.</p>
+            </div>
+          </div>
+
+          <div class="settings-card card-bg p-5 space-y-4">
+            <h2 class="text-sm font-bold tracking-wide uppercase border-b border-slate-700/50 pb-2">Manually Hibernate Tabs</h2>
+            <div class="text-xs space-y-3">
+              <p class="text-slate-400">Click Hibernate to unload a specific active tab or stack right now:</p>
+              <div id="hibernation-tabs-list" class="space-y-2 p-3 rounded-lg max-h-80 overflow-y-auto input-theme"></div>
+            </div>
+          </div>
+        </div>
+
+
+        <div data-section="bookmarks" class="settings-section space-y-6">
+          <div class="settings-card card-bg p-5 space-y-4">
+            <h2 class="text-sm font-bold tracking-wide uppercase border-b border-slate-700/50 pb-2">Bookmarks Bar</h2>
+            
+            <div class="text-xs space-y-3">
+              <label class="flex items-center gap-2 text-sm text-slate-300 cursor-pointer select-none w-fit">
+                <input type="checkbox" id="show-bookmark-bar" class="w-3.5 h-3.5 input-theme rounded" />
+                <span class="font-semibold text-slate-200">Show bookmark bar</span>
+              </label>
+              
+              <div class="h-px bg-slate-700/40 my-2"></div>
+              
+              <div class="space-y-2">
+                <div class="font-semibold text-slate-200 text-sm">Bookmarks List</div>
+                <div id="bookmarks-list" class="space-y-1 p-3 rounded-lg max-h-80 overflow-y-auto input-theme"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+
+        <div data-section="search" class="settings-section space-y-6">
+          <div class="settings-card card-bg p-5 space-y-4">
+            <h2 class="text-sm font-bold tracking-wide uppercase border-b border-slate-700/50 pb-2">Search Settings</h2>
+            
+            <div class="text-xs space-y-2">
+              <label for="search-engine-select" class="text-slate-300 text-sm font-medium">Default Search Engine:</label>
+              <select id="search-engine-select"
+                class="p-2 rounded outline-none text-xs w-48 block input-theme">
+                <option value="https://www.google.com/search?q=">Google</option>
+                <option value="https://search.brave.com/search?q=">Brave</option>
+                <option value="https://duckduckgo.com/?q=">DuckDuckGo</option>
+                <option value="https://www.bing.com/search?q=">Bing</option>
+                <option value="https://search.yahoo.com/search?p=">Yahoo</option>
+              </select>
+              <p class="text-[10px] text-slate-500 pt-1">This engine will be used when query terms are typed into the address field.</p>
+            </div>
+          </div>
+        </div>
+
+
+        <div data-section="privacy" class="settings-section space-y-6">
+          <div class="settings-card card-bg p-5 space-y-4">
+            <div class="flex justify-between items-center border-b border-slate-700/50 pb-2 flex-wrap gap-2">
+              <h2 class="text-sm font-bold tracking-wide uppercase">Tracker Blocking</h2>
+              <label class="flex items-center gap-2 text-slate-300 px-3 py-1 rounded cursor-pointer select-none text-xs input-theme">
+                <input type="checkbox" id="block-trackers" checked class="w-3.5 h-3.5" />
+                <span>Block trackers</span>
+              </label>
+            </div>
+            <p class="text-xs text-slate-400">Protects your privacy by blocking third-party tracking scripts, ads, and known tracking domains.</p>
+          </div>
+
+          <div class="settings-card card-bg p-5 space-y-4">
+            <div class="flex justify-between items-center border-b border-slate-700/50 pb-2 flex-wrap gap-2">
+              <h2 class="text-sm font-bold tracking-wide uppercase">Cookies</h2>
+              <div class="flex gap-2 items-center flex-wrap">
+                <input id="cookie-search" placeholder="Filter by domain..." 
+                  class="text-xs px-3 py-1.5 rounded outline-none w-48 input-theme" />
+
+                <button id="clear-third-party"
+                  class="bg-amber-950/40 border border-amber-800/40 hover:bg-amber-900/40 text-amber-200 text-xs px-3 py-1.5 rounded transition-all">
+                  Clear Trackers
+                </button>
+
+                <button id="clear-all-cookies"
+                  class="bg-red-950/40 border border-red-800/40 hover:bg-red-900/60 text-red-200 text-xs px-3 py-1.5 rounded transition-all">
+                  Clear All
+                </button>
+              </div>
+            </div>
+
+            <div class="text-xs space-y-3">
+              <label class="flex items-center gap-2 cursor-pointer select-none text-slate-300">
+                <input type="checkbox" id="toggle-third-party" class="w-3.5 h-3.5" />
+                <span>Hide third-party tracker cookies</span>
+              </label>
+
+              <div id="cookie-count" class="text-slate-500 text-xs font-mono"></div>
+              
+              <div id="cookies-list" class="space-y-1 max-h-80 overflow-y-auto p-3 rounded-lg input-theme">
+                <div class="text-slate-500">Loading cookies...</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+
+        <div data-section="extensions" class="settings-section space-y-6">
+          <div class="settings-card card-bg p-5 space-y-4">
+            <h2 class="text-sm font-bold tracking-wide uppercase border-b border-slate-700/50 pb-2">Install Chrome Extensions</h2>
+            
+            <div class="flex flex-col gap-3 text-xs">
+              <label class="text-slate-300">Install from Chrome Web Store:</label>
+              
+              <div class="flex gap-2">
+                <input id="extension-url-input"
+                  placeholder="Paste Chrome Web Store URL..."
+                  class="flex-1 p-2 text-xs rounded outline-none input-theme" />
+                
+                <button id="extension-install-btn"
+                  class="text-xs px-4 py-2 rounded font-semibold transition-colors btn-theme">
+                  Install
+                </button>
+              </div>
+              
+              <div id="extension-status" class="text-xs hidden p-2 rounded font-mono input-theme"></div>
+              
+              <div class="text-slate-500 text-[10px]">
+                Electron supports a subset of Chrome extension APIs. Some extensions may not function correctly.
+              </div>
+            </div>
+          </div>
+
+          <div class="settings-card card-bg p-5 space-y-4">
+            <h2 class="text-sm font-bold tracking-wide uppercase border-b border-slate-700/50 pb-2">Installed Extensions</h2>
+            <div id="extensions-list" class="space-y-2 text-xs text-slate-300">
+              <div class="text-slate-500">No extensions installed.</div>
+            </div>
+          </div>
+        </div>
+
+      </div>
     </div>
 
   </div>
 
   <script src="../theme.js"></script>
   <script type="module" src="./settingsUI.js"></script>
+  
+  <script src="./settings.js"></script>
 </body>
 
 </html>
