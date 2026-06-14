@@ -114,12 +114,5 @@ input:focus, select:focus {
   border-color: var(--theme-accent) !important;
   box-shadow: 0 0 0 2px rgba(157, 78, 221, 0.2);
 }
-.theme-preset-card {
-  transition: transform 0.15s ease, border-color 0.15s ease;
-  border-color: var(--theme-border) !important;
-}
-.theme-preset-card:hover {
-  transform: translateY(-2px);
-}
 
 

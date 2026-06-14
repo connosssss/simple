@@ -1,19 +1,3 @@
-window.applyPresetTheme = (color, accent, text) => {
-  const colorInput = document.getElementById("theme-color");
-  const accentInput = document.getElementById("theme-accent");
-  const textInput = document.getElementById("theme-text");
-  
-  if (colorInput && accentInput && textInput) {
-    colorInput.value = color;
-    accentInput.value = accent;
-    textInput.value = text;
-    
-    colorInput.dispatchEvent(new Event("input"));
-    accentInput.dispatchEvent(new Event("input"));
-    textInput.dispatchEvent(new Event("input"));
-  }
-};
-
 document.addEventListener("DOMContentLoaded", () => {
   const items = document.querySelectorAll(".sidebar-item");
   const sections = document.querySelectorAll(".settings-section");
