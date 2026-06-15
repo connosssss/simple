@@ -1,6 +1,6 @@
 import { setupAddressBarUI, updateAddressBar } from "./addressBarUI.js";
 import { setupBookmarkBarUI } from "./bookmarkBarUI.js";
-import { setupFindBarUI } from "./findBarUI.js";
+import { setupFindBarUI } from "./findbarUI.js";
 import { renderTabs, rerenderCurrentTabs } from "./tabBarUI.js";
 import { setupExtensionsUI } from "./extensionsUI.js";
 import { setupDownloadsUI } from "./downloadsUI.js";
