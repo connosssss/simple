@@ -101,6 +101,16 @@ class TabManager {
             } = newAddress);
         }
 
+        // Inherit stack context if in stacks and no explicit stack config is provided
+        if (!isStacked && !stackId && (!stackIds || stackIds.length === 0)) {
+            const activeTab = this.tabs[this.currentIndex];
+            if (activeTab && activeTab.stackIds && activeTab.stackIds.length > 0) {
+                isStacked = true;
+                stackIds = [...activeTab.stackIds];
+                stackId = stackIds[0];
+            }
+        }
+
         if (INTERNAL_PAGES.has(newAddress)) {
             const contentView = this.createSettingsTab(newAddress, switchTo);
             return contentView;
@@ -114,8 +124,13 @@ class TabManager {
             stackIds: stackIds
         });
 
-        // Migration for new stackIds structure
-        if (!newTab.stackIds) {
+        // Ensure stackIds is correctly populated
+        if (stackIds && stackIds.length > 0) {
+            newTab.stackIds = [...stackIds];
+            newTab.stackId = stackIds[0];
+            newTab.isStacked = true;
+        } else if (!newTab.stackIds) {
+            // Migration for new stackIds structure
             newTab.stackIds = newTab.stackId ? [newTab.stackId] : [];
         }
 

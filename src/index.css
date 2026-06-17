@@ -78,6 +78,7 @@
   padding: 4px 8px !important;
   gap: 6px !important;
   align-items: center !important;
+  overflow-y: hidden !important;
 }
 
 #tabs-list > div,

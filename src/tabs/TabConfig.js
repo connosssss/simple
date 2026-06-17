@@ -63,6 +63,7 @@ module.exports = {
             title: tab.title,
             isStacked: tab.isStacked,
             stackId: tab.stackId,
+            stackIds: tab.stackIds || []
         }));
 
         return {
@@ -149,10 +150,13 @@ module.exports = {
 
                 if (config.tabs && Array.isArray(config.tabs)) {
                     config.tabs.forEach(tabData => {
-                        this.createTab(tabData.address, false, 
-                            tabData.isStacked || false,
-                            tabData.stackId || null
-                        );
+                        this.createTab({
+                            address: tabData.address,
+                            switchTo: false,
+                            isStacked: tabData.isStacked || false,
+                            stackId: tabData.stackId || null,
+                            stackIds: tabData.stackIds || []
+                        });
                     });
                     
                     if (this.tabs.length > 0) {
