@@ -584,22 +584,58 @@ class TabManager {
         });
     }
 
-    checkAutoHibernation() {
+    async checkAutoHibernation() {
         if (this.closeAfter === -1) return;
 
         const now = Date.now();
         const closeAfterMs = this.closeAfter * 60 * 1000;
 
-        this.tabs.forEach((tab, index) => {
-            if (index === this.currentIndex) return;
-            if (!tab.isActive || !tab.contentView) return;
-            if (tab.keepActive) return;
+        const candidates = this.tabs.map((tab, index) => ({ tab, originalIndex: index }))
+            .filter(({ tab, originalIndex }) => {
+                if (originalIndex === this.currentIndex) return false;
+                if (!tab.isActive || !tab.contentView) return false;
+                if (tab.keepActive) return false;
+                return true;
+            });
+
+        for (const { tab } of candidates) {
+            if (!this.tabs.includes(tab)) continue;
+            if (this.tabs.indexOf(tab) === this.currentIndex) continue;
+            if (!tab.isActive || !tab.contentView) continue;
+
+            let isVideoPlaying = false;
+            if (isLiveWebContents(tab.contentView)) {
+                try {
+                    if (tab.contentView.webContents.isCurrentlyAudible()) {
+                        isVideoPlaying = true;
+                    } else {
+                        isVideoPlaying = await tab.contentView.webContents.executeJavaScript(`
+                            (() => {
+                                const videos = Array.from(document.querySelectorAll('video'));
+                                return videos.some(v => !v.paused && !v.ended && v.readyState >= 3);
+                            })()
+                        `).catch(() => false);
+                    }
+                } 
+                
+                catch (err) {
+                    console.error('Failed to check if video is playing in tab:', err);
+                }
+            }
+
+            if (isVideoPlaying) {
+                tab.lastActiveAt = now;
+                continue;
+            }
 
             const inactiveDuration = now - tab.lastActiveAt;
             if (inactiveDuration >= closeAfterMs) {
-                this.sleep(index);
+                const index = this.tabs.indexOf(tab);
+                if (index !== -1) {
+                    this.sleep(index);
+                }
             }
-        });
+        }
     }
 
     zoomIn(index = this.currentIndex) {
