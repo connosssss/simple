@@ -188,4 +188,86 @@ module.exports = {
         this.sendTabData(true);
     },
 
+    moveStackIntoStack(dragStackId, targetStackIds) {
+        if (!Array.isArray(targetStackIds)) {
+            targetStackIds = [targetStackIds];
+        }
+
+       
+        const tabsToMove = this.tabs.filter(tab => tab.stackIds && tab.stackIds.includes(dragStackId));
+        if (tabsToMove.length === 0) return;
+
+        const descendants = new Set();
+        tabsToMove.forEach(tab => {
+            const idx = tab.stackIds.indexOf(dragStackId);
+            if (idx !== -1) {
+                tab.stackIds.slice(idx + 1).forEach(id => descendants.add(id));
+            }
+        });
+
+        if (targetStackIds.some(id => id === dragStackId || descendants.has(id))) {
+            return;
+        }
+
+        const oldStackIdsToClean = new Set();
+      tabsToMove.forEach(tab => {
+          
+            tab.stackIds.forEach(id => {
+                oldStackIdsToClean.add(id);
+            });
+        });
+
+        tabsToMove.forEach(tab => {
+            const idx = tab.stackIds.indexOf(dragStackId);
+            if (idx !== -1) {
+                const subPath = tab.stackIds.slice(idx);
+                tab.stackIds = [...targetStackIds, ...subPath];
+                tab.stackId = tab.stackIds[0];
+                tab.isStacked = true;
+            }
+        });
+
+        oldStackIdsToClean.forEach(id => {
+            this.cleanupStack(id);
+        });
+
+        this.sendTabData(true);
+    },
+
+    moveStackToTab(dragStackId, targetTabIndex, parentStackIds = []) {
+        const targetTab = this.tabs[targetTabIndex];
+        if (!targetTab) return;
+
+        if (targetTab.isStacked) {
+            this.moveStackIntoStack(dragStackId, targetTab.stackIds);
+        }
+
+        else {
+            const tabsToMove = this.tabs.filter(tab => tab.stackIds && tab.stackIds.includes(dragStackId));
+          const descendants = new Set();
+          
+            tabsToMove.forEach(t => {
+                const idx = t.stackIds.indexOf(dragStackId);
+                if (idx !== -1) {
+                    t.stackIds.slice(idx + 1).forEach(id => descendants.add(id));
+                }
+            });
+
+            if (parentStackIds.some(id => id === dragStackId || descendants.has(id))) {
+                return;
+            }
+
+            const newStackId = crypto.randomUUID();
+            targetTab.isStacked = true;
+            targetTab.stackIds = [...parentStackIds, newStackId];
+            targetTab.stackId = targetTab.stackIds[0];
+            
+            
+            this.stackNames[newStackId] = `Stack ${this.nextStackNumber}`;
+            this.nextStackNumber++;
+            
+            this.moveStackIntoStack(dragStackId, [...parentStackIds, newStackId]);
+        }
+    },
+
 };

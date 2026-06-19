@@ -91,18 +91,20 @@ class TabManager {
     }
 
     createTab(newAddress = "", switchTo = true, isStacked = false, stackId = null, stackIds = null) {
+        let preventStackInherit = false;
         if (typeof newAddress === "object" && newAddress !== null) {
             ({
                 address: newAddress = "",
                 switchTo = true,
                 isStacked = false,
                 stackId = null,
-                stackIds = null
+                stackIds = null,
+                preventStackInherit = false
             } = newAddress);
         }
 
         // Inherit stack context if in stacks and no explicit stack config is provided
-        if (!isStacked && !stackId && (!stackIds || stackIds.length === 0)) {
+        if (!preventStackInherit && !isStacked && !stackId && (!stackIds || stackIds.length === 0)) {
             const activeTab = this.tabs[this.currentIndex];
             if (activeTab && activeTab.stackIds && activeTab.stackIds.length > 0) {
                 isStacked = true;

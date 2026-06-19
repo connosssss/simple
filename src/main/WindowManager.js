@@ -141,7 +141,7 @@ class WindowManager {
                         accelerator: 'CmdOrCtrl+T',
                         click: (menuItem, browserWindow) => {
                             const data = this.getActiveWindowData(browserWindow);
-                            if (data) data.tabManager.createTab();
+                            if (data) data.tabManager.createTab({ preventStackInherit: true });
                         }
                     },
                     {

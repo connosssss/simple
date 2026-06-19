@@ -68,6 +68,8 @@ contextBridge.exposeInMainWorld("electronAPI", {
     showStackContextMenu: (vars) => ipcRenderer.send("showStackContextMenu", vars),
     renameStack: (stackId, name) => ipcRenderer.send("renameStack", stackId, name),
     reorderStack: (stackId, toIndex) => ipcRenderer.send("reorderStack", stackId, toIndex),
+    moveStack: (dragStackId, targetStackIds) => ipcRenderer.send("moveStack", dragStackId, targetStackIds),
+    moveStackToTab: (dragStackId, targetTabIndex, parentStackIds) => ipcRenderer.send("moveStackToTab", dragStackId, targetTabIndex, parentStackIds),
     onPromptStackName: (callback) => ipcRenderer.on('promptStackName', (event, data) => callback(data)),
     stackBarsVisible: (count) => ipcRenderer.send("stackBarsVisible", count),
     bookmarkBarVisible: (visible) => ipcRenderer.send("bookmarkBarVisible", visible),

@@ -38,7 +38,7 @@ const setupThemeSync = () => {
 
 const setupWindowControls = () => {
   document.getElementById("new-tab").addEventListener("click", () => {
-    window.electronAPI.createTab();
+    window.electronAPI.createTab({ preventStackInherit: true });
   });
 
   document.getElementById("settings").addEventListener("click", () => {

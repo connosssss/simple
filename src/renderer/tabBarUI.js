@@ -19,6 +19,7 @@ tabsList.ondrop = (e) => {
   const dragStackId = e.dataTransfer.getData("application/stack-id");
   
     if (dragStackId) {
+        window.electronAPI.moveStack(dragStackId, []);
         window.electronAPI.reorderStack(dragStackId, 1000);
         return;
     }
@@ -199,7 +200,18 @@ export const renderTabs = (tabs) => {
                   
                     if (dragStackId) {
                         if (dragStackId !== stackIdAtLevel) {
-                             window.electronAPI.reorderStack(dragStackId, globalIndex);
+                            const rect = stackContainer.getBoundingClientRect();
+                          const x = e.clientX - rect.left;
+                          
+                            if (x > rect.width * 0.25 && x < rect.width * 0.75) {
+                                const targetPath = [...parentStackIds, stackIdAtLevel];
+                                window.electronAPI.moveStack(dragStackId, targetPath);
+                            }
+
+                            else {
+                                window.electronAPI.moveStack(dragStackId, parentStackIds);
+                                window.electronAPI.reorderStack(dragStackId, globalIndex);
+                            }
                         }
                       
                         return;
@@ -328,7 +340,10 @@ export const renderTabs = (tabs) => {
                 e.stopPropagation();
 
                 const dragStackId = e.dataTransfer.getData("application/stack-id");
-                if (dragStackId) return; 
+                if (dragStackId) {
+                    window.electronAPI.moveStack(dragStackId, currentPath);
+                    return;
+                } 
 
                 const startingIndex = parseInt(e.dataTransfer.getData("text/plain"));
                 if (!Number.isNaN(startingIndex) && latestTabs) {
@@ -530,7 +545,26 @@ function createTabElement(tab, index, isInStack, tabs, level = 0) {
             
           
             if (dragStackId) {
-                window.electronAPI.reorderStack(dragStackId, index);
+                const rect = tabE.getBoundingClientRect();
+                const x = e.clientX - rect.left;
+
+                const targetParentPath = activeStackIds.slice(0, level);
+
+                if (x > rect.width * 0.25 && x < rect.width * 0.75) {
+                    if (tab.isStacked) {
+                        const targetPath = tab.stackIds ? [...tab.stackIds] : [tab.stackId];
+                        window.electronAPI.moveStack(dragStackId, targetPath);
+                    }
+
+                    else {
+                        window.electronAPI.moveStackToTab(dragStackId, index, targetParentPath);
+                    }
+                }
+
+                else {
+                    window.electronAPI.moveStack(dragStackId, targetParentPath);
+                    window.electronAPI.reorderStack(dragStackId, index);
+                }
                 return;
             }
 

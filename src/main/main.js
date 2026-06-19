@@ -159,6 +159,8 @@ const ipcSetup = () => {
   onTabManager("removeFromStack", (tabManager, event, tabIndex, depth) => tabManager.removeFromStack(tabIndex, depth));
   onTabManager("renameStack", (tabManager, event, stackId, name) => tabManager.renameStack(stackId, name));
   onTabManager("reorderStack", (tabManager, event, stackId, toIndex) => tabManager.reorderStack(stackId, toIndex));
+  onTabManager("moveStack", (tabManager, event, dragStackId, targetStackIds) => tabManager.moveStackIntoStack(dragStackId, targetStackIds));
+  onTabManager("moveStackToTab", (tabManager, event, dragStackId, targetTabIndex, parentStackIds) => tabManager.moveStackToTab(dragStackId, targetTabIndex, parentStackIds));
 
   onWindowData("stackBarsVisible", (data, event, count) => {
 
