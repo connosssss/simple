@@ -1,7 +1,7 @@
 const { WebContentsView, ipcMain } = require("electron");
 const path = require("node:path");
-const crypto = require("node:crypto");
 const historyManager = require("../history/history");
+const { Tab } = require("./TabTree");
 
 const SETTINGS_ADDRESS = "about://settings";
 const SETTINGS_TITLE = "Settings";
@@ -12,24 +12,7 @@ const SETTINGS_FILE = path.join(__dirname, "../settings/settings.html");
 const HISTORY_FILE = path.join(__dirname, "../history/history.html");
 const PRELOAD_FILE = path.join(__dirname, "../main/preload.js");
 
-const createBaseTab = (overrides = {}) => ({
-  id: crypto.randomUUID(),
-  contentView: null,
-  address: "",
-  title: "",
-  isActive: true,
-  iconURL: "",
-  isStacked: false,
-  stackId: null,
-  lastActiveAt: Date.now(),
-  keepActive: false,
-  isSettingsTab: false,
-  isLoading: false,
-  lifecycleCleanup: null,
-  contextMenuHandler: null,
-  isNewTab: false,
-  ...overrides,
-});
+const createBaseTab = (overrides = {}) => new Tab(overrides);
 
 const isLiveWebContents = (contentView) =>
   Boolean(contentView && contentView.webContents && !contentView.webContents.isDestroyed());
@@ -225,13 +208,14 @@ const attachTabLifecycle = (manager, tab) => {
     }
 
     const shouldOpenInForeground = details.disposition === "foreground-tab";
-    const shouldStayInStack = Boolean(tab.isStacked && tab.stackId);
+    const shouldStayInStack = Boolean(tab.isStacked && tab.stackIds && tab.stackIds.length > 0);
 
     manager.createTab({
       address: details.url,
       switchTo: shouldOpenInForeground,
       isStacked: shouldStayInStack,
-      stackId: shouldStayInStack ? tab.stackId : null,
+      stackId: shouldStayInStack ? tab.stackIds[0] : null,
+      stackIds: shouldStayInStack ? [...tab.stackIds] : [],
     });
 
     return { action: "deny" };

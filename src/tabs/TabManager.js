@@ -5,6 +5,7 @@ const path = require('path');
 const TabStacking = require('./TabStacking');
 const TabContextMenu = require('./TabContextMenu');
 const TabConfig = require('./TabConfig');
+const { Tree } = require('./TabTree');
 const Bookmarks = require('../bookmarks/bookmarks');
 
 
@@ -36,6 +37,7 @@ class TabManager {
         this.mainWindow = mainWindow;
         this.ui = ui; 
         this.tabs = [];
+        this.tabTree = new Tree();
         this.mainTab = null;
         this.currentIndex = -1;
         this.lastOpenedTabs = [];
@@ -67,12 +69,18 @@ class TabManager {
 
     setDropdownVisible(visible) {
         this.dropdownVisible = !!visible;
+        this.tabTree.addressBar.setDropdownVisible(visible);
         this.resizeWindow();
     }
 
     setDownloadsDropdownVisible(visible) {
         this.downloadsDropdownVisible = !!visible;
+        this.tabTree.addressBar.setDownloadsDropdownVisible(visible);
         this.resizeWindow();
+    }
+
+    rebuildTabTree() {
+        this.tabTree.rebuildFromTabs(this.tabs, this.stackNames);
     }
 
 
@@ -140,6 +148,7 @@ class TabManager {
         
         this.tabs.push(newTab);
         this.lastOpenedTabs.push(newTab);
+        this.rebuildTabTree();
 
         if (switchTo) {
             this.switchTab(this.tabs.length - 1);
@@ -158,6 +167,7 @@ class TabManager {
         
         this.tabs.push(newTab);
         this.lastOpenedTabs.push(newTab);
+        this.rebuildTabTree();
 
         if (switchTo) {
             this.switchTab(this.tabs.length - 1);
@@ -185,6 +195,7 @@ class TabManager {
 
         this.mainTab = nextTab;
         this.mainTab.lastActiveAt = Date.now();
+        this.tabTree.addressBar.setAddress(this.mainTab.isNewTab ? "" : this.mainTab.address);
         this.mainWindow.contentView.addChildView(this.mainTab.contentView);
         
         try {
@@ -215,6 +226,7 @@ class TabManager {
         this.lastOpenedTabs = this.lastOpenedTabs.filter(t => t !== tabToClose);
         
         this.tabs.splice(tabID, 1);
+        this.rebuildTabTree();
         
         oldStackIds.forEach(id => this.cleanupStack(id));
 
@@ -334,6 +346,7 @@ class TabManager {
         const boundedIndex = Math.max(0, Math.min(toIndex, this.tabs.length - 1));
         const [tabToMove] = this.tabs.splice(fromIndex, 1);
         this.tabs.splice(boundedIndex, 0, tabToMove);
+        this.rebuildTabTree();
 
         if (this.mainTab) {
             this.currentIndex = this.tabs.indexOf(this.mainTab);
@@ -350,6 +363,7 @@ class TabManager {
 
         nonStackTabs.splice(boundedIndex, 0, ...stackTabs);
         this.tabs = nonStackTabs;
+        this.rebuildTabTree();
 
         if (this.mainTab) {
             this.currentIndex = this.tabs.indexOf(this.mainTab);
@@ -358,6 +372,11 @@ class TabManager {
     }
 
     sendTabData(forceSave = false) {
+        this.rebuildTabTree();
+        if (this.mainTab) {
+            this.tabTree.addressBar.setAddress(this.mainTab.isNewTab ? "" : this.mainTab.address);
+        }
+
         const tabData = this.tabs.map((tab, index) => ({
             id: tab.id || (tab.id = require('crypto').randomUUID()),
             index: index,
@@ -378,13 +397,15 @@ class TabManager {
             isLoading: Boolean(tab.isLoading)
         }));
 
-        this.ui.webContents.send("updateTabs", tabData);
+        const treeData = this.tabTree.toJSON();
+
+        this.ui.webContents.send("updateTabs", tabData, treeData);
         this.saveConfig(forceSave);
 
         const settingsTabs = this.getSettingsTabs();
       
         settingsTabs.forEach(t => {
-            t.contentView.webContents.send("updateTabs", tabData);
+            t.contentView.webContents.send("updateTabs", tabData, treeData);
         });
     }
 
@@ -484,6 +505,7 @@ class TabManager {
 
         this.tabs.splice(index, 1);
         this.lastOpenedTabs = this.lastOpenedTabs.filter(t => t !== tab);
+        this.rebuildTabTree();
         
         oldStackIds.forEach(id => this.cleanupStack(id));
 
@@ -526,6 +548,7 @@ class TabManager {
 
         this.tabs.push(tab);
         this.lastOpenedTabs.push(tab);
+        this.rebuildTabTree();
         this.switchTab(this.tabs.length - 1);
         this.sendTabData(true);
     }

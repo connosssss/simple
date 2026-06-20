@@ -3,6 +3,7 @@ const stackBarsContainer = document.getElementById("stack-bars-container");
 
 let activeStackIds = [];
 const lastActiveStackTab = new Map();
+const collapsedStacks = new Set();
 
 
 const selectedTabIds = new Set();
@@ -158,6 +159,25 @@ export const renderTabs = (tabs) => {
 
                 const isStackLoading = stackTabs.some(st => st.isLoading);
 
+                if (isSidebar) {
+                    const chevron = document.createElement("span");
+                    const isCollapsed = collapsedStacks.has(stackIdAtLevel);
+                    chevron.className = "cursor-pointer flex items-center justify-center w-3 h-3 text-slate-400 hover:text-white transition-transform duration-100 flex-shrink-0 mr-1";
+                    chevron.innerHTML = isCollapsed 
+                        ? `<svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg>`
+                        : `<svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/></svg>`;
+                    chevron.onclick = (e) => {
+                        e.stopPropagation();
+                        if (isCollapsed) {
+                            collapsedStacks.delete(stackIdAtLevel);
+                        } else {
+                            collapsedStacks.add(stackIdAtLevel);
+                        }
+                        renderTabs(tabs);
+                    };
+                    stackContainer.appendChild(chevron);
+                }
+
                 const nameSpan = document.createElement("span");
                 nameSpan.className = "truncate flex-1 overflow-hidden text-sm";
                 let sName = tab.stackNames && tab.stackNames[level] ? tab.stackNames[level] : "Stack";
@@ -170,6 +190,8 @@ export const renderTabs = (tabs) => {
                 countBadge.className = "text-[10px] opacity-50 flex-shrink-0 pointer-events-none";
                 countBadge.textContent = stackTabs.length;
                 stackContainer.appendChild(countBadge);
+
+
 
 
 
@@ -233,6 +255,17 @@ export const renderTabs = (tabs) => {
                   clickTimer = setTimeout(() => {
                     clickTimer = null;
 
+                    if (isSidebar) {
+                        const isCollapsed = collapsedStacks.has(stackIdAtLevel);
+                        if (isCollapsed) {
+                            collapsedStacks.delete(stackIdAtLevel);
+                        } else {
+                            collapsedStacks.add(stackIdAtLevel);
+                        }
+                        renderTabs(tabs);
+                        return;
+                    }
+
                     if (isActiveStack) {
                         activeStackIds = [...parentStackIds];
                         renderTabs(tabs);
@@ -284,7 +317,8 @@ export const renderTabs = (tabs) => {
                 container.appendChild(stackContainer);
 
                 if (isSidebar) {
-                    if (isActiveStack) {
+                    const isCollapsed = collapsedStacks.has(stackIdAtLevel);
+                    if (!isCollapsed) {
                         renderLevel(level + 1, container, [...parentStackIds, stackIdAtLevel]);
                     }
                 } 

@@ -49,18 +49,27 @@ const setupWindowControls = () => {
 const setupTabSubscription = () => {
   let previousTabCount = null;
 
-  window.electronAPI.onUpdateTabs((tabs) => {
+  const findTreeNode = (node, type) => {
+    if (!node) return null;
+    if (node.type === type) return node;
+
+    for (const child of node.children || []) {
+      const match = findTreeNode(child, type);
+      if (match) return match;
+    }
+
+    return null;
+  };
+
+  window.electronAPI.onUpdateTabs((tabs, tabTree) => {
     renderTabs(tabs);
 
     const mainTab = tabs.find((tab) => tab.isMainTab);
     if (mainTab) {
-      if (mainTab.isNewTab) {
-        updateAddressBar("");
-      }
+      const addressBarNode = findTreeNode(tabTree, "addressBar");
+      const addressFromTree = addressBarNode?.value?.currentAddress;
+      updateAddressBar(addressFromTree ?? (mainTab.isNewTab ? "" : mainTab.address));
 
-      else {
-        updateAddressBar(mainTab.address);
-      }
       const windowTitle = document.getElementById("window-title");
 
       if (windowTitle) {

@@ -12,7 +12,9 @@ module.exports = {
     cleanupStack(stackId, excludedTab = null) {
         if (!stackId) return;
 
-        const remainingTabs = this.tabs.filter(tab => tab.stackIds && tab.stackIds.includes(stackId) && tab !== excludedTab);
+        const treeTabs = this.tabTree ? this.tabTree.getTabsInStack(stackId) : [];
+        const remainingTabs = (treeTabs.length > 0 ? treeTabs : this.tabs)
+            .filter(tab => tab.stackIds && tab.stackIds.includes(stackId) && tab !== excludedTab);
 
 
         if (remainingTabs.length >= 2) return;
@@ -33,6 +35,7 @@ module.exports = {
         });
         delete this.stackNames[stackId];
         this.recalculateStackNumber();
+        this.rebuildTabTree();
     },
 
     recalculateStackNumber() {
@@ -77,6 +80,7 @@ module.exports = {
         this.stackNames[stackId] = `Stack ${this.nextStackNumber}`;
         this.nextStackNumber++;
 
+        this.rebuildTabTree();
         this.sendTabData(true);
     },
 
@@ -100,6 +104,7 @@ module.exports = {
         tab.stackIds = [...targetStackIds];
         tab.stackId = tab.stackIds[0];
         tab.isStacked = true;
+        this.rebuildTabTree();
         this.sendTabData(true);
     },
 
@@ -125,6 +130,7 @@ module.exports = {
             oldStackIds.forEach(id => this.cleanupStack(id));
         }
 
+        this.rebuildTabTree();
         this.sendTabData(true);
     },
 
@@ -147,6 +153,7 @@ module.exports = {
 
         delete this.stackNames[stackId];
         this.recalculateStackNumber();
+        this.rebuildTabTree();
         this.sendTabData(true);
 
     },
@@ -185,6 +192,7 @@ module.exports = {
             delete this.stackNames[stackId];
             this.recalculateStackNumber();
         }
+        this.rebuildTabTree();
         this.sendTabData(true);
     },
 
@@ -231,6 +239,7 @@ module.exports = {
             this.cleanupStack(id);
         });
 
+        this.rebuildTabTree();
         this.sendTabData(true);
     },
 

@@ -11,7 +11,7 @@ contextBridge.exposeInMainWorld("electronAPI", {
 
     createTab: (options) => ipcRenderer.send("createTab", options),
     switchTab: (index) => ipcRenderer.send("switchTab", index),
-    onUpdateTabs: (callback) => ipcRenderer.on('updateTabs', (event, tabs) => callback(tabs)),
+    onUpdateTabs: (callback) => ipcRenderer.on('updateTabs', (event, tabs, tabTree) => callback(tabs, tabTree)),
     closeTab: (index) => ipcRenderer.send("closeTab", index),
     reorderTabs: (fromIndex, toIndex) => ipcRenderer.send("reorderTabs", fromIndex, toIndex),
 
