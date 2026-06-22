@@ -51,20 +51,20 @@ class TreeNode {
         this.parent = null;
     }
 
-    find(predicate) {
-        if (predicate(this)) return this;
+    find(func) {
+        if (func(this)) return this;
 
         for (const child of this.children) {
-            const match = child.find(predicate);
+            const match = child.find(func);
             if (match) return match;
         }
 
         return null;
     }
 
-    walk(visitor) {
-        visitor(this);
-        this.children.forEach(child => child.walk(visitor));
+    traverse(callback) {
+        callback(this);
+        this.children.forEach(child => child.traverse(callback));
     }
 
     toJSON() {
@@ -122,7 +122,7 @@ class Stack extends TreeNode {
 
     getTabs() {
         const tabs = [];
-        this.walk((node) => {
+        this.traverse((node) => {
             if (node instanceof TabNode) {
                 tabs.push(node.tab);
             }
@@ -218,7 +218,7 @@ class Tree {
 
     getStackNames() {
         const names = {};
-        this.root.walk((node) => {
+        this.root.traverse((node) => {
             if (node instanceof Stack && node.name) {
                 names[node.id] = node.name;
             }
