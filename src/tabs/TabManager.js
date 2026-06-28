@@ -208,6 +208,13 @@ class TabManager {
 
         this.currentIndex = tabID;
 
+        // Track last visited tab on each stack this tab belongs to
+        if (nextTab.stackIds && nextTab.stackIds.length > 0 && nextTab.id) {
+            nextTab.stackIds.forEach(sid => {
+                this.tabTree.setStackLastVisitedTab(sid, nextTab.id);
+            });
+        }
+
         this.resizeWindow();
         this.sendTabData(true);
     }

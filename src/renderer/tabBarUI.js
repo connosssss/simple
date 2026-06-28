@@ -2,7 +2,6 @@ const tabsList = document.getElementById("tabs-list");
 const stackBarsContainer = document.getElementById("stack-bars-container");
 
 let activeStackIds = [];
-const lastActiveStackTab = new Map();
 const collapsedStacks = new Set();
 
 
@@ -81,7 +80,7 @@ window.electronAPI.onPromptStackName((data) => {
 });
 
 
-export const renderTabs = (tabs) => {
+export const renderTabs = (tabs, stackLastVisited = {}) => {
     latestTabs = tabs;
 
     const currentIds = new Set(tabs.map(t => t.id));
@@ -117,7 +116,6 @@ export const renderTabs = (tabs) => {
 
     if (mainTab && mainTab.isStacked && mainTab.stackIds) {
         activeStackIds = [...mainTab.stackIds];
-        lastActiveStackTab.set(activeStackIds[activeStackIds.length - 1], mainTab.index);
     }
     
     else {
@@ -272,9 +270,9 @@ export const renderTabs = (tabs) => {
                     }
 
                     else {
-                        const rememberedIndex = lastActiveStackTab.get(stackIdAtLevel);
-                        const targetTab = rememberedIndex != null ? tabs.find((_, i) => i === rememberedIndex) : null;
-                        const tabToSwitch = (targetTab && targetTab.stackIds && targetTab.stackIds[level] === stackIdAtLevel) ? targetTab : stackTabs[0];
+                        const lastVisitedTabId = stackLastVisited[stackIdAtLevel];
+                        const targetTab = lastVisitedTabId ? tabs.find(t => t.id === lastVisitedTabId && t.stackIds && t.stackIds[level] === stackIdAtLevel) : null;
+                        const tabToSwitch = targetTab || stackTabs[0];
                       
                         if (tabToSwitch) {
                             window.electronAPI.switchTab(tabs.indexOf(tabToSwitch));

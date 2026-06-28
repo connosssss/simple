@@ -62,7 +62,20 @@ const setupTabSubscription = () => {
   };
 
   window.electronAPI.onUpdateTabs((tabs, tabTree) => {
-    renderTabs(tabs);
+    const stackLastVisited = {};
+    const collectLastVisited = (node) => {
+      if (!node) return;
+      if (node.type === 'stack' && node.value?.lastVisitedTabId) {
+        stackLastVisited[node.id] = node.value.lastVisitedTabId;
+      }
+      
+      for (const child of node.children || []) {
+        collectLastVisited(child);
+      }
+    };
+    collectLastVisited(tabTree);
+
+    renderTabs(tabs, stackLastVisited);
 
     const mainTab = tabs.find((tab) => tab.isMainTab);
     if (mainTab) {

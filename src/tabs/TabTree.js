@@ -108,8 +108,8 @@ class TabNode extends TreeNode {
 }
 
 class Stack extends TreeNode {
-    constructor(id = crypto.randomUUID(), name = null) {
-        super('stack', id, { name });
+    constructor(id = crypto.randomUUID(), name = null, lastVisitedTabId = null) {
+        super('stack', id, { name, lastVisitedTabId });
     }
 
     get name() {
@@ -118,6 +118,14 @@ class Stack extends TreeNode {
 
     set name(nextName) {
         this.value = { ...(this.value || {}), name: nextName || null };
+    }
+
+    get lastVisitedTabId() {
+        return this.value?.lastVisitedTabId || null;
+    }
+
+    set lastVisitedTabId(tabId) {
+        this.value = { ...(this.value || {}), lastVisitedTabId: tabId || null };
     }
 
     getTabs() {
@@ -177,21 +185,28 @@ class Tree {
     }
 
     rebuildFromTabs(tabs, stackNames = {}) {
+        const lastVisited = {};
+        this.root.traverse(node => {
+            if (node instanceof Stack && node.lastVisitedTabId) {
+                lastVisited[node.id] = node.lastVisitedTabId;
+            }
+        });
+
         this.tabRoot.children = [];
 
         for (const tab of tabs) {
-            this.addTab(tab, tab.stackIds || [], stackNames);
+            this.addTab(tab, tab.stackIds || [], stackNames, lastVisited);
         }
     }
 
-    addTab(tab, stackIds = [], stackNames = {}) {
+    addTab(tab, stackIds = [], stackNames = {}, lastVisited = {}) {
         const cleanStackIds = Array.isArray(stackIds) ? stackIds.filter(Boolean) : [];
         let parent = this.tabRoot;
 
         for (const stackId of cleanStackIds) {
             let stack = parent.children.find(child => child instanceof Stack && child.id === stackId);
             if (!stack) {
-                stack = new Stack(stackId, stackNames[stackId] || null);
+                stack = new Stack(stackId, stackNames[stackId] || null, lastVisited[stackId] || null);
                 parent.appendChild(stack);
             } else {
                 stack.name = stackNames[stackId] || stack.name;
@@ -224,6 +239,13 @@ class Tree {
             }
         });
         return names;
+    }
+
+    setStackLastVisitedTab(stackId, tabId) {
+        const stack = this.findStack(stackId);
+        if (stack) {
+            stack.lastVisitedTabId = tabId;
+        }
     }
 
     toJSON() {
