@@ -1,6 +1,9 @@
 const { app } = require('electron');
 const WindowResizing = require('../main/WindowResizing');
 const path = require('path');
+const https = require('https');
+const http = require('http');
+const { URL } = require('url');
 
 const TabStacking = require('./TabStacking');
 const TabContextMenu = require('./TabContextMenu');
@@ -134,13 +137,13 @@ class TabManager {
             stackIds: stackIds
         });
 
-        // Ensure stackIds is correctly populated
         if (stackIds && stackIds.length > 0) {
             newTab.stackIds = [...stackIds];
             newTab.stackId = stackIds[0];
             newTab.isStacked = true;
-        } else if (!newTab.stackIds) {
-            // Migration for new stackIds structure
+        }
+
+        else if (!newTab.stackIds) {
             newTab.stackIds = newTab.stackId ? [newTab.stackId] : [];
         }
 
@@ -152,6 +155,11 @@ class TabManager {
 
         if (switchTo) {
             this.switchTab(this.tabs.length - 1);
+        }
+        else {
+            if (newAddress && !INTERNAL_PAGES.has(newAddress)) {
+                this.setInactiveTabTitle(newTab, newAddress);
+            }
         }
 
         this.sendTabData(true);
@@ -667,6 +675,90 @@ class TabManager {
                     this.sleep(index);
                 }
             }
+        }
+    }
+
+    decodeHtmlEntities(str) {
+        if (!str) return '';
+        return str
+            .replace(/&#(\d+);/g, (match, dec) => String.fromCharCode(dec))
+            .replace(/&#x([0-9a-f]+);/gi, (match, hex) => String.fromCharCode(parseInt(hex, 16)))
+            .replace(/&amp;/g, '&')
+            .replace(/&lt;/g, '<')
+            .replace(/&gt;/g, '>')
+            .replace(/&quot;/g, '"')
+            .replace(/&#039;/g, "'")
+            .replace(/&apos;/g, "'")
+            .replace(/&mdash;/g, '—')
+            .replace(/&ndash;/g, '–')
+            .replace(/&copy;/g, '©')
+            .replace(/&reg;/g, '®');
+    }
+
+    setInactiveTabTitle(tab, address, redirectCount = 0) {
+        if (redirectCount > 5) return;
+        if (!address || !address.startsWith('http')) return;
+
+        try {
+            const parsedUrl = new URL(address);
+            const client = parsedUrl.protocol === 'https:' ? https : http;
+
+            const req = client.get(address, {
+                headers: {
+                    'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+                    'Accept': 'text/html',
+                },
+                timeout: 5000,
+            }, (res) => {
+              if (res.statusCode >= 300 && res.statusCode < 400 && res.headers.location) {
+                  
+                let redirectUrl = res.headers.location;
+                
+                    if (!redirectUrl.startsWith('http')) {
+                        redirectUrl = new URL(redirectUrl, address).href;
+                    }
+                    this.setInactiveTabTitle(tab, redirectUrl, redirectCount + 1);
+                    return;
+                }
+
+                if (res.statusCode !== 200) {
+                    return;
+                }
+
+                let data = '';
+                res.setEncoding('utf8');
+
+                const processData = (chunk) => {
+                    data += chunk;
+                    const titleMatch = data.match(/<title[^>]*>([\s\S]*?)<\/title>/i);
+                    if (titleMatch) {
+                        req.destroy();
+
+                        if (this.tabs.includes(tab) && !tab.contentView) {
+                            tab.title = this.decodeHtmlEntities(titleMatch[1].replace(/\s+/g, ' ').trim());
+                            this.sendTabData(true);
+                        }
+                    }
+                };
+
+                res.on('data', processData);
+                res.on('end', () => {
+                  const titleMatch = data.match(/<title[^>]*>([\s\S]*?)<\/title>/i);
+                  
+                  if (titleMatch && this.tabs.includes(tab) && !tab.contentView) {
+                        tab.title = this.decodeHtmlEntities(titleMatch[1].replace(/\s+/g, ' ').trim());
+                        this.sendTabData(true);
+                  }
+                });
+            });
+
+            req.on('error', () => {});
+            req.on('timeout', () => {
+                req.destroy();
+            });
+        }
+        catch (e) {
+          console.error("Problem with loading opened tab name: ", e);
         }
     }
 
