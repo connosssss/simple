@@ -59,12 +59,22 @@ module.exports = {
 
     serializeConfig() {
         const savedTabs = this.tabs.filter(tab => !(tab.isSettingsTab)).map(tab => ({
+            id: tab.id,
             address: tab.address,
             title: tab.title,
             isStacked: tab.isStacked,
             stackId: tab.stackId,
             stackIds: tab.stackIds || []
         }));
+
+        const lastVisitedTabIds = {};
+        if (this.tabTree) {
+            this.tabTree.root.traverse(node => {
+                if (node.type === 'stack' && node.value?.lastVisitedTabId) {
+                    lastVisitedTabIds[node.id] = node.value.lastVisitedTabId;
+                }
+            });
+        }
 
         return {
             defaultSite: this.defaultSite,
@@ -75,6 +85,8 @@ module.exports = {
             tabs: savedTabs,
             stackNames: this.stackNames,
             nextStackNumber: this.nextStackNumber,
+            activeTabId: this.tabs[this.currentIndex]?.id || null,
+            lastVisitedTabIds
         };
     },
 
@@ -151,6 +163,7 @@ module.exports = {
                 if (config.tabs && Array.isArray(config.tabs)) {
                     config.tabs.forEach(tabData => {
                         this.createTab({
+                            id: tabData.id || null,
                             address: tabData.address,
                             switchTo: false,
                             isStacked: tabData.isStacked || false,
@@ -158,9 +171,23 @@ module.exports = {
                             stackIds: tabData.stackIds || []
                         });
                     });
-                    
-                    if (this.tabs.length > 0) {
-                        this.switchTab(this.tabs.length - 1);
+
+                    if (config.lastVisitedTabIds && this.tabTree) {
+                        for (const [stackId, tabId] of Object.entries(config.lastVisitedTabIds)) {
+                            this.tabTree.setStackLastVisitedTab(stackId, tabId);
+                        }
+                    }
+
+                    let activeIndex = -1;
+                    if (config.activeTabId) {
+                        activeIndex = this.tabs.findIndex(t => t.id === config.activeTabId);
+                    }
+                    if (activeIndex === -1 && this.tabs.length > 0) {
+                        activeIndex = this.tabs.length - 1;
+                    }
+
+                    if (activeIndex >= 0) {
+                        this.switchTab(activeIndex);
                     }
                 }
 

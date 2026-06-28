@@ -53,6 +53,7 @@ const createSettingsContentView = () => {
 
 
 const createRegularTab = ({
+  id = null,
   address = "",
   defaultSite,
   isStacked = false,
@@ -60,6 +61,7 @@ const createRegularTab = ({
   startHibernated = true,}) => {
     
   const tab = createBaseTab({
+    id: id || undefined,
     contentView: startHibernated ? null : createRegularContentView(),
     address,
     title: address,

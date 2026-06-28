@@ -102,9 +102,11 @@ class TabManager {
     }
 
     createTab(newAddress = "", switchTo = true, isStacked = false, stackId = null, stackIds = null) {
+        let id = null;
         let preventStackInherit = false;
         if (typeof newAddress === "object" && newAddress !== null) {
             ({
+                id = null,
                 address: newAddress = "",
                 switchTo = true,
                 isStacked = false,
@@ -130,6 +132,7 @@ class TabManager {
         }
 
         let newTab = createRegularTab({
+            id: id,
             address: newAddress,
             defaultSite: this.defaultSite,
             isStacked: isStacked,
