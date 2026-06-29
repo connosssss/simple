@@ -97,7 +97,6 @@ const loadRegularTabContent = (tab, address, defaultSite) => {
   if (!isLiveWebContents(tab.contentView)) return;
 
   const targetUrl = address || defaultSite;
-  tab.address = targetUrl;
   tab.contentView.webContents.loadURL(targetUrl);
 };
 
@@ -118,6 +117,9 @@ const syncTabState = (tab) => {
     tab.address = isHistory ? HISTORY_ADDRESS : SETTINGS_ADDRESS;
     return;
   }
+
+  // Don't overwrite the empty address/title of new tabs with about:blank
+  if (tab.isNewTab) return;
 
   tab.title = tab.contentView.webContents.getTitle();
   tab.address = tab.contentView.webContents.getURL();
@@ -186,6 +188,14 @@ const attachTabLifecycle = (manager, tab) => {
     manager.sendTabData();
   };
 
+  // Prevent the loaded page from stealing focus on new tabs —
+  // keep the address bar focused so the user can start typing immediately.
+  const handleNewTabFocus = () => {
+    if (tab.isNewTab && manager.ui && manager.ui.webContents) {
+      manager.ui.webContents.focus();
+    }
+  };
+
   const listeners = [
     ["page-title-updated", handlePageTitleUpdated],
     ["did-navigate", handleDidNavigate],
@@ -194,6 +204,7 @@ const attachTabLifecycle = (manager, tab) => {
     ["did-finish-load", syncAndBroadcast],
     ["did-start-loading", handleDidStartLoading],
     ["did-stop-loading", handleDidStopLoading],
+    ["did-stop-loading", handleNewTabFocus],
     ["will-navigate", () => {
         tab.isNewTab = false;
         manager.sendTabData();

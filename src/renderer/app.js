@@ -13,11 +13,8 @@ const applyTheme = () => {
 
 const focusAddressBarForNewTab = () => {
   window.electronAPI.focusUI();
-
-  setTimeout(() => {
-    addressBar.focus();
-    addressBar.select();
-  }, 150);
+  addressBar.focus();
+  addressBar.select();
 };
 
 const setupThemeSync = () => {
@@ -100,7 +97,7 @@ const setupTabSubscription = () => {
       mainTab.index === tabs.length - 1;
 
     if (openedNewTab) {
-      setTimeout(focusAddressBarForNewTab, 200);
+      focusAddressBarForNewTab();
     }
 
     previousTabCount = tabs.length;
