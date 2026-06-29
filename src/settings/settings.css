@@ -28,20 +28,19 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 .card-bg {
-  background-color: var(--theme-panel-strong) !important;
-  border: 1px solid var(--theme-border) !important;
+  
 }
 
 .input-theme {
   background-color: rgba(0, 0, 0, 0.22) !important;
-  border: 1px solid var(--theme-border) !important;
+  border: 1px solid transparent !important;
   color: var(--theme-text) !important;
 }
 
 .btn-theme {
   background-color: var(--theme-accent-soft) !important;
   color: var(--theme-text) !important;
-  border: 1px solid var(--theme-border) !important;
+  border: 1px solid transparent !important;
   transition: filter 0.15s ease, transform 0.1s ease;
 }
 .btn-theme:hover {
@@ -79,20 +78,6 @@ h1, h2, h3, h4, h5, h6 {
 .sidebar-item.active::before {
   background-color: var(--theme-accent) !important;
 }
-::-webkit-scrollbar {
-  width: 6px;
-  height: 6px;
-}
-::-webkit-scrollbar-track {
-  background: transparent;
-}
-::-webkit-scrollbar-thumb {
-  background: rgba(157, 78, 221, 0.25);
-  border-radius: 999px;
-}
-::-webkit-scrollbar-thumb:hover {
-  background: rgba(157, 78, 221, 0.45);
-}
 input[type="color"] {
   -webkit-appearance: none;
   border: none;
@@ -112,7 +97,12 @@ input[type="color"]::-webkit-color-swatch {
 input:focus, select:focus {
   outline: none;
   border-color: var(--theme-accent) !important;
-  box-shadow: 0 0 0 2px rgba(157, 78, 221, 0.2);
+  box-shadow: 0 0 0 2px var(--theme-accent-soft) !important;
+}
+
+select option {
+  background-color: var(--theme-bg-opaque, #161824) !important;
+  color: var(--theme-text, #e2e8f0) !important;
 }
 
 

@@ -67,7 +67,7 @@ export function setupBookmarkControls() {
         const input = document.createElement("input");
         input.type = "text";
         input.value = b.title || b.url;
-        input.className = "bg-slate-800 text-slate-200 text-xs px-1.5 py-0.5 rounded outline-none border border-slate-700 w-44";
+        input.className = "input-theme text-xs px-1.5 py-0.5 rounded outline-none w-44";
 
         title.replaceWith(input);
         input.focus();
@@ -117,7 +117,7 @@ export function setupBookmarkControls() {
       folderInput.type = "text";
       folderInput.placeholder = "None";
       folderInput.value = b.folder || "";
-      folderInput.className = "bg-slate-900 text-slate-200 text-xs px-1.5 py-0.5 rounded outline-none border border-slate-700 w-24";
+      folderInput.className = "input-theme text-xs px-1.5 py-0.5 rounded outline-none w-24";
 
       const saveFolder = async () => {
         const nextFolder = folderInput.value.trim();

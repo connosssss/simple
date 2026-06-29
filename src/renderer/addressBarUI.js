@@ -24,7 +24,7 @@ const updateBookmarkButton = () => {
   
   else {
     bookmarkBtn.innerHTML = `
-      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.2" class="w-4 h-4 text-white opacity-40 group-hover:opacity-100 mx-auto transition-opacity duration-100">
+      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.2" class="w-4 h-4 opacity-50 group-hover:opacity-100 mx-auto transition-opacity duration-100">
         <path stroke-linecap="round" stroke-linejoin="round" d="M11.48 3.499c.176-.434.772-.434.948 0l2.254 5.53a.75.75 0 0 0 .565.41l6.002.434c.48.034.673.626.31.957l-4.6 4.19a.75.75 0 0 0-.213.657l1.246 5.927c.099.474-.424.855-.838.572l-5.18-3.562a.75.75 0 0 0-.838 0l-5.18 3.562c-.414.283-.938-.098-.838-.572l1.246-5.927a.75.75 0 0 0-.213-.657l-4.6-4.19c-.362-.331-.17-.923.31-.957l6.002-.434a.75.75 0 0 0 .565-.41l2.254-5.53Z" />
       </svg>
     `;

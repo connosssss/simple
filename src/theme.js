@@ -66,6 +66,10 @@
     root.style.setProperty("--theme-accent", theme.accent);
     root.style.setProperty("--theme-bg-opaque", theme.color);
 
+    const { r, g, b } = hexToRgb(theme.color);
+    const brightness = (r * 299 + g * 587 + b * 114) / 1000;
+    root.style.colorScheme = brightness < 128 ? "dark" : "light";
+
     return theme;
   };
 
@@ -119,6 +123,12 @@
   };
 
   initThemeFromFile();
+
+  if (window.electronAPI?.onThemeUpdated) {
+    window.electronAPI.onThemeUpdated(() => {
+      initThemeFromFile();
+    });
+  }
 
   window.themeUtils = {
     THEME_KEY,
