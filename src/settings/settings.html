@@ -64,6 +64,10 @@
           Privacy & Security
         </button>
 
+        <button data-target="passwords" class="sidebar-item w-full flex items-center gap-3 px-3 py-2 text-xs rounded-md text-left">
+          Passwords & Autofill
+        </button>
+
         <button data-target="extensions" class="sidebar-item w-full flex items-center gap-3 px-3 py-2 text-xs rounded-md text-left">
           Extensions
         </button>
@@ -118,7 +122,7 @@
               <div class="flex items-center justify-between p-3 rounded-lg input-theme">
                 <div class="space-y-0.5">
                   <div class="font-semibold text-slate-200">Theme Base</div>
-                  <div class="text-[10px] text-slate-400 uppercase font-mono" id="theme-color-value"></div>
+                  <div class="text-[10px] text-slate-400 uppercase " id="theme-color-value"></div>
                 </div>
                 <input type="color" id="theme-color" />
               </div>
@@ -126,7 +130,7 @@
               <div class="flex items-center justify-between p-3 rounded-lg input-theme">
                 <div class="space-y-0.5">
                   <div class="font-semibold text-slate-200">Accent</div>
-                  <div class="text-[10px] text-slate-400 uppercase font-mono" id="theme-accent-value"></div>
+                  <div class="text-[10px] text-slate-400 uppercase " id="theme-accent-value"></div>
                 </div>
                 <input type="color" id="theme-accent" />
               </div>
@@ -134,7 +138,7 @@
               <div class="flex items-center justify-between p-3 rounded-lg input-theme">
                 <div class="space-y-0.5">
                   <div class="font-semibold text-slate-200">Text Color</div>
-                  <div class="text-[10px] text-slate-400 uppercase font-mono" id="theme-text-value"></div>
+                  <div class="text-[10px] text-slate-400 uppercase " id="theme-text-value"></div>
                 </div>
                 <input type="color" id="theme-text" />
               </div>
@@ -146,7 +150,7 @@
               <div class="flex flex-col gap-1.5">
                 <div class="flex justify-between font-semibold">
                   <span>Overall theme opacity</span>
-                  <span id="theme-overall-opacity-value" class="font-mono"></span>
+                  <span id="theme-overall-opacity-value" class=""></span>
                 </div>
                 <input type="range" id="theme-overall-opacity" min="0.02" max="1" step="0.02" class="w-full accent-[var(--theme-accent)]" />
               </div>
@@ -154,7 +158,7 @@
               <div class="flex flex-col gap-1.5">
                 <div class="flex justify-between font-semibold">
                   <span>Accent color opacity</span>
-                  <span id="theme-accent-opacity-value" class="font-mono"></span>
+                  <span id="theme-accent-opacity-value" class=""></span>
                 </div>
                 <input type="range" id="theme-accent-opacity" min="0.02" max="1" step="0.02" class="w-full accent-[var(--theme-accent)]" />
               </div>
@@ -172,7 +176,7 @@
                 <label for="siteChoiceBar" class="text-slate-300 text-sm">Default New Tab Site URL</label>
                 <input id="siteChoiceBar" placeholder="https://example.com" onfocus="this.select()"
                   class="w-full md:w-80 p-2 text-xs rounded outline-none input-theme" />
-                <span class="text-[10px] text-slate-500">Type URL and press <kbd class="font-mono bg-black/20 px-1 rounded text-slate-400">Enter</kbd> to save.</span>
+                <span class="text-[10px] text-slate-500">Type URL and press <kbd class=" bg-black/20 px-1 rounded text-slate-400">Enter</kbd> to save.</span>
               </div>
             </div>
           </div>
@@ -288,7 +292,7 @@
                 <span>Hide third-party tracker cookies</span>
               </label>
 
-              <div id="cookie-count" class="text-slate-500 text-xs font-mono"></div>
+              <div id="cookie-count" class="text-slate-500 text-xs "></div>
               
               <div id="cookies-list" class="space-y-1 max-h-80 overflow-y-auto p-3 rounded-lg input-theme">
                 <div class="text-slate-500">Loading cookies...</div>
@@ -316,7 +320,7 @@
                 </button>
               </div>
               
-              <div id="extension-status" class="text-xs hidden p-2 rounded font-mono input-theme"></div>
+              <div id="extension-status" class="text-xs hidden p-2 rounded  input-theme"></div>
               
               <div class="text-slate-500 text-[10px]">
                 Electron supports a subset of Chrome extension APIs. Some extensions may not function correctly.
@@ -328,6 +332,39 @@
             <h2 class="text-sm font-bold tracking-wide uppercase border-b border-slate-700/50 pb-2">Installed Extensions</h2>
             <div id="extensions-list" class="space-y-2 text-xs text-slate-300">
               <div class="text-slate-500">No extensions installed.</div>
+            </div>
+          </div>
+        </div>
+
+        <div data-section="passwords" class="settings-section space-y-6">
+          <div class="settings-card card-bg p-5 space-y-4">
+              
+            <div class="flex justify-between items-center border-b border-slate-700/50 pb-2 flex-wrap gap-2">
+              <h2 class="text-sm font-bold tracking-wide uppercase">Autofill Settings</h2>
+              
+              <label class="flex items-center gap-2 text-slate-300 px-3 py-1 rounded cursor-pointer select-none text-xs input-theme">
+                <input type="checkbox" id="offer-to-save-passwords" checked class="w-3.5 h-3.5" />
+                <span>Offer to save passwords</span>
+              </label>
+              
+            </div>
+            
+            <p class="text-xs text-slate-400">Save usernames and passwords for websites so the browser can fill them in automatically.</p>
+          </div>
+
+          <div class="settings-card card-bg p-5 space-y-4">
+            <div class="flex justify-between items-center border-b border-slate-700/50 pb-2 flex-wrap gap-2">
+              <h2 class="text-sm font-bold tracking-wide uppercase">Saved Passwords</h2>
+              <input id="password-search" placeholder="Search saved passwords..." 
+                class="text-xs px-3 py-1.5 rounded outline-none w-48 input-theme" />
+            </div>
+
+            <div class="text-xs space-y-3">
+              <div id="passwords-list-count" class="text-slate-500 text-xs ">0 passwords saved</div>
+              <div id="passwords-settings-list" class="space-y-1 max-h-80 overflow-y-auto p-3 rounded-lg input-theme">
+                <div class="text-slate-500">Loading passwords...</div>
+              </div>
+              
             </div>
           </div>
         </div>

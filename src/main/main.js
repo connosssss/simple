@@ -23,6 +23,7 @@ const extensionManager = require('../extensions/extensionManager');
 const bookmarkManager = require('../bookmarks/bookmarks');
 const historyManager = require('../history/history');
 const downloadsManager = require('../downloads/downloadsManager');
+const passwordManager = require('../passwords/passwordManager');
 
 const INTERNAL_PAGES = new Set(["about://settings", "about://history"]);
 
@@ -396,6 +397,89 @@ const ipcSetup = () => {
     historyManager.clear();
     broadcastHistory();
     return { success: true };
+  });
+
+  // Passwords IPC handlers
+  ipcMain.handle("passwords:get-all", () => {
+    return passwordManager.getAllCredentials();
+  });
+
+  ipcMain.handle("passwords:delete", (event, id) => {
+    return passwordManager.deleteCredential(id);
+  });
+
+  ipcMain.handle("passwords:save", (event, origin, username, password) => {
+    return passwordManager.saveCredential(origin, username, password);
+  });
+
+  ipcMain.handle("passwords:never-save", (event, origin) => {
+    passwordManager.neverSaveForOrigin(origin);
+    return true;
+  });
+
+  ipcMain.handle("passwords:get-settings", () => {
+    return passwordManager.getAutofillSettings();
+  });
+
+  ipcMain.handle("passwords:set-offer-save", (event, enabled) => {
+    passwordManager.setOfferToSave(enabled);
+    return true;
+  });
+
+  ipcMain.on("setPasswordPromptVisible", (event, visible) => {
+    const tabManager = getTabManager(event);
+    if (tabManager) {
+      tabManager.passwordPromptVisible = !!visible;
+      tabManager.resizeWindow();
+    }
+  });
+
+  ipcMain.handle("passwords:get-for-origin", (event) => {
+    const senderUrl = event.sender.getURL();
+    try {
+      const origin = new URL(senderUrl).origin;
+      const settings = passwordManager.getAutofillSettings();
+      if (!settings.offerToSave) return [];
+      if (passwordManager.isNeverSaveForOrigin(origin)) return [];
+      return passwordManager.getCredentialsForOrigin(origin);
+    } catch (e) {
+      console.error("Invalid sender URL for password request:", senderUrl);
+      return [];
+    }
+  });
+
+  ipcMain.on('password-submitted', (event, creds) => {
+    const senderUrl = event.sender.getURL();
+    try {
+      const origin = new URL(senderUrl).origin;
+      const { username, password } = creds;
+      const settings = passwordManager.getAutofillSettings();
+      if (!settings.offerToSave) return;
+      if (passwordManager.isNeverSaveForOrigin(origin)) return;
+
+      // Check if we already have this exact credential saved
+      const existing = passwordManager.getCredentialsForOrigin(origin);
+      const hasExactMatch = existing.some(item => item.username === username && item.password === password);
+      if (hasExactMatch) return;
+
+      // Find the window that contains this guest webContents to show the prompt
+      let winData = null;
+      for (const data of WindowManager.getAllWindows()) {
+        for (const tab of data.tabManager.tabs) {
+          if (tab.contentView && !tab.contentView.webContents.isDestroyed() && tab.contentView.webContents.id === event.sender.id) {
+            winData = data;
+            break;
+          }
+        }
+        if (winData) break;
+      }
+
+      if (winData && winData.ui && !winData.ui.webContents.isDestroyed()) {
+        winData.ui.webContents.send("show-password-prompt", { origin, username, password });
+      }
+    } catch (e) {
+      console.error("Error handling password-submitted:", e);
+    }
   });
 
   onWindowData("showBookmarkFolderMenu", (data, event, vars) => {

@@ -31,7 +31,7 @@ module.exports = {
     
     else {
       const uiPosition = tabManager?.uiPosition || 'top';
-      const dropdownVisible = tabManager?.dropdownVisible || tabManager?.downloadsDropdownVisible;
+      const dropdownVisible = tabManager?.dropdownVisible || tabManager?.downloadsDropdownVisible || tabManager?.passwordPromptVisible;
       const dropdownHeight = dropdownVisible ? 330 : 0;
       const uiHeight = topBarHeight + dropdownHeight;
 

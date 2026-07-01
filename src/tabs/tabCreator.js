@@ -34,6 +34,7 @@ const createRegularContentView = () => {
   const view = new WebContentsView({
     webPreferences: {
       partition: MAIN_PARTITION,
+      preload: path.join(__dirname, "../main/webPreload.js"),
     },
   });
 

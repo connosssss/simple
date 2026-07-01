@@ -4,12 +4,14 @@ import { setupThemeControls } from "./themeControls.js";
 import { setupExtensionControls } from "./extensionControls.js";
 import { setupBookmarkControls } from "./bookmarkSettingsUI.js";
 import { setupTabTreeControls } from "./tabTreeControls.js";
+import { setupPasswordControls } from "./passwordControls.js";
 
 
 setupThemeControls();
 setupCookieControls();
 setupExtensionControls();
 setupBookmarkControls();
+setupPasswordControls();
 
 const hibernationControls = setupHibernationControls();
 const tabTreeControls = setupTabTreeControls();

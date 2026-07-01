@@ -100,4 +100,16 @@ contextBridge.exposeInMainWorld("electronAPI", {
     onDownloadUpdated: (callback) => ipcRenderer.on("download-updated", (event, data) => callback(data)),
     onDownloadDone: (callback) => ipcRenderer.on("download-done", (event, data) => callback(data)),
     onDownloadRemoved: (callback) => ipcRenderer.on("download-removed", (event, data) => callback(data)),
+
+    //Passwords
+    getAllPasswords: () => ipcRenderer.invoke("passwords:get-all"),
+    deletePassword: (id) => ipcRenderer.invoke("passwords:delete", id),
+    
+    savePassword: (origin, username, password) => ipcRenderer.invoke("passwords:save", origin, username, password),
+    neverSavePassword: (origin) => ipcRenderer.invoke("passwords:never-save", origin),
+    
+    getPasswordSettings: () => ipcRenderer.invoke("passwords:get-settings"),
+    setOfferToSavePasswords: (enabled) => ipcRenderer.invoke("passwords:set-offer-save", enabled),
+    onShowPasswordPrompt: (callback) => ipcRenderer.on("show-password-prompt", (event, data) => callback(data)),
+    setPasswordPromptVisible: (visible) => ipcRenderer.send("setPasswordPromptVisible", visible),
 })

@@ -116,6 +116,28 @@
       <div id="bookmark-bar-list" class="flex flex-row items-center gap-1 overflow-x-auto whitespace-nowrap w-full pr-1 group-[.layout-left]:flex-col group-[.layout-left]:items-stretch group-[.layout-left]:overflow-y-auto group-[.layout-left]:overflow-x-hidden group-[.layout-left]:h-auto group-[.layout-left]:gap-1 group-[.layout-right]:flex-col group-[.layout-right]:items-stretch group-[.layout-right]:overflow-y-auto group-[.layout-right]:overflow-x-hidden group-[.layout-right]:h-auto group-[.layout-right]:gap-1"></div>
     </div>
 
+    
+    <div id="password-prompt" class="fixed top-4 right-4 z-[9999] hidden w-[380px] rounded-none border border-[var(--theme-border)] shadow-[0_10px_30px_rgba(0,0,0,0.6)] bg-[var(--theme-bg-opaque)] p-3 text-[var(--theme-text)] flex flex-col gap-2 transition-all duration-300">
+      <div class="flex items-center justify-between border-b border-[var(--theme-border)] pb-2 mb-1">
+          
+        <span class="font-bold text-sm">Save password?</span>
+        
+        <button id="password-prompt-close" class="p-0.5 text-[var(--theme-text)] opacity-60 hover:opacity-100 rounded-none hover:bg-[var(--theme-accent-soft)] transition-colors">
+          X
+        </button>
+      </div>
+      
+      <p class="text-[10px] text-[var(--theme-text)] opacity-60 font-medium tracking-wide" id="password-prompt-text">Would you like to save the password for this site?</p>
+      <div class="text-[10px] flex flex-col gap-1.5 bg-black/25 p-2.5 rounded-none border border-[var(--theme-border)]">
+        <div class="flex justify-between items-center"><span class="opacity-50 font-medium">Username</span><span id="password-prompt-user" class="font-semibold truncate max-w-[220px] text-[var(--theme-text)]"></span></div>
+        <div class="flex justify-between items-center"><span class="opacity-50 font-medium">Password</span><span id="password-prompt-pass" class="text-slate-400 select-none tracking-widest text-[9px]">••••••••</span></div>
+      </div>
+      <div class="flex gap-2 justify-end mt-1">
+        <button id="password-prompt-never" class="px-2.5 py-1 text-[10px] font-semibold text-rose-400 rounded-none bg-rose-400/5 hover:bg-rose-400/15 border border-rose-400/20 transition-colors whitespace-nowrap">Never</button>
+        <button id="password-prompt-save" class="px-3 py-1 text-[10px] font-semibold text-white rounded-none bg-[var(--theme-accent)] transition-colors whitespace-nowrap hover:filter hover:brightness-110">Save</button>
+      </div>
+    </div>
+
     <script src="./theme.js"></script>
     <script type="module" src="./renderer/app.js"></script>
   </body>

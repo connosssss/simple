@@ -148,4 +148,73 @@ const setupLayoutSubscription = () => {
   });
 };
 
+const setupPasswordPrompt = () => {
+  
+  const prompt = document.getElementById("password-prompt");
+  const userEl = document.getElementById("password-prompt-user");
+  const textEl = document.getElementById("password-prompt-text");
+  const saveBtn = document.getElementById("password-prompt-save");
+  const neverBtn = document.getElementById("password-prompt-never");
+  const closeBtn = document.getElementById("password-prompt-close");
+
+  let currentPromptData = null;
+
+  if (window.electronAPI && window.electronAPI.onShowPasswordPrompt) {
+    window.electronAPI.onShowPasswordPrompt((data) => {
+      
+      currentPromptData = data;
+      let displayOrigin = data.origin;
+      
+      try {
+        displayOrigin = new URL(data.origin).hostname;
+      }
+      catch (e) { }
+
+      textEl.textContent = `Would you like to save the password for ${displayOrigin}?`;
+      userEl.textContent = data.username || "(no username)";
+      
+      prompt.classList.remove("hidden");
+      prompt.classList.add("flex");
+      
+      if (window.electronAPI.setPasswordPromptVisible) {
+        window.electronAPI.setPasswordPromptVisible(true);
+      }
+    });
+  }
+
+  const hidePrompt = () => {
+    prompt.classList.remove("flex");
+    prompt.classList.add("hidden");
+    currentPromptData = null;
+    
+    if (window.electronAPI.setPasswordPromptVisible) {
+      window.electronAPI.setPasswordPromptVisible(false);
+    }
+    
+  };
+
+  closeBtn.addEventListener("click", hidePrompt);
+
+  saveBtn.addEventListener("click", async () => {
+    
+    if (currentPromptData) {
+      const { origin, username, password } = currentPromptData;
+      await window.electronAPI.savePassword(origin, username, password);
+    }
+    hidePrompt();
+    
+  });
+
+  neverBtn.addEventListener("click", async () => {
+    
+    if (currentPromptData) {
+      const { origin } = currentPromptData;
+      await window.electronAPI.neverSavePassword(origin);
+    }
+    hidePrompt();
+    
+  });
+};
+
 setupLayoutSubscription();
+setupPasswordPrompt();
