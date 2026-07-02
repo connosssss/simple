@@ -11,6 +11,9 @@ let suggestionItems = [];
 let selectedIndex = -1;
 let originalInputValue = "";
 let isDeleting = false;
+let isUserEditingAddress = false;
+
+const isAddressBarFocused = () => document.activeElement === addressBar;
 
 const updateBookmarkButton = () => {
   const isBookmarked = bookmarkedUrls.has(currentAddress);
@@ -32,8 +35,10 @@ const updateBookmarkButton = () => {
 };
 
 export const updateAddressBar = (address) => {
-  currentAddress = address;
-  addressBar.value = shortenAddress(address);
+  currentAddress = address || "";
+  if (!(isUserEditingAddress && isAddressBarFocused())) {
+    addressBar.value = shortenAddress(currentAddress);
+  }
   updateBookmarkButton();
 };
 
@@ -216,6 +221,7 @@ const renderDropdown = () => {
     });
 
     row.addEventListener("click", () => {
+      isUserEditingAddress = false;
       if (item.isSearch) {
         currentAddress = item.url;
         addressBar.value = item.matchable;
@@ -237,6 +243,7 @@ const renderDropdown = () => {
 
 export const setupAddressBarUI = () => {
   addressBar.addEventListener("input", () => {
+    isUserEditingAddress = true;
     const query = addressBar.value;
     originalInputValue = query;
 
@@ -297,6 +304,7 @@ export const setupAddressBarUI = () => {
       
       else if (event.key === "Enter") {
         event.preventDefault();
+        isUserEditingAddress = false;
         let targetUrl = addressBar.value;
         if (selectedIndex >= 0 && selectedIndex < suggestionItems.length) {
           targetUrl = suggestionItems[selectedIndex].url;
@@ -311,6 +319,7 @@ export const setupAddressBarUI = () => {
     else {
       if (event.key === "Enter") {
         event.preventDefault();
+        isUserEditingAddress = false;
         currentAddress = addressBar.value;
         window.electronAPI.search(addressBar.value);
       }
@@ -318,6 +327,7 @@ export const setupAddressBarUI = () => {
   });
 
   addressBar.addEventListener("focus", () => {
+    isUserEditingAddress = false;
     if (currentAddress) {
       addressBar.value = currentAddress;
       addressBar.select();
@@ -325,6 +335,7 @@ export const setupAddressBarUI = () => {
   });
 
   addressBar.addEventListener("blur", () => {
+    isUserEditingAddress = false;
     hideDropdown();
     if (currentAddress) {
       addressBar.value = shortenAddress(currentAddress);
