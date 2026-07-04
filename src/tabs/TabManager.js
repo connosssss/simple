@@ -29,6 +29,44 @@ const {
 
 const INTERNAL_PAGES = new Set(["about://settings", "about://history"]);
 
+const stackIdsFor = (tab) => Array.isArray(tab?.stackIds) ? tab.stackIds : [];
+
+const hasStackPath = (tab, stackPath) => {
+    const ids = stackIdsFor(tab);
+    return stackPath.every((stackId, index) => ids[index] === stackId);
+};
+
+const findNextTabIndex = (tabs, startIndex, predicate) => {
+    if (tabs.length === 0) return -1;
+
+    const start = Math.max(0, Math.min(startIndex, tabs.length - 1));
+
+    for (let index = start; index < tabs.length; index++) {
+        if (predicate(tabs[index])) return index;
+    }
+
+    for (let index = start - 1; index >= 0; index--) {
+        if (predicate(tabs[index])) return index;
+    }
+
+    return -1;
+};
+
+const chooseTabAfterClose = (tabs, closedIndex, closedStackIds = []) => {
+    if (tabs.length === 0) return -1;
+
+    const stackIds = Array.isArray(closedStackIds) ? closedStackIds.filter(Boolean) : [];
+
+    for (let depth = stackIds.length; depth > 0; depth--) {
+        const stackPath = stackIds.slice(0, depth);
+        const index = findNextTabIndex(tabs, closedIndex, tab => hasStackPath(tab, stackPath));
+        if (index !== -1) return index;
+    }
+
+    const topLevelIndex = findNextTabIndex(tabs, closedIndex, tab => stackIdsFor(tab).length === 0);
+    return topLevelIndex !== -1 ? topLevelIndex : Math.min(closedIndex, tabs.length - 1);
+};
+
 
 
 class TabManager {
@@ -264,7 +302,7 @@ class TabManager {
         tabToClose.contentView = null;
 
         if (tabID === this.currentIndex) {
-            const nextIndex = Math.min(tabID, this.tabs.length - 1);
+            const nextIndex = chooseTabAfterClose(this.tabs, tabID, oldStackIds);
 
             if (nextIndex >= 0) {
                 this.switchTab(nextIndex);
@@ -541,9 +579,10 @@ class TabManager {
         }
 
         if (index === this.currentIndex) {
-            if (this.tabs.length > 0) {
-                 const newIndex = index > 0 ? index - 1 : 0;
-                 this.switchTab(newIndex);
+            const newIndex = chooseTabAfterClose(this.tabs, index, oldStackIds);
+
+            if (newIndex >= 0) {
+                this.switchTab(newIndex);
             }
             else {
                 this.mainTab = null;
@@ -804,3 +843,4 @@ Object.assign(TabManager.prototype, TabConfig);
 
 
 module.exports = TabManager;
+module.exports.chooseTabAfterClose = chooseTabAfterClose;
