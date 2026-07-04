@@ -1,58 +1,33 @@
 ## simple
-simple is an electron based browser focused around giving users more features around controlling both tabs and ram. It is currently in an early phase of development and is still being worked on
+simple is an electron based browser focused around giving users more features around controlling both tabs and ram usage. It is still in an early phase and is still being worked on 
+
+<p align="center">
+  <img width="1918" height="1029" alt="image" src="https://github.com/user-attachments/assets/274e0058-683e-4e6e-b6eb-fad9db4fe559" />
+</p>
+
+### Notable Features
+While there are many features making it work like a typical browser (such as history, cookie management, chrome extension support, ect.), but there are also some features that 
+#### Multi-layered tab stacking
+<p align="center">
+  <img width="792" height="412" alt="image" src="https://github.com/user-attachments/assets/1128fb72-539d-4c84-9978-8005367227ae" />
+</p>
 
 
-
-#### Features List 
-
-The list is mainly just a way to track semi big features or updates as they come out, with it not covering things like bug fixes
-
----
+#### Custom Themes
+<p align="center"><img width="792" height="412" alt="image" src="https://github.com/user-attachments/assets/2bab41f1-5be9-41ea-bafc-152ced738d88" /></p>
 
 
-6.13 Settings page redesign
+#### Tab overview + hibernation settings
+<p align="center"><img width="792" height="412" alt="image" src="https://github.com/user-attachments/assets/cc6234d8-26fc-4b57-bea9-b0ac1d5885fe" /></p>
 
-6.11 Multi layered tab stacking working
-
-6.10 Selecting multiple tabs working
-
-6.2 UI redesign
-
-5.29 Unix based OS support 
-
-5.17 Bookmarks + Bookmarks bar UI
-
-5.5 - 5.28 Small bug fixes and tiny additions across the app
-
-5.3 Chrome extension support added
-
-4.28 Customizable themes/colors added
-
-4.23 Semi transparency working in navbar
-
-4.16 Default Search engine choice + default site on tab open
-
-4.4 Stacks now are collapseable, nameable, and have more options through the context men
-
-3.23 Now supports basic tab grouping/ stacking
-
-3.13 Browser now let's users see and delete cookies / trackers
-
-2.19.25 Tabs now save on close
-
-2.17.25: Users can now right click to show a context menu (an example being, right click an image and have the chance to open in new tab or copy it)
-
-2.16.25: Browser now supports multiple simultaneous windows
-
-2.16.25: Users can now download files using the browser 
-
-2.16.25: Started List
+### Download or Setup
+You can download the app through downloading the lastest installer's release or set it up manually by cloning the repository and running 
+```
+cd simple
+npm i
+npm run start
+// Or if you want to build it as an app
+npm run make
+```
 
 
-#### Coming soon
----
-- Bookmarks bar
-- Autofill in the address bar
-- Font customization
-  ...
-  
