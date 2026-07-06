@@ -1,6 +1,7 @@
 const fs = require('fs');
 const path = require('path');
 const { app } = require('electron');
+const { writeJsonAtomic } = require('../utils/fileIO');
 
 const HISTORY_PATH = path.join(app.getPath('userData'), 'history.json');
 
@@ -27,7 +28,7 @@ const load = () => {
 const save = () => {
 
     try {
-        fs.writeFileSync(HISTORY_PATH, JSON.stringify(history));
+        writeJsonAtomic(HISTORY_PATH, history);
     }
 
     catch (e) {

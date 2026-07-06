@@ -1,4 +1,5 @@
 const fs = require('fs');
+const { writeJsonAtomic } = require('../utils/fileIO');
 
 const SAVE_DELAY_MS = 150;
 
@@ -96,8 +97,9 @@ module.exports = {
         clearTimeout(this.saveTimer);
         this.saveTimer = setTimeout(() => {
             try {
-                fs.writeFileSync(this.configPath, JSON.stringify(this.serializeConfig()));
-            } catch (error) {
+                writeJsonAtomic(this.configPath, this.serializeConfig());
+            }
+            catch (error) {
                 console.error("Error saving config:", error);
             }
         }, SAVE_DELAY_MS);
@@ -116,8 +118,9 @@ module.exports = {
         clearTimeout(this.saveTimer);
         this.saveTimer = null;
         try {
-            fs.writeFileSync(this.configPath, JSON.stringify(this.serializeConfig()));
-        } catch (error) {
+            writeJsonAtomic(this.configPath, this.serializeConfig());
+        }
+        catch (error) {
             console.error("Error flushing config save:", error);
         }
     },

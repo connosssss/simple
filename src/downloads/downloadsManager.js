@@ -1,6 +1,7 @@
 const { app, shell } = require('electron');
 const path = require('path');
 const fs = require('fs');
+const { writeJsonAtomic } = require('../utils/fileIO');
 
 const DOWNLOADS_FILE = path.join(app.getPath('userData'), 'downloads.json');
 let downloads = [];
@@ -46,7 +47,7 @@ const saveHistory = () => {
       
     }));
 
-    fs.writeFileSync(DOWNLOADS_FILE, JSON.stringify(cleanDownloads, null, 2), 'utf-8');
+    writeJsonAtomic(DOWNLOADS_FILE, cleanDownloads, 2);
   } 
   
   catch (e) {

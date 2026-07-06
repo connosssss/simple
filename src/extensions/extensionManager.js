@@ -2,6 +2,7 @@ const { session, app } = require('electron');
 const https = require('https');
 const fs = require('fs');
 const path = require('path');
+const { writeJsonAtomic } = require('../utils/fileIO');
 
 const EXTENSIONS_DIR = path.join(app.getPath('userData'), 'extensions');
 const EXTENSIONS_META_PATH = path.join(app.getPath('userData'), 'extensions.json');
@@ -178,7 +179,7 @@ catch (e) {
 
 const saveMeta = (meta) => {
   try {
-    fs.writeFileSync(EXTENSIONS_META_PATH, JSON.stringify(meta, null, 2));
+    writeJsonAtomic(EXTENSIONS_META_PATH, meta, 2);
   }
 
   catch (e) {

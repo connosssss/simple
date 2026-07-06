@@ -1,6 +1,7 @@
 const { app, BaseWindow, BrowserWindow, WebContentsView, ipcMain, Menu, session, dialog } = require('electron');
 const path = require('node:path');
 const fs = require('fs');
+const { writeJsonAtomic } = require('../utils/fileIO');
 
 
 
@@ -346,7 +347,7 @@ const ipcSetup = () => {
   // Theme / bookmark / loading stuff
   ipcMain.handle("saveThemeToFile", (event, themeData) => {
     try {
-      fs.writeFileSync(getThemePath(), JSON.stringify(themeData));
+      writeJsonAtomic(getThemePath(), themeData);
       return { success: true };
     } catch (e) {
       console.error("Error saving theme:", e);

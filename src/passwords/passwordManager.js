@@ -1,6 +1,7 @@
 const { app, safeStorage } = require('electron');
 const fs = require('fs');
 const path = require('path');
+const { writeJsonAtomic } = require('../utils/fileIO');
 
 const getPasswordFilePath = () => path.join(app.getPath('userData'), 'passwords.json');
 const getSettingsFilePath = () => path.join(app.getPath('userData'), 'autofill-settings.json');
@@ -36,7 +37,7 @@ const saveSettings = () => {
   const filePath = getSettingsFilePath();
   
   try {
-    fs.writeFileSync(filePath, JSON.stringify(settings, null, 2), 'utf-8');
+    writeJsonAtomic(filePath, settings, 2);
   }
 
   catch (e) {
@@ -122,7 +123,7 @@ const savePasswords = () => {
       };
     });
     
-    fs.writeFileSync(filePath, JSON.stringify(serialized, null, 2), 'utf-8');
+    writeJsonAtomic(filePath, serialized, 2);
   }
 
   catch (e) {

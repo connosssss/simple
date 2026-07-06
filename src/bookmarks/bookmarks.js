@@ -1,6 +1,7 @@
 const fs = require('fs');
 const path = require('path');
 const { app } = require('electron');
+const { writeJsonAtomic } = require('../utils/fileIO');
 
 const BOOKMARKS_PATH = path.join(app.getPath('userData'), 'bookmarks.json');
 
@@ -21,7 +22,7 @@ const load = () => {
 
 const save = () => {
     try {
-        fs.writeFileSync(BOOKMARKS_PATH, JSON.stringify(bookmarks));
+        writeJsonAtomic(BOOKMARKS_PATH, bookmarks);
         console.log(bookmarks);
     } 
     
