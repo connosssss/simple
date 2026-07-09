@@ -4,6 +4,9 @@ const historyList = document.getElementById("history-list");
 const noHistoryMsg = document.getElementById("no-history-msg");
 
 let allHistory = [];
+let loadedCount = 100;
+const CHUNK_SIZE = 100;
+let observer;
 
 const renderHistory = (historyItems) => {
 
@@ -12,12 +15,16 @@ const renderHistory = (historyItems) => {
   if (!historyItems || historyItems.length === 0) {
     historyList.appendChild(noHistoryMsg);
     noHistoryMsg.classList.remove("hidden");
+    if (observer) {
+      observer.disconnect();
+    }
     return;
   }
 
   noHistoryMsg.classList.add("hidden");
 
   const sorted = [...historyItems].sort((a, b) => b.visitedAt - a.visitedAt);
+  const sliced = sorted.slice(0, loadedCount);
 
   const startOfToday = (() => { const d = new Date(); d.setHours(0, 0, 0, 0); return d.getTime(); })();
   const startOfThisWeek = startOfToday - 6 * 24 * 60 * 60 * 1000;
@@ -30,7 +37,7 @@ const renderHistory = (historyItems) => {
     { title: "Earlier", items: [] }
   ];
 
-  sorted.forEach(item => {
+  sliced.forEach(item => {
     if (item.visitedAt >= startOfToday) groups[0].items.push(item);
     else if (item.visitedAt >= startOfThisWeek) groups[1].items.push(item);
     else if (item.visitedAt >= startOfThisMonth) groups[2].items.push(item);
@@ -115,9 +122,39 @@ const renderHistory = (historyItems) => {
   });
 });
 
+  if (loadedCount < historyItems.length) {
+    setupInfiniteScroll(historyItems);
+  }
 };
 
-const filterHistory = () => {
+const setupInfiniteScroll = (historyItems) => {
+  if (observer) {
+    observer.disconnect();
+  }
+
+  const scrollTrigger = document.createElement("div");
+  scrollTrigger.id = "scroll-trigger";
+  scrollTrigger.className = "h-8 flex items-center justify-center text-xs text-slate-500 py-4";
+  scrollTrigger.textContent = "Loading more...";
+  historyList.appendChild(scrollTrigger);
+
+  observer = new IntersectionObserver((entries) => {
+    if (entries[0].isIntersecting) {
+      observer.disconnect();
+      loadedCount += CHUNK_SIZE;
+      filterHistory(false);
+    }
+  }, {
+    rootMargin: "150px"
+  });
+
+  observer.observe(scrollTrigger);
+};
+
+const filterHistory = (resetCount = true) => {
+  if (resetCount !== false) {
+    loadedCount = CHUNK_SIZE;
+  }
   const query = searchInput.value.toLowerCase().trim();
   const filtered = allHistory.filter(item => {
     const title = (item.title || "").toLowerCase();
@@ -130,13 +167,13 @@ const filterHistory = () => {
 if (window.electronAPI) {
   window.electronAPI.onUpdateHistory((history) => {
     allHistory = history;
-    filterHistory();
+    filterHistory(false);
   });
 
   if (window.electronAPI.getHistory) {
     window.electronAPI.getHistory().then(history => {
       allHistory = history || [];
-      filterHistory();
+      filterHistory(true);
     });
   }
 }
