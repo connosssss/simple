@@ -19,7 +19,7 @@ configureAppStorage();
 
 const Navigation = require('../addressBar/Navigation');
 const WindowManager = require('./WindowManager');
-const { registerCookieAndTrackerIPC } = require('./cookiesAndTrackers');
+const { setupTrackerBlocking, registerCookieAndTrackerIPC } = require('./cookiesAndTrackers');
 const extensionManager = require('../extensions/extensionManager');
 const bookmarkManager = require('../bookmarks/bookmarks');
 const historyManager = require('../history/history');
@@ -865,6 +865,7 @@ app.whenReady().then(async () => {
   // Changed to help fix bug of logging out of active account sessions when you close a window
   const mainSession = session.fromPartition('persist:main');
   setSessionUserAgent(mainSession);
+  setupTrackerBlocking();
 
   // Set up downloads broadcast callback to notify all windows
   downloadsManager.setBroadcastCallback((type, data) => {
