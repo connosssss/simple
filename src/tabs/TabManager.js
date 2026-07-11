@@ -28,6 +28,7 @@ const {
 } = require('./tabCreator');
 
 const INTERNAL_PAGES = new Set(["about://settings", "about://history"]);
+const MAX_CLOSED_TABS = 25;
 
 const stackIdsFor = (tab) => Array.isArray(tab?.stackIds) ? tab.stackIds : [];
 
@@ -82,6 +83,7 @@ class TabManager {
         this.mainTab = null;
         this.currentIndex = -1;
         this.lastOpenedTabs = [];
+        this.closedTabs = [];
         this.defaultSite = "https://google.com";
         this.searchEngine = "https://www.google.com/search?q=";
         this.showBookmarkBar = true;
@@ -278,6 +280,13 @@ class TabManager {
 
         let tabToClose = this.tabs[tabID];
         const oldStackIds = tabToClose.stackIds ? [...tabToClose.stackIds] : [];
+        this.closedTabs.push({
+            address: tabToClose.isNewTab ? "" : tabToClose.address,
+            isStacked: oldStackIds.length > 0,
+            stackId: oldStackIds[0] || null,
+            stackIds: oldStackIds,
+        });
+        this.closedTabs = this.closedTabs.slice(-MAX_CLOSED_TABS);
 
         this.lastOpenedTabs = this.lastOpenedTabs.filter(t => t !== tabToClose);
         
@@ -538,6 +547,17 @@ class TabManager {
              const idx = this.tabs.indexOf(tab);
              if (idx > -1) this.closeTab(idx);
         }
+    }
+
+    reopenClosedTab() {
+        const tab = this.closedTabs.pop();
+        if (!tab) return;
+
+        this.createTab({
+            ...tab,
+            switchTo: true,
+            preventStackInherit: true,
+        });
     }
 
     toggleKeepActive(index) {

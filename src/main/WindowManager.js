@@ -167,6 +167,14 @@ class WindowManager {
                         }
                     },
                     {
+                        label: 'Reopen Closed Tab',
+                        accelerator: 'CmdOrCtrl+Shift+T',
+                        click: (menuItem, browserWindow) => {
+                            const data = this.getActiveWindowData(browserWindow);
+                            if (data) data.tabManager.reopenClosedTab();
+                        }
+                    },
+                    {
                         label: 'Print',
                         accelerator: 'CmdOrCtrl+P',
                         click: (menuItem, browserWindow) => {
