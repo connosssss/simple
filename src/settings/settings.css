@@ -91,8 +91,7 @@ input[type="color"]::-webkit-color-swatch-wrapper {
   padding: 0;
 }
 input[type="color"]::-webkit-color-swatch {
-  border: 2px solid var(--theme-border);
-  border-radius: 8px;
+  border: none;
 }
 input:focus, select:focus {
   outline: none;

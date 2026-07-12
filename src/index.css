@@ -63,6 +63,37 @@
   border-radius: 0.125rem;
 }
 
+.tab-hover-card {
+  position: fixed;
+  z-index: 9999;
+  display: none;
+  max-width: 220px;
+  padding: 6px 8px;
+  border: 1px solid var(--theme-border);
+  border-radius: 6px;
+  background: var(--theme-panel-strong);
+  color: var(--theme-text);
+  pointer-events: none;
+}
+
+.tab-hover-card.visible {
+  display: block;
+}
+
+.tab-hover-title {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.tab-hover-memory {
+  margin-top: 2px;
+  color: var(--theme-faint);
+  font-size: 10px;
+}
+
 
 .tab-icon {
   width: 16px !important;
@@ -318,10 +349,6 @@ body.layout-right #address-actions-group button:not(#downloads-dropdown *) {
 
 
 
-
-
-
-/* --- Premium Custom Scrollbar Styling --- */
 ::-webkit-scrollbar {
   width: 8px !important;
   height: 8px !important;

@@ -32,6 +32,50 @@ tabsList.ondrop = (e) => {
 };
 
 let latestTabs = null;
+let tabHoverCard = null;
+
+const tabMemoryText = (tab) => tab.memoryText || "0 MB";
+
+const setTabHoverVisible = (visible) => {
+    if (window.electronAPI?.setTabHoverVisible) {
+        window.electronAPI.setTabHoverVisible(visible);
+    }
+};
+
+function showTabHoverCard(tabElement, tab) {
+    setTabHoverVisible(true);
+
+    if (!tabHoverCard) {
+        tabHoverCard = document.createElement("div");
+        tabHoverCard.className = "tab-hover-card";
+        tabHoverCard.innerHTML = `<div class="tab-hover-title"></div><div class="tab-hover-memory"></div>`;
+        document.body.appendChild(tabHoverCard);
+    }
+
+    tabHoverCard.querySelector(".tab-hover-title").textContent = tab.title || "New Tab";
+    tabHoverCard.querySelector(".tab-hover-memory").textContent = `RAM: ${tabMemoryText(tab)}`;
+    tabHoverCard.classList.add("visible");
+
+    const rect = tabElement.getBoundingClientRect();
+    const cardRect = tabHoverCard.getBoundingClientRect();
+    const top = document.body.classList.contains("layout-bottom")
+        ? rect.top - cardRect.height - 6
+        : rect.bottom + 6;
+    const maxLeft = Math.max(8, window.innerWidth - cardRect.width - 8);
+    const left = Math.min(Math.max(rect.left, 8), maxLeft);
+
+    tabHoverCard.style.left = `${left}px`;
+    tabHoverCard.style.top = `${Math.max(top, 8)}px`;
+}
+
+function hideTabHoverCard() {
+    if (tabHoverCard) {
+        tabHoverCard.classList.remove("visible");
+    }
+    setTabHoverVisible(false);
+}
+
+document.addEventListener("mouseleave", hideTabHoverCard);
 
 function startInlineStackRename(container, stackId, currentName) {
     container.innerHTML = "";
@@ -477,7 +521,9 @@ function createTabElement(tab, index, isInStack, tabs, level = 0) {
         tabE.className = `relative flex items-center px-2 cursor-pointer ${bgClass} flex-1 min-w-0 max-w-[10rem] mb-0 rounded-t-sm h-8 transition-all duration-100 gap-2 group-[.layout-left]:w-full group-[.layout-right]:w-full group-[.layout-left]:max-w-none group-[.layout-right]:max-w-none group-[.layout-left]:flex-none group-[.layout-right]:flex-none`;
         tabE.dataset.themeState = isSelected ? "selected" : tab.isMainTab ? "main" : tab.isActive ? "active" : "resting";
 
-        tabE.title = tab.title || "Tab";
+        tabE.title = `${tab.title || "Tab"}\nRAM: ${tabMemoryText(tab)}`;
+        tabE.addEventListener("mouseenter", () => showTabHoverCard(tabE, tab));
+        tabE.addEventListener("mouseleave", hideTabHoverCard);
 
         const appendTabIcon = () => {
 

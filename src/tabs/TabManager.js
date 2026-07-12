@@ -30,6 +30,24 @@ const {
 const INTERNAL_PAGES = new Set(["about://settings", "about://history"]);
 const MAX_CLOSED_TABS = 25;
 
+const formatMemoryUsage = (memoryKb) => {
+    const kb = Number(memoryKb) || 0;
+    if (kb <= 0) return "0 MB";
+    if (kb < 1024) return `${Math.round(kb)} KB`;
+    return `${Math.round(kb / 1024)} MB`;
+};
+
+const readTabMemoryKb = async (tab) => {
+    if (!tab?.contentView || !isLiveWebContents(tab.contentView)) return 0;
+
+    try {
+        const memory = await tab.contentView.webContents.getProcessMemoryInfo();
+        return memory.residentSet || memory.private || memory.shared || 0;
+    } catch (error) {
+        return tab.memoryUsageKb || 0;
+    }
+};
+
 const stackIdsFor = (tab) => Array.isArray(tab?.stackIds) ? tab.stackIds : [];
 
 const hasStackPath = (tab, stackPath) => {
@@ -94,15 +112,18 @@ class TabManager {
         this.bookmarkBarVisible = false;
         this.saveTimer = null;
         this.dropdownVisible = false;
+        this.tabHoverVisible = false;
         this.downloadsDropdownVisible = false;
         this.uiPosition = 'top';
         this.configPath = path.join(app.getPath('userData'), 'config.json');
+        this.memoryUsageInterval = null;
 
         if (!skipConfig) {
             this.loadConfig();
         }
 
         this.startAutoHibernationChecker();
+        this.startMemoryUsageRefresh();
 
     }
 
@@ -113,6 +134,11 @@ class TabManager {
     setDropdownVisible(visible) {
         this.dropdownVisible = !!visible;
         this.tabTree.addressBar.setDropdownVisible(visible);
+        this.resizeWindow();
+    }
+
+    setTabHoverVisible(visible) {
+        this.tabHoverVisible = !!visible;
         this.resizeWindow();
     }
 
@@ -436,7 +462,12 @@ class TabManager {
         this.sendTabData(true);
     }
 
-    sendTabData(forceSave = false) {
+    async sendTabData(forceSave = false, saveConfig = true) {
+        await Promise.all(this.tabs.map(async tab => {
+            tab.memoryUsageKb = await readTabMemoryKb(tab);
+            tab.memoryText = formatMemoryUsage(tab.memoryUsageKb);
+        }));
+
         this.rebuildTabTree();
         if (this.mainTab) {
             this.tabTree.addressBar.setAddress(this.mainTab.isNewTab ? "" : this.mainTab.address);
@@ -459,18 +490,35 @@ class TabManager {
             stackNames: (tab.stackIds || []).map(id => this.stackNames[id] || null),
             isSettingsTab: Boolean(tab.isSettingsTab),
             isNewTab: Boolean(tab.isNewTab),
-            isLoading: Boolean(tab.isLoading)
+            isLoading: Boolean(tab.isLoading),
+            memoryUsageKb: tab.memoryUsageKb || 0,
+            memoryText: tab.memoryText || "0 MB"
         }));
 
         const treeData = this.tabTree.toJSON();
 
+        if (!this.ui?.webContents || this.ui.webContents.isDestroyed()) return;
         this.ui.webContents.send("updateTabs", tabData, treeData);
-        this.saveConfig(forceSave);
+        if (saveConfig) {
+            this.saveConfig(forceSave);
+        }
 
         const settingsTabs = this.getSettingsTabs();
       
         settingsTabs.forEach(t => {
             t.contentView.webContents.send("updateTabs", tabData, treeData);
+        });
+    }
+
+    startMemoryUsageRefresh() {
+        this.memoryUsageInterval = setInterval(() => {
+            this.sendTabData(false, false);
+        }, 5000);
+
+        this.mainWindow.on('closed', () => {
+            if (this.memoryUsageInterval) {
+                clearInterval(this.memoryUsageInterval);
+            }
         });
     }
 

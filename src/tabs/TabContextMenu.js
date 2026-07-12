@@ -5,12 +5,6 @@ const { createRegularTab } = require('./tabCreator');
 const searchUrlFor = (searchEngine, text) =>
     (searchEngine || "https://www.google.com/search?q=") + encodeURIComponent(text);
 
-
-    if (!canceled && filePath) {
-        await webContents.savePage(filePath, 'HTMLComplete');
-    }
-};
-
 module.exports = {
 
     attachContextMenu(tab) {

@@ -86,6 +86,7 @@ contextBridge.exposeInMainWorld("electronAPI", {
     clearHistory: () => ipcRenderer.invoke("clearHistory"),
     onUpdateHistory: (callback) => ipcRenderer.on("updateHistory", (event, history) => callback(history)),
     setDropdownVisible: (visible) => ipcRenderer.send("setDropdownVisible", visible),
+    setTabHoverVisible: (visible) => ipcRenderer.send("setTabHoverVisible", visible),
 
     // Downloads
     getDownloads: () => ipcRenderer.invoke("getDownloads"),

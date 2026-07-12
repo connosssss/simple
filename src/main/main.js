@@ -28,6 +28,13 @@ const passwordManager = require('../passwords/passwordManager');
 
 const INTERNAL_PAGES = new Set(["about://settings", "about://history"]);
 
+const formatMemoryUsage = (memoryKb) => {
+  const kb = Number(memoryKb) || 0;
+  if (kb <= 0) return "0 MB";
+  if (kb < 1024) return `${Math.round(kb)} KB`;
+  return `${Math.round(kb / 1024)} MB`;
+};
+
 
 // Handle creating/removing shortcuts on Windows when installing/uninstalling.
 if (require('electron-squirrel-startup')) {
@@ -247,6 +254,14 @@ const ipcSetup = () => {
     
     if (tabManager && tabManager.setDropdownVisible) {
       tabManager.setDropdownVisible(visible);
+    }
+  });
+
+  ipcMain.on("setTabHoverVisible", (event, visible) => {
+    const tabManager = getTabManager(event);
+
+    if (tabManager && tabManager.setTabHoverVisible) {
+      tabManager.setTabHoverVisible(visible);
     }
   });
 
@@ -546,7 +561,16 @@ const ipcSetup = () => {
     let cmTemplate;
 
     if (selectedIndices.length > 1) {
+      const selectedMemoryKb = selectedIndices.reduce((total, index) => {
+        return total + (Number(tabManager.tabs[index]?.memoryUsageKb) || 0);
+      }, 0);
+
       cmTemplate = [
+        {
+          label: `RAM: ${formatMemoryUsage(selectedMemoryKb)}`,
+          enabled: false
+        },
+        { type: 'separator' },
         {
           label: `Close Selected Tabs (${selectedIndices.length})`,
           click: () => {
@@ -580,6 +604,11 @@ const ipcSetup = () => {
       if (!targetTab) return;
 
       cmTemplate = [
+        {
+          label: `RAM: ${targetTab.memoryText || "0 MB"}`,
+          enabled: false
+        },
+        { type: 'separator' },
         {
           label: 'Close Tab',
           click: () => {

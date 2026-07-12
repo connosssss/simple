@@ -168,6 +168,7 @@ export const setupTabTreeControls = () => {
             const tabData = tabIndex !== -1 ? currentTabs[tabIndex] : null;
             const isMainTab = tabData ? tabData.isMainTab : false;
             const isActive = tabData ? tabData.isActive : true;
+            const memoryText = tabData?.memoryText || "0 MB";
 
             const rowDiv = document.createElement("div");
             rowDiv.className = `flex items-center justify-between p-1.5 px-2.5 rounded-md hover:bg-slate-800/30 group select-none cursor-pointer transition-all duration-150 ${
@@ -212,6 +213,11 @@ export const setupTabTreeControls = () => {
             titleSpan.className = `font-medium truncate max-w-[220px] ${isMainTab ? 'text-white' : 'text-slate-300'}`;
             titleSpan.textContent = tabTitle;
             leftSide.appendChild(titleSpan);
+
+            const memoryBadge = document.createElement("span");
+            memoryBadge.className = "text-[10px] px-1.5 py-0.5 rounded bg-slate-800/40 text-slate-400 font-medium flex-shrink-0";
+            memoryBadge.textContent = memoryText;
+            leftSide.appendChild(memoryBadge);
 
             const addressSpan = document.createElement("span");
             addressSpan.className = "text-[10px] text-slate-500 font-mono truncate min-w-0 flex-1 ml-1.5";
