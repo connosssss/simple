@@ -1,5 +1,15 @@
 const { Menu, clipboard, dialog } = require('electron');
 const fs = require('fs');
+const { createRegularTab } = require('./tabCreator');
+
+const searchUrlFor = (searchEngine, text) =>
+    (searchEngine || "https://www.google.com/search?q=") + encodeURIComponent(text);
+
+
+    if (!canceled && filePath) {
+        await webContents.savePage(filePath, 'HTMLComplete');
+    }
+};
 
 module.exports = {
 
@@ -19,6 +29,16 @@ module.exports = {
                 menuTemplate.push({
                     label: 'Open Link in New Tab',
                     click: () => this.createTab(params.linkURL, false)
+                });
+
+                menuTemplate.push({
+                    label: 'Open Link in New Window',
+                    click: () => {
+                        require('../main/WindowManager').createWindow(createRegularTab({
+                            address: params.linkURL,
+                            defaultSite: this.defaultSite
+                        }));
+                    }
                 });
 
                 menuTemplate.push({
@@ -90,11 +110,34 @@ module.exports = {
                 menuTemplate.push({ type: 'separator' });
             }
 
-            if (params.selectionText) {
+            if (params.isEditable) {
+                menuTemplate.push(
+                    { role: 'undo' },
+                    { role: 'redo' },
+                    { type: 'separator' },
+                    { role: 'cut' },
+                    { role: 'copy' },
+                    { role: 'paste' },
+                    { role: 'delete' },
+                    { type: 'separator' },
+                    { role: 'selectall' },
+                    { type: 'separator' }
+                );
+            }
+            else if (params.selectionText) {
                 menuTemplate.push({ role: 'copy' });
             }
 
-    
+            if (params.selectionText) {
+                const selectedText = params.selectionText.trim();
+                if (selectedText) {
+                    menuTemplate.push({
+                        label: `Search for "${selectedText.slice(0, 40)}${selectedText.length > 40 ? '...' : ''}"`,
+                        click: () => this.createTab(searchUrlFor(this.searchEngine, selectedText), true)
+                    });
+                    menuTemplate.push({ type: 'separator' });
+                }
+            }
         
             menuTemplate.push({
                 label: 'Reload',
@@ -105,6 +148,17 @@ module.exports = {
             });
 
             menuTemplate.push({ type: 'separator' });
+
+
+            menuTemplate.push({
+                label: 'View Page Source',
+                click: () => {
+                    const url = webContents.getURL();
+                    if (url && !url.startsWith('view-source:')) {
+                        this.createTab(`view-source:${url}`, true);
+                    }
+                }
+            });
 
             menuTemplate.push({
                 label: 'Inspect Element',
