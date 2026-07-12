@@ -1,44 +1,83 @@
 const fs = require('fs');
 const path = require('path');
 const { app } = require('electron');
-const { writeJsonAtomic } = require('../utils/fileIO');
 
-const HISTORY_PATH = path.join(app.getPath('userData'), 'history.json');
+const HISTORY_PATH = path.join(app.getPath('userData'), 'history.jsonl');
+const OLD_HISTORY_PATH = path.join(app.getPath('userData'), 'history.json');
 
 const history = [];
+let pendingEntry = null;
+
+const commitPendingEntry = () => {
+    if (pendingEntry) {
+        try {
+            fs.appendFileSync(HISTORY_PATH, JSON.stringify(pendingEntry) + '\n', 'utf-8');
+        } catch (e) {
+            console.error("Error appending to history:", e);
+        }
+        pendingEntry = null;
+    }
+};
+
+const saveAll = () => {
+    try {
+        const tempPath = HISTORY_PATH + '.tmp';
+        const content = history.map(entry => JSON.stringify(entry)).join('\n') + (history.length > 0 ? '\n' : '');
+        fs.writeFileSync(tempPath, content, 'utf-8');
+        fs.renameSync(tempPath, HISTORY_PATH);
+    } catch (e) {
+        console.error("Error rewriting history:", e);
+    }
+};
 
 const load = () => {
-
     try {
-        if (fs.existsSync(HISTORY_PATH)) {
-
-            const data = JSON.parse(fs.readFileSync(HISTORY_PATH, 'utf-8'));
-            if (Array.isArray(data)) {
-                setHistory(data);
+        if (fs.existsSync(OLD_HISTORY_PATH)) {
+            try {
+                const oldContent = fs.readFileSync(OLD_HISTORY_PATH, 'utf-8').trim();
+                if (oldContent.startsWith('[')) {
+                    const data = JSON.parse(oldContent);
+                    if (Array.isArray(data)) {
+                        history.push(...data);
+                    }
+                }
+            }
+          
+            catch (e) {
+                console.error("Error migrating old history:", e);
+            }
+          
+          saveAll();
+          
+            try {
+                fs.unlinkSync(OLD_HISTORY_PATH);
             }
 
+            catch (e) {
+                console.error("Error deleting old history file:", e);
+            }
+            return;
         }
-    }
 
-    catch (e) {
+        if (fs.existsSync(HISTORY_PATH)) {
+            const fileContent = fs.readFileSync(HISTORY_PATH, 'utf-8');
+          const lines = fileContent.split('\n');
+          
+            for (const line of lines) {
+                const trimmed = line.trim();
+                if (trimmed) {
+                    try {
+                        history.push(JSON.parse(trimmed));
+                    }
+                    catch (e) {
+                        console.error("Failed to parse history line:", e);
+                    }
+                }
+            }
+        }
+    } catch (e) {
         console.error("Error loading history:", e);
     }
-};
-
-const save = () => {
-
-    try {
-        writeJsonAtomic(HISTORY_PATH, history);
-    }
-
-    catch (e) {
-        console.error("Error saving history:", e);
-    }
-};
-
-const setHistory = (newHistory) => {
-    history.length = 0;
-    history.push(...newHistory);
 };
 
 load();
@@ -49,6 +88,8 @@ module.exports = {
     add(url, title, iconURL) {
         if (!url || url.startsWith('about:') || url === 'about:blank') return null;
 
+        commitPendingEntry();
+
         const entry = {
             id: Date.now().toString() + Math.random().toString(36).substring(2, 7),
             url,
@@ -58,7 +99,7 @@ module.exports = {
         };
 
         history.push(entry);
-        save();
+        pendingEntry = entry;
         return entry;
     },
 
@@ -75,24 +116,37 @@ module.exports = {
                     last.iconURL = iconURL;
                     updated = true;
                 }
-                if (updated) {
-                    save();
-                }
             }
         }
     },
 
     remove(id) {
+        if (pendingEntry && pendingEntry.id === id) {
+            pendingEntry = null;
+        }
         const index = history.findIndex(item => item.id === id);
         if (index !== -1) {
             history.splice(index, 1);
-            save();
+            saveAll();
         }
     },
 
     clear() {
+        pendingEntry = null;
         history.length = 0;
-        save();
+        try {
+            if (fs.existsSync(HISTORY_PATH)) {
+                fs.truncateSync(HISTORY_PATH, 0);
+            }
+        }
+
+        catch (e) {
+            console.error("Error clearing history file:", e);
+        }
+    },
+
+    flush() {
+        commitPendingEntry();
     },
 
     getAll() {

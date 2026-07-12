@@ -85,20 +85,45 @@ const ipcSetup = () => {
 
   };
 
-  const broadcastHistory = () => {
-    const historyList = historyManager.getAll();
+  let broadcastTimeout = null;
+  const broadcastHistory = (immediate = false) => {
+    const performBroadcast = () => {
+      const historyList = historyManager.getAll();
 
-    for (const data of WindowManager.getAllWindows()) {
-      data.ui.webContents.send("updateHistory", historyList);
+      for (const data of WindowManager.getAllWindows()) {
+        if (data.ui && data.ui.webContents && !data.ui.webContents.isDestroyed()) {
+          data.ui.webContents.send("updateHistory", historyList);
+        }
 
-      const settingsTabs = data.tabManager.getSettingsTabs ? data.tabManager.getSettingsTabs() : data.tabManager.tabs.filter(t => t.isSettingsTab && t.contentView && !t.contentView.webContents.isDestroyed());
-      for (const tab of settingsTabs) {
-        tab.contentView.webContents.send("updateHistory", historyList);
+        const settingsTabs = data.tabManager.getSettingsTabs ? data.tabManager.getSettingsTabs() : data.tabManager.tabs.filter(t => t.isSettingsTab && t.contentView && !t.contentView.webContents.isDestroyed());
+        for (const tab of settingsTabs) {
+          if (tab.contentView && tab.contentView.webContents && !tab.contentView.webContents.isDestroyed()) {
+            tab.contentView.webContents.send("updateHistory", historyList);
+          }
+        }
       }
+    };
+
+    if (broadcastTimeout) {
+      clearTimeout(broadcastTimeout);
+      broadcastTimeout = null;
+    }
+
+    if (immediate) {
+      performBroadcast();
+    }
+
+    else {
+      broadcastTimeout = setTimeout(() => {
+        broadcastTimeout = null;
+        performBroadcast();
+      }, 1000);
     }
   };
 
-  ipcMain.on("broadcastHistory", broadcastHistory);
+  ipcMain.on("broadcastHistory", () => {
+    broadcastHistory(false);
+  });
 
   const broadcastBookmarks = () => {
     const bookmarks = bookmarkManager.getAll();
@@ -390,13 +415,13 @@ const ipcSetup = () => {
 
   ipcMain.handle("deleteHistoryItem", (event, id) => {
     historyManager.remove(id);
-    broadcastHistory();
+    broadcastHistory(true);
     return { success: true };
   });
 
   ipcMain.handle("clearHistory", () => {
     historyManager.clear();
-    broadcastHistory();
+    broadcastHistory(true);
     return { success: true };
   });
 
@@ -938,6 +963,15 @@ app.on('window-all-closed', () => {
 });
 
 app.on('will-quit', async () => {
+  try {
+    if (typeof historyManager.flush === 'function') {
+      historyManager.flush();
+    }
+  }
+  catch (err) {
+    console.error('Failed to flush history: ', err);
+  }
+
   try {
     for (const data of WindowManager.getAllWindows()) {
       if (data.tabManager && typeof data.tabManager.flushConfigSave === 'function') {

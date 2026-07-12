@@ -164,7 +164,6 @@ const attachTabLifecycle = (manager, tab) => {
     const url = webContents.getURL();
     if (url && !url.startsWith("about:") && url !== "about:blank") {
       historyManager.updateLastEntryTitleAndIcon(url, title, tab.iconURL || "");
-      ipcMain.emit("broadcastHistory");
     }
   };
 
@@ -175,7 +174,6 @@ const attachTabLifecycle = (manager, tab) => {
     
     if (url && !url.startsWith("about:") && url !== "about:blank") {
       historyManager.updateLastEntryTitleAndIcon(url, null, tab.iconURL);
-      ipcMain.emit("broadcastHistory");
     }
   };
 
