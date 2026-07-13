@@ -46,7 +46,7 @@ const renderBookmarkBar = () => {
   for (const name of folderNames) {
     const folderBtn = document.createElement("button");
     folderBtn.type = "button";
-    folderBtn.className = "theme-button-alt theme-text text-xs rounded-sm px-2 py-1 max-w-48 truncate transition-all duration-100 flex items-center gap-1 font-semibold group-[.layout-left]:w-full group-[.layout-right]:w-full group-[.layout-left]:max-w-none group-[.layout-right]:max-w-none group-[.layout-left]:justify-start group-[.layout-right]:justify-start group-[.layout-left]:p-[4px_6px] group-[.layout-right]:p-[4px_6px]";
+    folderBtn.className = "theme-button-alt theme-text text-xs rounded-sm px-2 py-1 max-w-48 truncate transition-all duration-100 flex items-center gap-1 font-semibold group-[.layout-side]:w-full group-[.layout-side]:max-w-none group-[.layout-side]:justify-start group-[.layout-side]:p-[4px_6px]";
     const icon = document.createElementNS("http://www.w3.org/2000/svg", "svg");
     icon.setAttribute("viewBox", "0 0 24 24");
     icon.setAttribute("fill", "none");
@@ -79,7 +79,7 @@ const renderBookmarkBar = () => {
   for (const bookmark of rootBookmarks) {
     const button = document.createElement("button");
     button.type = "button";
-    button.className = "theme-button-alt theme-text text-xs rounded-sm px-2 py-1 max-w-48 truncate transition-all duration-100 flex items-center gap-1 group-[.layout-left]:w-full group-[.layout-right]:w-full group-[.layout-left]:max-w-none group-[.layout-right]:max-w-none group-[.layout-left]:justify-start group-[.layout-right]:justify-start group-[.layout-left]:p-[4px_6px] group-[.layout-right]:p-[4px_6px]";
+    button.className = "theme-button-alt theme-text text-xs rounded-sm px-2 py-1 max-w-48 truncate transition-all duration-100 flex items-center gap-1 group-[.layout-side]:w-full group-[.layout-side]:max-w-none group-[.layout-side]:justify-start group-[.layout-side]:p-[4px_6px]";
 
     const icon = document.createElement("img");
     icon.className = "w-4 h-4 flex-shrink-0 pointer-events-none opacity-75 rounded-sm";

@@ -114,15 +114,16 @@ setupDownloadsUI();
 setupTabSubscription();
 
 const setupLayoutSubscription = () => {
-  let currentUiPosition = 'top';
+  let currentUiPosition = localStorage.getItem("uiPosition") || 'top';
 
   const applyUiPosition = (position) => {
     if (!position) position = 'top';
     localStorage.setItem("uiPosition", position);
     if (currentUiPosition === position) return;
 
-    document.body.classList.remove('layout-top', 'layout-bottom', 'layout-left', 'layout-right');
+    document.body.classList.remove('layout-top', 'layout-bottom', 'layout-left', 'layout-right', 'layout-side');
     document.body.classList.add(`layout-${position}`);
+    document.body.classList.toggle('layout-side', position === 'left' || position === 'right');
     currentUiPosition = position;
     if (typeof rerenderCurrentTabs === 'function') {
       rerenderCurrentTabs();

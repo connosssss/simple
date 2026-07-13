@@ -7,58 +7,206 @@
     <link rel="stylesheet" href="./index.css" />
   </head>
 
-  <body class="group overflow-hidden m-0 p-0 bg-transparent flex flex-col justify-start h-screen w-screen group-[.layout-bottom]:justify-end group-[.layout-left]:border-r group-[.layout-left]:border-[var(--theme-border)] group-[.layout-right]:border-l group-[.layout-right]:border-[var(--theme-border)]">
+  <body class="
+    group overflow-hidden m-0 p-0 bg-transparent
+    flex flex-col justify-start h-screen w-screen
+    group-[.layout-bottom]:justify-end
+    group-[.layout-side]:border-[var(--theme-border)]
+    group-[.layout-left]:border-r
+    group-[.layout-right]:border-l
+  ">
     <script>
       (function() {
         const pos = localStorage.getItem("uiPosition") || "top";
         document.body.classList.add("layout-" + pos);
+        document.body.classList.toggle("layout-side", pos === "left" || pos === "right");
       })();
     </script>
     
-    <div class="theme-shell w-screen flex flex-row backdrop-blur-md h-[30px] items-center justify-center text-center group-[.layout-bottom]:order-5 group-[.layout-bottom]:border-b-0 group-[.layout-bottom]:border-t group-[.layout-bottom]:border-[var(--theme-border)] group-[.layout-left]:order-1 group-[.layout-left]:h-[38px] group-[.layout-left]:w-full group-[.layout-left]:border-b group-[.layout-left]:border-[var(--theme-border)] group-[.layout-left]:shrink-0 group-[.layout-right]:order-1 group-[.layout-right]:h-[38px] group-[.layout-right]:w-full group-[.layout-right]:border-b group-[.layout-right]:border-[var(--theme-border)] group-[.layout-right]:shrink-0" style="-webkit-app-region: drag;">
+    <div
+      class="
+        theme-shell w-screen flex flex-row backdrop-blur-md
+        h-[30px] items-center justify-center text-center
+        group-[.layout-bottom]:order-5
+        group-[.layout-bottom]:border-b-0
+        group-[.layout-bottom]:border-t
+        group-[.layout-bottom]:border-[var(--theme-border)]
+        group-[.layout-side]:order-1
+        group-[.layout-side]:h-[38px]
+        group-[.layout-side]:border-b
+        group-[.layout-side]:border-[var(--theme-border)]
+        group-[.layout-side]:shrink-0
+      "
+      style="-webkit-app-region: drag;"
+    >
       <div id="window-title" class="theme-text text-md max-w-[70%] truncate"> simple</div>
     </div>
 
-    <div class="theme-shell theme-border w-screen flex flex-row backdrop-blur-md h-[40px] items-center justify-start gap-2 border-b border-black/20 group-[.layout-bottom]:order-4 group-[.layout-bottom]:border-b group-[.layout-bottom]:border-[var(--theme-border)] group-[.layout-left]:order-4 group-[.layout-left]:flex-col group-[.layout-left]:items-stretch group-[.layout-left]:h-0 group-[.layout-left]:grow group-[.layout-left]:w-full group-[.layout-left]:border-b-0 group-[.layout-right]:order-4 group-[.layout-right]:flex-col group-[.layout-right]:items-stretch group-[.layout-right]:h-0 group-[.layout-right]:grow group-[.layout-right]:w-full group-[.layout-right]:border-b-0">
-      <div id="tabs-list" class="flex flex-row overflow-x-hidden gap-1 h-full items-center ml-2 group-[.layout-left]:flex-col group-[.layout-left]:items-stretch group-[.layout-left]:overflow-y-auto group-[.layout-left]:overflow-x-hidden group-[.layout-left]:h-auto group-[.layout-left]:grow group-[.layout-left]:gap-1 group-[.layout-left]:p-[4px_6px] group-[.layout-left]:ml-0 group-[.layout-right]:flex-col group-[.layout-right]:items-stretch group-[.layout-right]:overflow-y-auto group-[.layout-right]:overflow-x-hidden group-[.layout-right]:h-auto group-[.layout-right]:grow group-[.layout-right]:gap-1 group-[.layout-right]:p-[4px_6px] group-[.layout-right]:ml-0"></div>
-      <button id="new-tab" class="theme-button w-8 h-8 flex items-center justify-center text-white rounded transition-all duration-100 mr-2 active:scale-95 group-[.layout-left]:w-[calc(100%-12px)] group-[.layout-left]:m-[6px] group-[.layout-left]:h-[30px] group-[.layout-left]:shrink-0 group-[.layout-left]:justify-center group-[.layout-left]:rounded group-[.layout-right]:w-[calc(100%-12px)] group-[.layout-right]:m-[6px] group-[.layout-right]:h-[30px] group-[.layout-right]:shrink-0 group-[.layout-right]:justify-center group-[.layout-right]:rounded">
+    <div class="
+      tab-bar theme-shell theme-border w-screen
+      flex flex-row backdrop-blur-md h-[40px]
+      items-center justify-start gap-2
+      border-b border-black/20
+      group-[.layout-bottom]:order-4
+      group-[.layout-bottom]:border-[var(--theme-border)]
+      group-[.layout-side]:order-4
+      group-[.layout-side]:flex-col
+      group-[.layout-side]:items-stretch
+      group-[.layout-side]:h-0
+      group-[.layout-side]:grow
+      group-[.layout-side]:w-full
+      group-[.layout-side]:border-b-0
+    ">
+      <div
+        id="tabs-list"
+        class="
+          flex flex-row overflow-x-hidden gap-1 h-full items-center ml-2
+          flex-1 min-w-0
+          group-[.layout-side]:flex-col
+          group-[.layout-side]:items-stretch
+          group-[.layout-side]:overflow-y-auto
+          group-[.layout-side]:h-auto
+          group-[.layout-side]:grow
+          group-[.layout-side]:p-[4px_6px]
+          group-[.layout-side]:ml-0
+        "
+      ></div>
+      <button
+        id="new-tab"
+        class="
+          w-8 h-8 flex items-center justify-center shrink-0
+          text-white rounded transition-all duration-100
+          mr-2 active:scale-95
+        "
+      >
         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5" class="w-4 h-4">
           <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
         </svg>
       </button>
     </div>
 
-    <div id="stack-bars-container" class="flex flex-col w-screen group-[.layout-bottom]:order-3 group-[.layout-left]:order-5 group-[.layout-left]:w-full group-[.layout-right]:order-5 group-[.layout-right]:w-full">
-    </div>
+    <div
+      id="stack-bars-container"
+      class="
+        flex flex-col w-screen
+        group-[.layout-bottom]:order-3
+        group-[.layout-side]:order-5 group-[.layout-side]:w-full
+      "
+    ></div>
 
-    <div class="relative theme-shell theme-border w-screen flex flex-row backdrop-blur-md h-[40px] gap-1 items-center justify-start border-b border-black/20 group-[.layout-bottom]:order-2 group-[.layout-bottom]:border-b group-[.layout-bottom]:border-[var(--theme-border)] group-[.layout-left]:order-2 group-[.layout-left]:border-b group-[.layout-left]:border-[var(--theme-border)] group-[.layout-left]:h-auto group-[.layout-left]:grid group-[.layout-left]:grid-cols-[auto_auto] group-[.layout-left]:row-gap-[6px] group-[.layout-left]:column-gap-[2px] group-[.layout-left]:p-[8px_4px] group-[.layout-left]:w-full group-[.layout-left]:shrink-0 group-[.layout-right]:order-2 group-[.layout-right]:border-b group-[.layout-right]:border-[var(--theme-border)] group-[.layout-right]:h-auto group-[.layout-right]:grid group-[.layout-right]:grid-cols-[auto_auto] group-[.layout-right]:row-gap-[6px] group-[.layout-right]:column-gap-[2px] group-[.layout-right]:p-[8px_4px] group-[.layout-right]:w-full group-[.layout-right]:shrink-0" id="address-bar-part" style="grid-template-areas: 'nav actions' 'input input';">
-      <div id="global-progress-bar" class="absolute bottom-0 left-0 h-[2.5px] z-50 pointer-events-none transition-all duration-300 w-0 opacity-0" style="background-color: var(--theme-accent);"></div>
+    <div
+      class="
+        relative theme-shell theme-border w-screen
+        flex flex-row backdrop-blur-md h-[40px] gap-1
+        items-center justify-start
+        border-b border-black/20
+        group-[.layout-bottom]:order-2
+        group-[.layout-bottom]:border-[var(--theme-border)]
+        group-[.layout-side]:order-2
+        group-[.layout-side]:border-[var(--theme-border)]
+        group-[.layout-side]:h-auto
+        group-[.layout-side]:grid
+        group-[.layout-side]:grid-cols-[auto_auto]
+        group-[.layout-side]:row-gap-[6px]
+        group-[.layout-side]:column-gap-[2px]
+        group-[.layout-side]:p-[8px_4px]
+        group-[.layout-side]:w-full
+        group-[.layout-side]:shrink-0
+      "
+      id="address-bar-part"
+      style="grid-template-areas: 'nav actions' 'input input';"
+    >
+      <div
+        id="global-progress-bar"
+        class="
+          absolute bottom-0 left-0 h-[2.5px] z-50
+          pointer-events-none transition-all duration-300
+          w-0 opacity-0
+        "
+        style="background-color: var(--theme-accent);"
+      ></div>
 
-      <div class="flex flex-row gap-1 ml-1 group-[.layout-left]:[grid-area:nav] group-[.layout-left]:w-auto group-[.layout-left]:flex-row group-[.layout-left]:gap-[2px] group-[.layout-left]:items-center group-[.layout-left]:ml-0 group-[.layout-right]:[grid-area:nav] group-[.layout-right]:w-auto group-[.layout-right]:flex-row group-[.layout-right]:gap-[2px] group-[.layout-right]:items-center group-[.layout-right]:ml-0">
-        <button class="theme-button group w-[2.0rem] h-[2.0rem] bg-slate-800/60 hover:bg-slate-700/70 text-white rounded-sm transition-all duration-100 flex items-center justify-center active:scale-95" id="back" title="Go back">
-          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5" class="w-4 h-4 opacity-50 group-hover:opacity-100 transition-opacity duration-100">
+      <div class="
+        flex flex-row gap-1 ml-1 items-center
+        group-[.layout-side]:[grid-area:nav]
+        group-[.layout-side]:gap-[2px]
+        group-[.layout-side]:ml-0
+      ">
+        <button
+          class="
+            theme-button w-[2.0rem] h-[2.0rem]
+            bg-slate-800/60 hover:bg-slate-700/70
+            text-white rounded-sm transition-all duration-100
+            flex items-center justify-center active:scale-95
+          "
+          id="back" title="Go back"
+        >
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5" class="w-4 h-4">
             <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5 8.25 12l7.5-7.5" />
           </svg>
         </button>
-        <button class="theme-button group w-[2.0rem] h-[2.0rem] bg-slate-800/60 hover:bg-slate-700/70 text-white rounded-sm transition-all duration-100 flex items-center justify-center active:scale-95" id="forward" title="Go forward">
-          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5" class="w-4 h-4 opacity-50 group-hover:opacity-100 transition-opacity duration-100">
+        <button
+          class="
+            theme-button w-[2.0rem] h-[2.0rem]
+            bg-slate-800/60 hover:bg-slate-700/70
+            text-white rounded-sm transition-all duration-100
+            flex items-center justify-center active:scale-95
+          "
+          id="forward" title="Go forward"
+        >
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5" class="w-4 h-4">
             <path stroke-linecap="round" stroke-linejoin="round" d="m8.25 4.5 7.5 7.5-7.5 7.5" />
           </svg>
         </button>
-        <button class="theme-button group w-[2.0rem] h-[2.0rem] bg-slate-800/60 hover:bg-slate-700/70 text-white rounded-sm transition-all duration-100 flex items-center justify-center active:scale-95" id="refresh" title="Reload page">
-          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5" class="w-4 h-4 opacity-50 group-hover:opacity-100 transition-opacity duration-100">
+        <button
+          class="
+            theme-button w-[2.0rem] h-[2.0rem]
+            bg-slate-800/60 hover:bg-slate-700/70
+            text-white rounded-sm transition-all duration-100
+            flex items-center justify-center active:scale-95
+          "
+          id="refresh" title="Reload page"
+        >
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5" class="w-4 h-4">
             <path stroke-linecap="round" stroke-linejoin="round" d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0 3.181 3.183a8.25 8.25 0 0 0 13.803-3.7M4.031 9.865a8.25 8.25 0 0 1 13.803-3.7l3.181 3.182m0-4.991v4.99" />
           </svg>
         </button>
       </div>
 
-      <div class="relative w-full h-[80%] flex items-center group-[.layout-left]:[grid-area:input] group-[.layout-left]:w-full group-[.layout-left]:h-[28px] group-[.layout-right]:[grid-area:input] group-[.layout-right]:w-full group-[.layout-right]:h-[28px]">
-        <input class="theme-input w-full h-full px-2 outline-none text-sm rounded-sm selection:bg-slate-700/60" id="address-bar" onfocus="this.select()" />
-        <div id="autocomplete-dropdown" class="absolute left-0 right-0 top-full mt-1.5 hidden z-50 rounded-xl border border-[var(--theme-border)] shadow-[0_10px_30px_rgba(0,0,0,0.4)] overflow-y-auto max-h-[310px] bg-[var(--theme-panel-strong)] backdrop-blur-[20px] py-1.5 group-[.layout-bottom]:top-auto group-[.layout-bottom]:bottom-full group-[.layout-bottom]:mt-0 group-[.layout-bottom]:mb-1.5"></div>
+      <div class="
+        relative w-full h-[80%] flex items-center
+        group-[.layout-side]:[grid-area:input]
+        group-[.layout-side]:h-[28px]
+      ">
+        <input
+          class="theme-input w-full h-full px-2 outline-none text-sm rounded-sm selection:bg-slate-700/60"
+          id="address-bar"
+          onfocus="this.select()"
+        />
+        <div
+          id="autocomplete-dropdown"
+          class="
+            absolute left-0 right-0 top-full mt-1.5
+            hidden z-50 rounded-xl
+            border border-[var(--theme-border)]
+            shadow-[0_10px_30px_rgba(0,0,0,0.4)]
+            overflow-y-auto max-h-[310px]
+            bg-[var(--theme-panel-strong)] backdrop-blur-[20px]
+            py-1.5
+            group-[.layout-bottom]:top-auto
+            group-[.layout-bottom]:bottom-full
+            group-[.layout-bottom]:mt-0
+            group-[.layout-bottom]:mb-1.5
+          "
+        ></div>
       </div>
 
       <div id="find-bar" class="theme-panel hidden flex backdrop-blur-md rounded-sm p-[2px] gap-[2px]">
-        <input id="find-input" class="theme-input text-sm px-2 py-1 rounded-sm outline-none" placeholder="Find in page" />
+        <input
+          id="find-input"
+          class="theme-input text-sm px-2 py-1 rounded-sm outline-none"
+          placeholder="Find in page"
+        />
         <button id="find-close" class="theme-button-alt text-xs p-1 rounded flex items-center justify-center">
           <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5" class="w-3 h-3">
             <path stroke-linecap="round" stroke-linejoin="round" d="M6 18 18 6M6 6l12 12" />
@@ -66,32 +214,84 @@
         </button>
       </div>
 
-      <div class="flex flex-row gap-1 items-center mr-1 group-[.layout-left]:[grid-area:actions] group-[.layout-left]:w-auto group-[.layout-left]:flex-row group-[.layout-left]:gap-1 group-[.layout-left]:items-center group-[.layout-left]:justify-end group-[.layout-left]:mr-0 group-[.layout-right]:[grid-area:actions] group-[.layout-right]:w-auto group-[.layout-right]:flex-row group-[.layout-right]:gap-1 group-[.layout-right]:items-center group-[.layout-right]:justify-end group-[.layout-right]:mr-0" id="address-actions-group">
-        <button class="theme-button group w-[2.0rem] h-[2.0rem] text-slate-400 hover:text-slate-200 rounded-sm transition-all duration-100 flex items-center justify-center active:scale-95"
-          id="extensions-menu" title="Extensions">
-          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.2" class="w-4 h-4 opacity-50 group-hover:opacity-100 transition-opacity duration-100">
+      <div
+        class="
+          flex flex-row gap-1 items-center mr-1
+          group-[.layout-side]:[grid-area:actions]
+          group-[.layout-side]:justify-end
+          group-[.layout-side]:mr-0
+        "
+        id="address-actions-group"
+      >
+        <button
+          class="
+            theme-button w-[2.0rem] h-[2.0rem]
+            text-slate-400 hover:text-slate-200
+            rounded-sm transition-all duration-100
+            flex items-center justify-center active:scale-95
+          "
+          id="extensions-menu" title="Extensions"
+        >
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.2" class="w-4 h-4">
             <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6A2.25 2.25 0 0 1 6 3.75h2.25A2.25 2.25 0 0 1 10.5 6v2.25a2.25 2.25 0 0 1-2.25 2.25H6a2.25 2.25 0 0 1-2.25-2.25V6ZM3.75 15.75A2.25 2.25 0 0 1 6 13.5h2.25a2.25 2.25 0 0 1 2.25 2.25V18a2.25 2.25 0 0 1-2.25 2.25H6a2.25 2.25 0 0 1-3.75-2.25v-2.25ZM13.5 6a2.25 2.25 0 0 1 2.25-2.25H18A2.25 2.25 0 0 1 20.25 6v2.25a2.25 2.25 0 0 1-2.25 2.25h-2.25A2.25 2.25 0 0 1 13.5 8.25V6ZM13.5 15.75a2.25 2.25 0 0 1 2.25-2.25H18a2.25 2.25 0 0 1 2.25 2.25V18a2.25 2.25 0 0 1-2.25 2.25h-2.25A2.25 2.25 0 0 1 13.5 18v-2.25Z" />
           </svg>
         </button>
   
-        <button class="theme-button group w-[2.0rem] h-[2.0rem] text-slate-400 hover:text-slate-200 rounded-sm transition-all duration-100 flex items-center justify-center active:scale-95"
-          id="bookmark" title="Bookmark page">
-        </button>
+        <button
+          class="
+            theme-button w-[2.0rem] h-[2.0rem]
+            text-slate-400 hover:text-slate-200
+            rounded-sm transition-all duration-100
+            flex items-center justify-center active:scale-95
+          "
+          id="bookmark" title="Bookmark page"
+        ></button>
 
-        <button class="theme-button group relative w-[2.0rem] h-[2.0rem] text-slate-400 hover:text-slate-200 rounded-sm transition-all duration-100 flex items-center justify-center active:scale-95" id="downloads-btn" title="Downloads">
+        <button
+          class="
+            theme-button relative w-[2.0rem] h-[2.0rem]
+            text-slate-400 hover:text-slate-200
+            rounded-sm transition-all duration-100
+            flex items-center justify-center active:scale-95
+          "
+          id="downloads-btn" title="Downloads"
+        >
           <svg class="absolute inset-0 w-full h-full -rotate-90 pointer-events-none hidden" id="downloads-progress-ring" viewBox="0 0 32 32">
             <circle class="text-slate-700/60" stroke="currentColor" stroke-width="2.5" fill="transparent" r="12" cx="16" cy="16" />
-            <circle class="transition-all duration-300" id="downloads-progress-bar-circle" stroke="var(--theme-accent)" stroke-width="2.5" fill="transparent" r="12" cx="16" cy="16" stroke-dasharray="75.4" stroke-dashoffset="75.4" stroke-linecap="round" />
+            <circle
+              class="transition-all duration-300"
+              id="downloads-progress-bar-circle"
+              stroke="var(--theme-accent)" stroke-width="2.5" fill="transparent"
+              r="12" cx="16" cy="16"
+              stroke-dasharray="75.4" stroke-dashoffset="75.4" stroke-linecap="round"
+            />
           </svg>
 
           <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5" class="w-4 h-4" id="downloads-icon">
             <path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75V16.5M16.5 12 12 16.5m0 0L7.5 12m4.5 4.5V3" />
           </svg>
 
-          <span class="absolute -top-1 -right-1 text-white text-[9px] font-bold rounded-none h-4 min-w-4 px-1 flex items-center justify-center border border-slate-900 shadow-md hidden" id="downloads-count-badge" style="background-color: var(--theme-accent);">0</span>
+          <span
+            class="
+              absolute -top-1 -right-1 text-white text-[9px] font-bold
+              rounded-none h-4 min-w-4 px-1
+              flex items-center justify-center
+              border border-slate-900 shadow-md hidden
+            "
+            id="downloads-count-badge"
+            style="background-color: var(--theme-accent);"
+          >0</span>
         </button>
         
-        <button class="theme-button group w-[2.0rem] h-[2.0rem] text-slate-400 hover:text-slate-200 rounded-sm transition-all duration-100 flex items-center justify-center active:scale-95" id="settings" title="Settings">
+        <button
+          class="
+            theme-button w-[2.0rem] h-[2.0rem]
+            text-slate-400 hover:text-slate-200
+            rounded-sm transition-all duration-100
+            flex items-center justify-center active:scale-95
+          "
+          id="settings" title="Settings"
+        >
           <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.2" class="w-4 h-4">
             <path stroke-linecap="round" stroke-linejoin="round" d="M9.594 3.94c.09-.542.56-.94 1.11-.94h2.593c.55 0 1.02.398 1.11.94l.213 1.281c.063.374.313.686.645.87.074.04.147.083.22.127.324.196.72.257 1.075.124l1.217-.456a1.125 1.125 0 0 1 1.37.49l1.296 2.247a1.125 1.125 0 0 1-.26 1.43l-1.003.828c-.293.241-.438.613-.43.992a7.723 7.723 0 0 1 0 .255c-.008.378.137.75.43.991l1.004.827c.424.35.534.954.26 1.43l-1.298 2.247a1.125 1.125 0 0 1-1.369.491l-1.217-.456c-.355-.133-.75-.072-1.076.124a6.57 6.57 0 0 1-.22.128c-.331.183-.581.495-.644.869l-.213 1.28c-.09.543-.56.941-1.11.941h-2.594c-.55 0-1.02-.398-1.11-.94l-.213-1.281c-.062-.374-.312-.686-.644-.87a6.52 6.52 0 0 1-.22-.127c-.325-.196-.72-.257-1.076-.124l-1.217.456a1.125 1.125 0 0 1-1.369-.49l-1.297-2.247a1.125 1.125 0 0 1 .26-1.43l1.004-.827c.292-.24.437-.613.43-.992a6.932 6.932 0 0 1 0-.255c.007-.378-.138-.75-.43-.991l-1.004-.827a1.125 1.125 0 0 1-.26-1.43l1.297-2.247a1.125 1.125 0 0 1 1.37-.491l1.216.456c.356.133.751.072 1.076-.124.072-.044.146-.087.22-.128c.332-.183.582-.495.645-.869L9.594 3.94ZM12.75 12a.75.75 0 1 1-1.5 0 .75.75 0 0 1 1.5 0Z" />
           </svg>
@@ -99,42 +299,129 @@
       </div>
  
 
-      <div id="downloads-dropdown" class="absolute right-2 top-full mt-1.5 w-[380px] hidden z-50 rounded-none border border-[var(--theme-border)] shadow-[0_10px_30px_rgba(0,0,0,0.6)] bg-[var(--theme-bg-opaque)] p-3 text-[var(--theme-text)] flex flex-col gap-2 max-h-[300px] overflow-y-auto group-[.layout-bottom]:top-auto group-[.layout-bottom]:bottom-full group-[.layout-bottom]:mt-0 group-[.layout-bottom]:mb-1.5 group-[.layout-left]:w-[calc(100%-12px)] group-[.layout-left]:left-1.5 group-[.layout-left]:right-1.5 group-[.layout-right]:w-[calc(100%-12px)] group-[.layout-right]:left-1.5 group-[.layout-right]:right-1.5">
-
+      <div
+        id="downloads-dropdown"
+        class="
+          absolute right-2 top-full mt-1.5 w-[380px]
+          hidden z-50 rounded-none
+          border border-[var(--theme-border)]
+          shadow-[0_10px_30px_rgba(0,0,0,0.6)]
+          bg-[var(--theme-bg-opaque)]
+          p-3 text-[var(--theme-text)]
+          flex flex-col gap-2 max-h-[300px] overflow-y-auto
+          group-[.layout-bottom]:top-auto
+          group-[.layout-bottom]:bottom-full
+          group-[.layout-bottom]:mt-0
+          group-[.layout-bottom]:mb-1.5
+          group-[.layout-side]:w-[calc(100%-12px)]
+          group-[.layout-side]:left-1.5
+          group-[.layout-side]:right-1.5
+        "
+      >
         <div class="flex items-center justify-between border-b border-[var(--theme-border)] pb-2 mb-1">
           <span class="font-bold text-sm">Downloads</span>
           <button id="clear-downloads-btn" class="text-xs text-[var(--theme-text)] opacity-70 hover:opacity-100">Clear all</button>
         </div>
 
         <div id="downloads-list-container" class="flex flex-col gap-2.5 overflow-y-auto max-h-[220px]">
-
         </div>
       </div>
     </div>
 
-    <div id="bookmark-bar" class="theme-shell theme-border hidden w-screen flex-row items-center gap-1 px-2 h-[38px] border-b border-black/20 overflow-hidden group-[.layout-bottom]:order-1 group-[.layout-bottom]:border-b group-[.layout-bottom]:border-[var(--theme-border)] group-[.layout-left]:order-3 group-[.layout-left]:border-b group-[.layout-left]:border-[var(--theme-border)] group-[.layout-left]:h-auto group-[.layout-left]:max-h-[150px] group-[.layout-left]:flex-col group-[.layout-left]:items-stretch group-[.layout-left]:p-[6px] group-[.layout-left]:w-full group-[.layout-left]:shrink-0 group-[.layout-left]:overflow-y-auto group-[.layout-left]:overflow-x-hidden group-[.layout-right]:order-3 group-[.layout-right]:border-b group-[.layout-right]:border-[var(--theme-border)] group-[.layout-right]:h-auto group-[.layout-right]:max-h-[150px] group-[.layout-right]:flex-col group-[.layout-right]:items-stretch group-[.layout-right]:p-[6px] group-[.layout-right]:w-full group-[.layout-right]:shrink-0 group-[.layout-right]:overflow-y-auto group-[.layout-right]:overflow-x-hidden">
-      <div id="bookmark-bar-list" class="flex flex-row items-center gap-1 overflow-x-auto whitespace-nowrap w-full pr-1 group-[.layout-left]:flex-col group-[.layout-left]:items-stretch group-[.layout-left]:overflow-y-auto group-[.layout-left]:overflow-x-hidden group-[.layout-left]:h-auto group-[.layout-left]:gap-1 group-[.layout-right]:flex-col group-[.layout-right]:items-stretch group-[.layout-right]:overflow-y-auto group-[.layout-right]:overflow-x-hidden group-[.layout-right]:h-auto group-[.layout-right]:gap-1"></div>
+    <div
+      id="bookmark-bar"
+      class="
+        theme-shell theme-border hidden w-screen
+        flex-row items-center gap-1 px-2 h-[38px]
+        border-b border-black/20 overflow-hidden
+        group-[.layout-bottom]:order-1
+        group-[.layout-bottom]:border-b
+        group-[.layout-bottom]:border-[var(--theme-border)]
+        group-[.layout-side]:order-3
+        group-[.layout-side]:border-b
+        group-[.layout-side]:border-[var(--theme-border)]
+        group-[.layout-side]:h-auto
+        group-[.layout-side]:max-h-[150px]
+        group-[.layout-side]:flex-col
+        group-[.layout-side]:items-stretch
+        group-[.layout-side]:p-[6px]
+        group-[.layout-side]:w-full
+        group-[.layout-side]:shrink-0
+        group-[.layout-side]:overflow-y-auto
+        group-[.layout-side]:overflow-x-hidden
+      "
+    >
+      <div
+        id="bookmark-bar-list"
+        class="
+          flex flex-row items-center gap-1
+          overflow-x-auto whitespace-nowrap w-full pr-1
+          group-[.layout-side]:flex-col
+          group-[.layout-side]:items-stretch
+          group-[.layout-side]:overflow-y-auto
+          group-[.layout-side]:overflow-x-hidden
+          group-[.layout-side]:h-auto
+        "
+      ></div>
     </div>
 
-    
-    <div id="password-prompt" class="fixed top-4 right-4 z-[9999] hidden w-[380px] rounded-none border border-[var(--theme-border)] shadow-[0_10px_30px_rgba(0,0,0,0.6)] bg-[var(--theme-bg-opaque)] p-3 text-[var(--theme-text)] flex flex-col gap-2 transition-all duration-300">
+    <div
+      id="password-prompt"
+      class="
+        fixed top-4 right-4 z-[9999] hidden w-[380px]
+        rounded-none border border-[var(--theme-border)]
+        shadow-[0_10px_30px_rgba(0,0,0,0.6)]
+        bg-[var(--theme-bg-opaque)]
+        p-3 text-[var(--theme-text)]
+        flex flex-col gap-2 transition-all duration-300
+      "
+    >
       <div class="flex items-center justify-between border-b border-[var(--theme-border)] pb-2 mb-1">
-          
         <span class="font-bold text-sm">Save password?</span>
-        
-        <button id="password-prompt-close" class="p-0.5 text-[var(--theme-text)] opacity-60 hover:opacity-100 rounded-none hover:bg-[var(--theme-accent-soft)] transition-colors">
-          X
-        </button>
+        <button
+          id="password-prompt-close"
+          class="
+            p-0.5 text-[var(--theme-text)] opacity-60
+            hover:opacity-100 rounded-none
+            hover:bg-[var(--theme-accent-soft)] transition-colors
+          "
+        >X</button>
       </div>
       
-      <p class="text-[10px] text-[var(--theme-text)] opacity-60 font-medium tracking-wide" id="password-prompt-text">Would you like to save the password for this site?</p>
+      <p
+        class="text-[10px] text-[var(--theme-text)] opacity-60 font-medium tracking-wide"
+        id="password-prompt-text"
+      >Would you like to save the password for this site?</p>
+
       <div class="text-[10px] flex flex-col gap-1.5 bg-black/25 p-2.5 rounded-none border border-[var(--theme-border)]">
-        <div class="flex justify-between items-center"><span class="opacity-50 font-medium">Username</span><span id="password-prompt-user" class="font-semibold truncate max-w-[220px] text-[var(--theme-text)]"></span></div>
-        <div class="flex justify-between items-center"><span class="opacity-50 font-medium">Password</span><span id="password-prompt-pass" class="text-slate-400 select-none tracking-widest text-[9px]">••••••••</span></div>
+        <div class="flex justify-between items-center">
+          <span class="opacity-50 font-medium">Username</span>
+          <span id="password-prompt-user" class="font-semibold truncate max-w-[220px] text-[var(--theme-text)]"></span>
+        </div>
+        <div class="flex justify-between items-center">
+          <span class="opacity-50 font-medium">Password</span>
+          <span id="password-prompt-pass" class="text-slate-400 select-none tracking-widest text-[9px]">••••••••</span>
+        </div>
       </div>
+
       <div class="flex gap-2 justify-end mt-1">
-        <button id="password-prompt-never" class="px-2.5 py-1 text-[10px] font-semibold text-rose-400 rounded-none bg-rose-400/5 hover:bg-rose-400/15 border border-rose-400/20 transition-colors whitespace-nowrap">Never</button>
-        <button id="password-prompt-save" class="px-3 py-1 text-[10px] font-semibold text-white rounded-none bg-[var(--theme-accent)] transition-colors whitespace-nowrap hover:filter hover:brightness-110">Save</button>
+        <button
+          id="password-prompt-never"
+          class="
+            px-2.5 py-1 text-[10px] font-semibold text-rose-400
+            rounded-none bg-rose-400/5 hover:bg-rose-400/15
+            border border-rose-400/20 transition-colors whitespace-nowrap
+          "
+        >Never</button>
+        <button
+          id="password-prompt-save"
+          class="
+            px-3 py-1 text-[10px] font-semibold text-white
+            rounded-none bg-[var(--theme-accent)]
+            transition-colors whitespace-nowrap
+            hover:filter hover:brightness-110
+          "
+        >Save</button>
       </div>
     </div>
 

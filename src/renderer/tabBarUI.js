@@ -166,7 +166,7 @@ export const renderTabs = (tabs, stackLastVisited = {}) => {
         activeStackIds = [];
     }
 
-    const isSidebar = document.body.classList.contains('layout-left') || document.body.classList.contains('layout-right');
+    const isSidebar = document.body.classList.contains('layout-side');
 
     const renderLevel = (level, container, parentStackIds) => {
         const renderedStacks = new Set();
@@ -195,7 +195,7 @@ export const renderTabs = (tabs, stackLastVisited = {}) => {
                     ? "bg-slate-700 hover:bg-slate-600 text-white"
                     : "bg-slate-800/50 hover:bg-slate-700/50 text-slate-400";
 
-                stackContainer.className = `relative flex items-center px-3 cursor-pointer ${bgClass} min-w-0 max-w-[10rem] mb-0 rounded-t-s h-8 transition-all duration-100 gap-1 flex-shrink-0 group-[.layout-left]:w-full group-[.layout-right]:w-full group-[.layout-left]:max-w-none group-[.layout-right]:max-w-none group-[.layout-left]:flex-none group-[.layout-right]:flex-none group-[.layout-left]:px-2 group-[.layout-right]:px-2`;
+                stackContainer.className = `relative flex items-center px-3 cursor-pointer ${bgClass} min-w-0 max-w-[10rem] mb-0 rounded-t-s h-8 transition-all duration-100 gap-1 flex-shrink-0 group-[.layout-side]:w-full group-[.layout-side]:max-w-none group-[.layout-side]:flex-none group-[.layout-side]:px-2`;
                 stackContainer.setAttribute("data-stack-id", stackIdAtLevel);
                 stackContainer.dataset.themeState = isActiveStack ? "active" : "idle";
 
@@ -351,7 +351,6 @@ export const renderTabs = (tabs, stackLastVisited = {}) => {
                     const indent = level * 16;
                     stackContainer.style.setProperty('margin-left', `${indent}px`, 'important');
                     stackContainer.style.setProperty('width', `calc(100% - ${indent}px)`, 'important');
-                    stackContainer.style.setProperty('border-left', '2px solid var(--theme-border)', 'important');
                     stackContainer.style.setProperty('border-top-left-radius', '0px', 'important');
                     stackContainer.style.setProperty('border-bottom-left-radius', '0px', 'important');
                 }
@@ -387,7 +386,7 @@ export const renderTabs = (tabs, stackLastVisited = {}) => {
             const nextStackId = activeStackIds[i];
             
             const newBar = document.createElement("div");
-            newBar.className = "theme-shell theme-border w-screen flex flex-row backdrop-blur-md h-[40px] items-center justify-start gap-1 border-b border-black/20 stack-tabs-bar transition-all duration-100 group-[.layout-bottom]:order-3 group-[.layout-bottom]:border-b group-[.layout-bottom]:border-[var(--theme-border)] group-[.layout-left]:hidden group-[.layout-right]:hidden";
+            newBar.className = "theme-shell w-screen flex flex-row backdrop-blur-md h-[40px] items-center justify-start gap-1 stack-tabs-bar transition-all duration-100 group-[.layout-bottom]:order-3 group-[.layout-side]:hidden";
             
             const newList = document.createElement("div");
             newList.className = "stack-tabs-list flex flex-row overflow-x-hidden gap-1 h-8 items-center ml-1";
@@ -518,7 +517,7 @@ function createTabElement(tab, index, isInStack, tabs, level = 0) {
         }
 
 
-        tabE.className = `relative flex items-center px-2 cursor-pointer ${bgClass} flex-1 min-w-0 max-w-[10rem] mb-0 rounded-t-sm h-8 transition-all duration-100 gap-2 group-[.layout-left]:w-full group-[.layout-right]:w-full group-[.layout-left]:max-w-none group-[.layout-right]:max-w-none group-[.layout-left]:flex-none group-[.layout-right]:flex-none`;
+        tabE.className = `relative flex items-center px-2 cursor-pointer ${bgClass} flex-1 min-w-0 max-w-[10rem] mb-0 rounded-t-sm h-8 transition-all duration-100 gap-2 group-[.layout-side]:w-full group-[.layout-side]:max-w-none group-[.layout-side]:flex-none`;
         tabE.dataset.themeState = isSelected ? "selected" : tab.isMainTab ? "main" : tab.isActive ? "active" : "resting";
 
         tabE.title = `${tab.title || "Tab"}\nRAM: ${tabMemoryText(tab)}`;
@@ -800,12 +799,11 @@ function createTabElement(tab, index, isInStack, tabs, level = 0) {
 
         tabE.setAttribute("data-tab-id", tab.id);
 
-        const isSidebar = document.body.classList.contains('layout-left') || document.body.classList.contains('layout-right');
+        const isSidebar = document.body.classList.contains('layout-side');
         if (isSidebar && level > 0) {
             const indent = level * 16;
             tabE.style.setProperty('margin-left', `${indent}px`, 'important');
             tabE.style.setProperty('width', `calc(100% - ${indent}px)`, 'important');
-            tabE.style.setProperty('border-left', '2px solid var(--theme-border)', 'important');
             tabE.style.setProperty('border-top-left-radius', '0px', 'important');
             tabE.style.setProperty('border-bottom-left-radius', '0px', 'important');
         }

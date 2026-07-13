@@ -122,7 +122,7 @@
   padding: 0 14px !important;
   font-size: 12.5px !important;
   margin: 0 !important;
-  border: 1px solid rgba(255, 255, 255, 0.05) !important;
+  border: 0 !important;
   transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1) !important;
   box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1) !important;
   display: flex !important;
@@ -135,14 +135,16 @@
   border-top-right-radius: 6px !important;
   border-bottom-left-radius: 0px !important;
   border-bottom-right-radius: 0px !important;
-  border: 1px dashed rgba(255, 255, 255, 0.25) !important;
   background: rgba(255, 255, 255, 0.05) !important;
 }
 
 #tabs-list > div[data-stack-id][data-theme-state="active"] {
   background: rgba(255, 255, 255, 0.15) !important;
-  border-style: solid !important;
-  border-color: var(--theme-border) !important;
+}
+
+.tab-bar,
+.stack-tabs-bar {
+  border: 0 !important;
 }
 
 #tabs-list > div[data-theme-state="main"],
@@ -230,10 +232,12 @@
 #new-tab,
 .new-stack-tab {
   width: 28px !important;
+  min-width: 28px !important;
   height: 28px !important;
+  flex-shrink: 0 !important;
   border-radius: 50% !important;
-  background: rgba(255, 255, 255, 0.05) !important;
-  border: 1px solid rgba(255, 255, 255, 0.08) !important;
+  background: transparent !important;
+  border: 1px solid transparent !important;
   color: rgba(255, 255, 255, 0.7) !important;
   display: flex !important;
   align-items: center !important;
@@ -256,17 +260,14 @@
   transform: scale(0.95);
 }
 
-body.layout-left #tabs-list > div,
-body.layout-left .stack-tabs-list > div,
-body.layout-right #tabs-list > div,
-body.layout-right .stack-tabs-list > div {
+body.layout-side #tabs-list > div,
+body.layout-side .stack-tabs-list > div {
   border-radius: 8px !important;
   height: 32px !important;
   margin: 2px 0 !important;
 }
 
-body.layout-left #new-tab,
-body.layout-right #new-tab {
+body.layout-side #new-tab {
   width: 28px !important;
   height: 28px !important;
   border-radius: 50% !important;
@@ -315,10 +316,8 @@ body.layout-right #new-tab {
   height: 15px !important;
 }
 
-body.layout-left #address-bar-part button:not(#downloads-dropdown *),
-body.layout-left #address-actions-group button:not(#downloads-dropdown *),
-body.layout-right #address-bar-part button:not(#downloads-dropdown *),
-body.layout-right #address-actions-group button:not(#downloads-dropdown *) {
+body.layout-side #address-bar-part button:not(#downloads-dropdown *),
+body.layout-side #address-actions-group button:not(#downloads-dropdown *) {
   width: 26px !important;
   height: 26px !important;
 }
@@ -372,10 +371,8 @@ body.layout-right #address-actions-group button:not(#downloads-dropdown *) {
 }
 
 /* Specific styling for scrollable containers in sidebars */
-body.layout-left #tabs-list,
-body.layout-right #tabs-list,
-body.layout-left #bookmark-bar,
-body.layout-right #bookmark-bar {
+body.layout-side #tabs-list,
+body.layout-side #bookmark-bar {
   scrollbar-width: thin !important;
   scrollbar-color: rgba(148, 163, 184, 0.25) transparent !important;
 }
