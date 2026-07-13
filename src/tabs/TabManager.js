@@ -37,15 +37,22 @@ const formatMemoryUsage = (memoryKb) => {
     return `${Math.round(kb / 1024)} MB`;
 };
 
-const readTabMemoryKb = async (tab) => {
+const readTabMemoryKb = async (tab, metrics = null) => {
     if (!tab?.contentView || !isLiveWebContents(tab.contentView)) return 0;
 
     try {
-        const memory = await tab.contentView.webContents.getProcessMemoryInfo();
-        return memory.residentSet || memory.private || memory.shared || 0;
+        const pid = tab.contentView.webContents.getOSProcessId();
+        if (pid) {
+            const list = metrics || app.getAppMetrics();
+            const metric = list.find(m => m.pid === pid);
+            if (metric && metric.memory) {
+                return metric.memory.workingSetSize || metric.memory.privateBytes || 0;
+            }
+        }
     } catch (error) {
-        return tab.memoryUsageKb || 0;
+        // Fall back to returning 0 or tab's previous value
     }
+    return tab.memoryUsageKb || 0;
 };
 
 const stackIdsFor = (tab) => Array.isArray(tab?.stackIds) ? tab.stackIds : [];
@@ -463,8 +470,9 @@ class TabManager {
     }
 
     async sendTabData(forceSave = false, saveConfig = true) {
+        const metrics = app.getAppMetrics();
         await Promise.all(this.tabs.map(async tab => {
-            tab.memoryUsageKb = await readTabMemoryKb(tab);
+            tab.memoryUsageKb = await readTabMemoryKb(tab, metrics);
             tab.memoryText = formatMemoryUsage(tab.memoryUsageKb);
         }));
 
