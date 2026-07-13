@@ -10,7 +10,7 @@
 
 body {
   font-family: 'Inter', sans-serif;
-  background-color: var(--theme-shell) !important;
+  background: var(--theme-shell) !important;
   color: var(--theme-text) !important;
 }
 
@@ -24,7 +24,7 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 .content-bg {
-  background-color: var(--theme-panel) !important;
+  background: var(--theme-panel) !important;
 }
 
 .card-bg {
@@ -93,6 +93,33 @@ input[type="color"]::-webkit-color-swatch-wrapper {
 input[type="color"]::-webkit-color-swatch {
   border: none;
 }
+
+.gradient-panel {
+  transition: opacity 0.15s ease, filter 0.15s ease;
+}
+
+.gradient-preview {
+  height: 44px;
+  border: 1px solid var(--theme-border);
+  border-radius: 6px;
+}
+
+.gradient-stop-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  min-width: 0;
+}
+
+.gradient-stop-row input[type="color"] {
+  flex: 0 0 auto;
+}
+
+.gradient-stop-row button {
+  flex: 0 0 auto;
+}
+
 input:focus, select:focus {
   outline: none;
   border-color: var(--theme-accent) !important;

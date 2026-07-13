@@ -8,10 +8,13 @@
     accent: "#334155",
     text: "#E2E8F0",
     overallOpacity: 0.5,
-    accentOpacity: 0.6
+    accentOpacity: 0.6,
+    gradientEnabled: false,
+    gradientColors: ["#0f172a", "#334155"]
   };
 
   const clamp = (value, min, max) => Math.min(max, Math.max(min, value));
+  const isHexColor = (value) => /^#[0-9a-f]{6}$/i.test(value || "");
 
   const hexToRgb = (hex) => {
     const clean = (hex || "").replace("#", "");
@@ -29,16 +32,30 @@
     const { r, g, b } = hexToRgb(hex);
     return `rgba(${r}, ${g}, ${b}, ${alpha})`;
   };
+
+  const parseGradientColors = (colors) => {
+    const validColors = Array.isArray(colors) ? colors.filter(isHexColor) : [];
+    return validColors.length >= 2 ? validColors : [...DEFAULT_THEME.gradientColors];
+  };
+
+  const themeBackground = (theme, opacity) => {
+    if (!theme.gradientEnabled) return rgba(theme.color, opacity);
+    return `linear-gradient(135deg, ${theme.gradientColors.map(color => rgba(color, opacity)).join(", ")})`;
+  };
   
 
   const parseTheme = (savedTheme) => {
     if (!savedTheme) return { ...DEFAULT_THEME };
+    const gradientColors = parseGradientColors(savedTheme.gradientColors);
+
     return {
-      color: savedTheme.color || DEFAULT_THEME.color,
+      color: isHexColor(savedTheme.color) ? savedTheme.color : gradientColors[0],
       accent: savedTheme.accent || DEFAULT_THEME.accent,
       text: savedTheme.text || DEFAULT_THEME.text,
       overallOpacity: clamp(Number(savedTheme.overallOpacity ?? savedTheme.opacity ?? DEFAULT_THEME.overallOpacity), 0.02, 1),
-      accentOpacity: clamp(Number(savedTheme.accentOpacity ?? DEFAULT_THEME.accentOpacity), 0.02, 1)
+      accentOpacity: clamp(Number(savedTheme.accentOpacity ?? DEFAULT_THEME.accentOpacity), 0.02, 1),
+      gradientEnabled: Boolean(savedTheme.gradientEnabled),
+      gradientColors
     };
   };
 
@@ -56,9 +73,9 @@
     const theme = getTheme();
     const root = document.documentElement;
 
-    root.style.setProperty("--theme-shell", rgba(theme.color, theme.overallOpacity));
-    root.style.setProperty("--theme-panel", rgba(theme.color, Math.min(theme.overallOpacity + 0.14, 1)));
-    root.style.setProperty("--theme-panel-strong", rgba(theme.color, Math.min(theme.overallOpacity + 0.26, 1)));
+    root.style.setProperty("--theme-shell", themeBackground(theme, theme.overallOpacity));
+    root.style.setProperty("--theme-panel", themeBackground(theme, Math.min(theme.overallOpacity + 0.14, 1)));
+    root.style.setProperty("--theme-panel-strong", themeBackground(theme, Math.min(theme.overallOpacity + 0.26, 1)));
     root.style.setProperty("--theme-accent-soft", rgba(theme.accent, theme.accentOpacity));
     root.style.setProperty("--theme-resting", rgba(theme.color, Math.max(theme.overallOpacity * 0.35, 0.04)));
     root.style.setProperty("--theme-border", rgba(theme.accent, 0.55));
@@ -74,10 +91,10 @@
   };
 
   const saveTheme = (partialTheme) => {
-    const nextTheme = {
+    const nextTheme = parseTheme({
       ...getTheme(),
       ...partialTheme
-    };
+    });
 
     nextTheme.overallOpacity = clamp(Number(nextTheme.overallOpacity), 0.02, 1);
     nextTheme.accentOpacity = clamp(Number(nextTheme.accentOpacity), 0.02, 1);

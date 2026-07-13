@@ -36,11 +36,6 @@
           Appearance
         </button>
 
-        <button data-target="themes" class="sidebar-item w-full flex items-center gap-3 px-3 py-2 text-xs rounded-md text-left">
-      
-          Themes
-        </button>
-
         <button data-target="startpage" class="sidebar-item w-full flex items-center gap-3 px-3 py-2 text-xs rounded-md text-left">
           
           Start Page
@@ -103,10 +98,7 @@
               </div>
             </div>
           </div>
-        </div>
 
-        <div data-section="themes" class="settings-section space-y-6">
-          
           <div class="settings-card card-bg p-5 space-y-4">
             <div class="flex justify-between items-center border-b border-slate-700/50 pb-2">
               <h2 class="text-sm font-bold tracking-wide uppercase">Custom Color Palette</h2>
@@ -141,6 +133,24 @@
                   <div class="text-[10px] text-slate-400 uppercase " id="theme-text-value"></div>
                 </div>
                 <input type="color" id="theme-text" />
+              </div>
+            </div>
+
+            <div class="space-y-3 text-xs">
+              <label class="gradient-toggle flex items-center justify-between gap-3 p-3 rounded-sm input-theme cursor-pointer select-none">
+                <div class="space-y-0.5">
+                  <div class="font-semibold text-slate-200">Use gradient base</div>
+                  <div class="text-[10px] text-slate-400">Blend multiple colors across the browser chrome.</div>
+                </div>
+                <input type="checkbox" id="theme-gradient-enabled" class="w-4 h-4" />
+              </label>
+
+              <div id="theme-gradient-panel" class="gradient-panel p-3 rounded-sm input-theme space-y-3">
+                <div id="theme-gradient-preview" class="gradient-preview"></div>
+                <div id="theme-gradient-colors" class="grid grid-cols-1 md:grid-cols-2 gap-3"></div>
+                <button id="add-gradient-color" type="button" class="px-3 py-1.5 text-[11px] font-medium rounded transition-colors btn-theme">
+                  Add color
+                </button>
               </div>
             </div>
 

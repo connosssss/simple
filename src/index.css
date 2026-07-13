@@ -71,7 +71,7 @@
   padding: 6px 8px;
   border: 1px solid var(--theme-border);
   border-radius: 6px;
-  background: var(--theme-panel-strong);
+  background: var(--theme-accent);
   color: var(--theme-text);
   pointer-events: none;
 }
