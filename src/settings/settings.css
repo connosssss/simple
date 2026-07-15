@@ -14,6 +14,26 @@ body {
   color: var(--theme-text) !important;
 }
 
+
+#settings-content-area :where(h1, h2, h3, h4, h5, h6, label, span, div, kbd, button),
+.sidebar-bg :where(input, svg),
+.input-theme,
+.btn-theme {
+  color: var(--theme-text) !important;
+}
+
+#settings-content-area :where(p, kbd),
+#settings-content-area :where([id$="-value"], #cookie-count, #passwords-list-count),
+#settings-content-area :where(.gradient-stop-value),
+.input-theme::placeholder {
+  color: var(--theme-muted) !important;
+}
+
+#settings-content-area :where(button:hover, label:hover, span:hover),
+.sidebar-bg :where(input:focus, svg:hover) {
+  color: var(--theme-text) !important;
+}
+
 h1, h2, h3, h4, h5, h6 {
   font-family: 'Outfit', sans-serif;
 }

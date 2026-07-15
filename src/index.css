@@ -3,6 +3,8 @@
   --theme-panel: rgba(15, 23, 42, 0.64);
   --theme-panel-strong: rgba(15, 23, 42, 0.76);
   --theme-accent-soft: rgba(51, 65, 85, 0.6);
+  --theme-accent-muted: rgba(51, 65, 85, 0.21);
+  --theme-accent-hover: rgba(51, 65, 85, 0.78);
   --theme-resting: rgba(15, 23, 42, 0.18);
   --theme-border: rgba(51, 65, 85, 0.55);
   --theme-text: rgba(255, 255, 255, 0.94);
@@ -112,6 +114,11 @@
   overflow-y: hidden !important;
 }
 
+body:not(.layout-side) #tabs-list {
+  flex: 0 1 auto !important;
+  max-width: calc(100% - 44px) !important;
+}
+
 #tabs-list > div,
 .stack-tabs-list > div {
   height: 28px !important;
@@ -135,11 +142,13 @@
   border-top-right-radius: 6px !important;
   border-bottom-left-radius: 0px !important;
   border-bottom-right-radius: 0px !important;
-  background: rgba(255, 255, 255, 0.05) !important;
+  background: var(--theme-accent-muted) !important;
+  color: var(--theme-muted) !important;
 }
 
 #tabs-list > div[data-stack-id][data-theme-state="active"] {
-  background: rgba(255, 255, 255, 0.15) !important;
+  background: var(--theme-accent-soft) !important;
+  color: var(--theme-text) !important;
 }
 
 .tab-bar,
@@ -147,11 +156,13 @@
   border: 0 !important;
 }
 
+#tabs-list > div[data-theme-state="selected"],
+.stack-tabs-list > div[data-theme-state="selected"],
 #tabs-list > div[data-theme-state="main"],
 .stack-tabs-list > div[data-theme-state="main"] {
   background: var(--theme-accent-soft) !important;
-  color: #ffffff !important;
-  border-color: rgba(255, 255, 255, 0.2) !important;
+  color: var(--theme-text) !important;
+  border-color: var(--theme-border) !important;
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2) !important;
   filter: none !important;
   font-weight: 500 !important;
@@ -160,31 +171,31 @@
 
 #tabs-list > div[data-theme-state="active"],
 .stack-tabs-list > div[data-theme-state="active"] {
-  background: rgba(255, 255, 255, 0.1) !important;
-  color: rgba(255, 255, 255, 0.8) !important;
-  border-color: rgba(255, 255, 255, 0.06) !important;
+  background: var(--theme-accent-muted) !important;
+  color: var(--theme-text) !important;
+  border-color: var(--theme-border) !important;
 }
 
 #tabs-list > div[data-theme-state="idle"],
 .stack-tabs-list > div[data-theme-state="idle"] {
-  background: rgba(255, 255, 255, 0.05) !important;
-  color: rgba(255, 255, 255, 0.6) !important;
-  border-color: rgba(255, 255, 255, 0.05) !important;
+  background: var(--theme-resting) !important;
+  color: var(--theme-muted) !important;
+  border-color: var(--theme-border) !important;
 }
 
 #tabs-list > div[data-theme-state="resting"],
 .stack-tabs-list > div[data-theme-state="resting"] {
   background: rgba(0, 0, 0, 0.2) !important;
-  color: rgba(255, 255, 255, 0.45) !important;
+  color: var(--theme-faint) !important;
   border-color: transparent !important;
   opacity: 0.8 !important;
 }
 
 #tabs-list > div:hover,
 .stack-tabs-list > div:hover {
-  background: rgba(255, 255, 255, 0.12) !important;
-  color: #ffffff !important;
-  border-color: rgba(255, 255, 255, 0.15) !important;
+  background: var(--theme-accent-hover) !important;
+  color: var(--theme-text) !important;
+  border-color: var(--theme-border) !important;
   filter: none !important;
   opacity: 1 !important;
 }
@@ -202,7 +213,7 @@
   background: transparent !important;
   border: none !important;
   margin-left: 6px !important;
-  color: rgba(255, 255, 255, 0.6) !important;
+  color: var(--theme-muted) !important;
   padding: 0 !important;
 }
 
@@ -214,8 +225,8 @@
 #tabs-list > div button:hover,
 .stack-tabs-list > div button:hover {
   opacity: 1 !important;
-  background: rgba(255, 255, 255, 0.2) !important;
-  color: #fff !important;
+  background: var(--theme-accent-hover) !important;
+  color: var(--theme-text) !important;
 }
 
 #tabs-list > div[data-theme-state="main"] button,
@@ -225,7 +236,7 @@
 
 #tabs-list > div[data-theme-state="main"] button:hover,
 .stack-tabs-list > div[data-theme-state="main"] button:hover {
-  background: rgba(255, 255, 255, 0.25) !important;
+  background: var(--theme-accent-hover) !important;
   opacity: 1 !important;
 }
 
@@ -238,7 +249,7 @@
   border-radius: 50% !important;
   background: transparent !important;
   border: 1px solid transparent !important;
-  color: rgba(255, 255, 255, 0.7) !important;
+  color: var(--theme-muted) !important;
   display: flex !important;
   align-items: center !important;
   justify-content: center !important;
@@ -249,9 +260,9 @@
 
 #new-tab:hover,
 .new-stack-tab:hover {
-  background: rgba(255, 255, 255, 0.12) !important;
-  border-color: rgba(255, 255, 255, 0.15) !important;
-  color: #fff !important;
+  background: var(--theme-accent-muted) !important;
+  border-color: var(--theme-border) !important;
+  color: var(--theme-text) !important;
   transform: scale(1.05);
 }
 

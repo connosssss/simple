@@ -77,9 +77,13 @@
     root.style.setProperty("--theme-panel", themeBackground(theme, Math.min(theme.overallOpacity + 0.14, 1)));
     root.style.setProperty("--theme-panel-strong", themeBackground(theme, Math.min(theme.overallOpacity + 0.26, 1)));
     root.style.setProperty("--theme-accent-soft", rgba(theme.accent, theme.accentOpacity));
+    root.style.setProperty("--theme-accent-muted", rgba(theme.accent, Math.max(theme.accentOpacity * 0.35, 0.12)));
+    root.style.setProperty("--theme-accent-hover", rgba(theme.accent, Math.min(theme.accentOpacity + 0.18, 1)));
     root.style.setProperty("--theme-resting", rgba(theme.color, Math.max(theme.overallOpacity * 0.35, 0.04)));
     root.style.setProperty("--theme-border", rgba(theme.accent, 0.55));
-    root.style.setProperty("--theme-text", rgba(theme.text, 0.70));
+    root.style.setProperty("--theme-text", rgba(theme.text, 0.94));
+    root.style.setProperty("--theme-muted", rgba(theme.text, 0.72));
+    root.style.setProperty("--theme-faint", rgba(theme.text, 0.48));
     root.style.setProperty("--theme-accent", theme.accent);
     root.style.setProperty("--theme-bg-opaque", theme.color);
 
