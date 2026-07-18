@@ -33,23 +33,31 @@
     return `rgba(${r}, ${g}, ${b}, ${alpha})`;
   };
 
+  const isGradientColorStop = (value) => /^#[0-9a-f]{6}(?:\s+\d{1,3}%)?$/i.test(value || "");
+
   const parseGradientColors = (colors) => {
-    const validColors = Array.isArray(colors) ? colors.filter(isHexColor) : [];
+    const validColors = Array.isArray(colors) ? colors.filter(isGradientColorStop) : [];
     return validColors.length >= 2 ? validColors : [...DEFAULT_THEME.gradientColors];
   };
 
   const themeBackground = (theme, opacity) => {
     if (!theme.gradientEnabled) return rgba(theme.color, opacity);
-    return `linear-gradient(135deg, ${theme.gradientColors.map(color => rgba(color, opacity)).join(", ")})`;
+    return `linear-gradient(to right, ${theme.gradientColors.map(stopStr => {
+      const parts = stopStr.trim().split(/\s+/);
+      const color = parts[0];
+      const position = parts[1] || "";
+      return position ? `${rgba(color, opacity)} ${position}` : rgba(color, opacity);
+    }).join(", ")})`;
   };
-  
 
   const parseTheme = (savedTheme) => {
     if (!savedTheme) return { ...DEFAULT_THEME };
     const gradientColors = parseGradientColors(savedTheme.gradientColors);
+    const baseColorStop = gradientColors[0] || DEFAULT_THEME.gradientColors[0];
+    const baseColor = baseColorStop.split(/\s+/)[0];
 
     return {
-      color: isHexColor(savedTheme.color) ? savedTheme.color : gradientColors[0],
+      color: isHexColor(savedTheme.color) ? savedTheme.color : baseColor,
       accent: savedTheme.accent || DEFAULT_THEME.accent,
       text: savedTheme.text || DEFAULT_THEME.text,
       overallOpacity: clamp(Number(savedTheme.overallOpacity ?? savedTheme.opacity ?? DEFAULT_THEME.overallOpacity), 0.02, 1),
