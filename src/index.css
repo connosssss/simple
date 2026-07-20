@@ -13,8 +13,12 @@
   
 }
 
-.theme-shell {
+body {
   background: var(--theme-shell) !important;
+}
+
+.theme-shell {
+  background: transparent !important;
 }
 
 .theme-panel {
@@ -289,7 +293,7 @@ body.layout-side #new-tab {
 #address-bar-part {
   padding: 6px 12px !important;
   gap: 8px !important;
-  background: var(--theme-shell) !important;
+  background: transparent !important;
   border-bottom: 1px solid rgba(255, 255, 255, 0.06) !important;
 }
 
@@ -381,8 +385,37 @@ body.layout-side #address-actions-group button:not(#downloads-dropdown *) {
   background-clip: padding-box !important;
 }
 
-/* Specific styling for scrollable containers in sidebars */
-body.layout-side #tabs-list,
+body.layout-side #tabs-list {
+  flex: 1 1 0% !important;
+  min-height: 0 !important;
+  height: 0 !important;
+  overflow-y: auto !important;
+  overflow-x: hidden !important;
+  align-items: stretch !important;
+  padding: 4px 6px !important;
+  gap: 4px !important;
+  scrollbar-width: thin !important;
+  scrollbar-color: rgba(148, 163, 184, 0.4) transparent !important;
+}
+
+body.layout-side #tabs-list::-webkit-scrollbar {
+  width: 6px !important;
+  height: 6px !important;
+}
+
+body.layout-side #tabs-list::-webkit-scrollbar-track {
+  background: transparent !important;
+}
+
+body.layout-side #tabs-list::-webkit-scrollbar-thumb {
+  background: rgba(148, 163, 184, 0.35) !important;
+  border-radius: 9999px !important;
+}
+
+body.layout-side #tabs-list::-webkit-scrollbar-thumb:hover {
+  background: rgba(148, 163, 184, 0.65) !important;
+}
+
 body.layout-side #bookmark-bar {
   scrollbar-width: thin !important;
   scrollbar-color: rgba(148, 163, 184, 0.25) transparent !important;

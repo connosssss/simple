@@ -491,6 +491,13 @@ export const renderTabs = (tabs, stackLastVisited = {}) => {
         }
         previousLoadingState.set("global-progress", activeTab.isLoading);
     }
+
+    if (activeTab && isSidebar) {
+        const activeTabEl = tabsList.querySelector(`[data-tab-id="${activeTab.id}"]`);
+        if (activeTabEl) {
+            activeTabEl.scrollIntoView({ block: "nearest", inline: "nearest" });
+        }
+    }
 };
 
 
@@ -518,6 +525,7 @@ function createTabElement(tab, index, isInStack, tabs, level = 0) {
 
 
         tabE.className = `relative flex items-center px-2 cursor-pointer ${bgClass} flex-1 min-w-0 max-w-[10rem] mb-0 rounded-t-sm h-8 transition-all duration-100 gap-2 group-[.layout-side]:w-full group-[.layout-side]:max-w-none group-[.layout-side]:flex-none`;
+        tabE.setAttribute("data-tab-id", tab.id);
         tabE.dataset.themeState = isSelected ? "selected" : tab.isMainTab ? "main" : tab.isActive ? "active" : "resting";
 
         tabE.title = `${tab.title || "Tab"}\nRAM: ${tabMemoryText(tab)}`;

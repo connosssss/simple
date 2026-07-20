@@ -40,9 +40,9 @@
     return validColors.length >= 2 ? validColors : [...DEFAULT_THEME.gradientColors];
   };
 
-  const themeBackground = (theme, opacity) => {
+  const themeBackground = (theme, opacity, direction = "to right") => {
     if (!theme.gradientEnabled) return rgba(theme.color, opacity);
-    return `linear-gradient(to right, ${theme.gradientColors.map(stopStr => {
+    return `linear-gradient(${direction}, ${theme.gradientColors.map(stopStr => {
       const parts = stopStr.trim().split(/\s+/);
       const color = parts[0];
       const position = parts[1] || "";
@@ -80,10 +80,12 @@
   const applyTheme = () => {
     const theme = getTheme();
     const root = document.documentElement;
+    const isSideLayout = typeof document !== "undefined" && document.body ? document.body.classList.contains("layout-side") : false;
+    const direction = isSideLayout ? "to bottom" : "to right";
 
-    root.style.setProperty("--theme-shell", themeBackground(theme, theme.overallOpacity));
-    root.style.setProperty("--theme-panel", themeBackground(theme, Math.min(theme.overallOpacity + 0.14, 1)));
-    root.style.setProperty("--theme-panel-strong", themeBackground(theme, Math.min(theme.overallOpacity + 0.26, 1)));
+    root.style.setProperty("--theme-shell", themeBackground(theme, theme.overallOpacity, direction));
+    root.style.setProperty("--theme-panel", themeBackground(theme, Math.min(theme.overallOpacity + 0.14, 1), direction));
+    root.style.setProperty("--theme-panel-strong", themeBackground(theme, Math.min(theme.overallOpacity + 0.26, 1), direction));
     root.style.setProperty("--theme-accent-soft", rgba(theme.accent, theme.accentOpacity));
     root.style.setProperty("--theme-accent-muted", rgba(theme.accent, Math.max(theme.accentOpacity * 0.35, 0.12)));
     root.style.setProperty("--theme-accent-hover", rgba(theme.accent, Math.min(theme.accentOpacity + 0.18, 1)));
