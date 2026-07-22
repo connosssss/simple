@@ -257,57 +257,22 @@
 
         <div data-section="keybinds" class="settings-section space-y-6">
           <div class="settings-card card-bg p-5 space-y-4">
-            <h2 class="text-sm font-bold tracking-wide uppercase border-b border-slate-700/50 pb-2">Keybinds</h2>
+            <div class="flex items-center justify-between border-b border-slate-700/50 pb-2">
+              <h2 class="text-sm font-bold tracking-wide uppercase">Keybinds</h2>
+              <button id="reset-all-keybinds-btn" class="px-2.5 py-1 text-xs bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white rounded border border-slate-700/60 transition-colors font-medium cursor-pointer">
+                Reset All to Default
+              </button>
+            </div>
 
-            <div class="text-xs space-y-2">
-              <div class="flex items-center justify-between gap-4 p-2 rounded input-theme">
-                <span class="font-semibold text-slate-200">New Tab</span>
-                <kbd class="font-mono text-[11px] text-slate-300">Ctrl/Cmd + T</kbd>
-              </div>
-              <div class="flex items-center justify-between gap-4 p-2 rounded input-theme">
-                <span class="font-semibold text-slate-200">New Window</span>
-                <kbd class="font-mono text-[11px] text-slate-300">Ctrl/Cmd + N</kbd>
-              </div>
-              <div class="flex items-center justify-between gap-4 p-2 rounded input-theme">
-                <span class="font-semibold text-slate-200">Close Tab</span>
-                <kbd class="font-mono text-[11px] text-slate-300">Ctrl/Cmd + W</kbd>
-              </div>
-              <div class="flex items-center justify-between gap-4 p-2 rounded input-theme">
-                <span class="font-semibold text-slate-200">Reopen Closed Tab</span>
-                <kbd class="font-mono text-[11px] text-slate-300">Ctrl/Cmd + Shift + T</kbd>
-              </div>
-              <div class="flex items-center justify-between gap-4 p-2 rounded input-theme">
-                <span class="font-semibold text-slate-200">Print</span>
-                <kbd class="font-mono text-[11px] text-slate-300">Ctrl/Cmd + P</kbd>
-              </div>
-              <div class="flex items-center justify-between gap-4 p-2 rounded input-theme">
-                <span class="font-semibold text-slate-200">Find in Page</span>
-                <kbd class="font-mono text-[11px] text-slate-300">Ctrl/Cmd + F</kbd>
-              </div>
-              <div class="flex items-center justify-between gap-4 p-2 rounded input-theme">
-                <span class="font-semibold text-slate-200">Toggle Developer Tools</span>
-                <kbd class="font-mono text-[11px] text-slate-300">Ctrl/Cmd + Shift + I</kbd>
-              </div>
-              <div class="flex items-center justify-between gap-4 p-2 rounded input-theme">
-                <span class="font-semibold text-slate-200">Zoom In</span>
-                <kbd class="font-mono text-[11px] text-slate-300">Ctrl/Cmd + =</kbd>
-              </div>
-              <div class="flex items-center justify-between gap-4 p-2 rounded input-theme">
-                <span class="font-semibold text-slate-200">Zoom Out</span>
-                <kbd class="font-mono text-[11px] text-slate-300">Ctrl/Cmd + -</kbd>
-              </div>
-              <div class="flex items-center justify-between gap-4 p-2 rounded input-theme">
-                <span class="font-semibold text-slate-200">Reset Zoom</span>
-                <kbd class="font-mono text-[11px] text-slate-300">Ctrl/Cmd + 0</kbd>
-              </div>
-              <div class="flex items-center justify-between gap-4 p-2 rounded input-theme">
-                <span class="font-semibold text-slate-200">Picture in Picture</span>
-                <kbd class="font-mono text-[11px] text-slate-300">Alt + P</kbd>
-              </div>
-              <div class="flex items-center justify-between gap-4 p-2 rounded input-theme">
-                <span class="font-semibold text-slate-200">History</span>
-                <kbd class="font-mono text-[11px] text-slate-300">Ctrl/Cmd + H</kbd>
-              </div>
+            <div id="keybind-conflict-alert" class="hidden p-3 rounded bg-amber-500/10 border border-amber-500/30 text-amber-300 text-xs flex items-center justify-between gap-2">
+              <span id="keybind-conflict-msg"></span>
+              <button id="dismiss-keybind-alert" class="text-amber-400 hover:text-amber-200 font-bold px-1">&times;</button>
+            </div>
+
+            <p class="text-xs text-slate-400">Click any shortcut button to rebind it. Press <kbd class="font-mono bg-slate-800 px-1 py-0.5 rounded text-slate-300">Esc</kbd> while recording to cancel.</p>
+
+            <div id="keybinds-list" class="text-xs space-y-2">
+              <div class="text-slate-500 text-xs py-4 text-center">Loading keybinds...</div>
             </div>
           </div>
         </div>

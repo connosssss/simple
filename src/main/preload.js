@@ -42,6 +42,8 @@ contextBridge.exposeInMainWorld("electronAPI", {
     updateCloseAfter: (closeAfter) => ipcRenderer.send("updateCloseAfter", closeAfter),
     updateUiPosition: (position) => ipcRenderer.send("updateUiPosition", position),
     updateShowBookmarkBar: (enabled) => ipcRenderer.send("updateShowBookmarkBar", enabled),
+    updateKeybinds: (keybinds) => ipcRenderer.send("updateKeybinds", keybinds),
+    resetKeybinds: () => ipcRenderer.send("resetKeybinds"),
     getSettings: () => ipcRenderer.invoke("getSettings"),
     onInitSettings: (callback) => ipcRenderer.on('initSettings', (event, settings) => callback(settings)),
     onSettingsUpdated: (callback) => ipcRenderer.on("settingsUpdated", (event, settings) => callback(settings)),

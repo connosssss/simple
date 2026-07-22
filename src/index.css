@@ -13,12 +13,21 @@
   
 }
 
-body {
+body.layout-side {
   background: var(--theme-shell) !important;
 }
 
-.theme-shell {
+body.layout-side .theme-shell,
+body.layout-side #address-bar-part {
   background: transparent !important;
+}
+
+body:not(.layout-side) {
+  background: transparent !important;
+}
+
+body:not(.layout-side) .theme-shell {
+  background: var(--theme-shell) !important;
 }
 
 .theme-panel {
@@ -290,7 +299,14 @@ body.layout-side #new-tab {
   align-self: center !important;
 }
 
-#address-bar-part {
+body:not(.layout-side) #address-bar-part {
+  padding: 6px 12px !important;
+  gap: 8px !important;
+  background: var(--theme-shell) !important;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06) !important;
+}
+
+body.layout-side #address-bar-part {
   padding: 6px 12px !important;
   gap: 8px !important;
   background: transparent !important;

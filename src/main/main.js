@@ -184,6 +184,19 @@ const ipcSetup = () => {
       data.tabManager.resizeWindow();
     }
   });
+  onTabManager("updateKeybinds", (tabManager, event, keybinds) => {
+    for (const data of WindowManager.getAllWindows()) {
+      data.tabManager.updateKeybinds(keybinds);
+    }
+    WindowManager.setupApplicationMenu(keybinds);
+  });
+  onTabManager("resetKeybinds", (tabManager) => {
+    const { DEFAULT_KEYBINDS } = require('../tabs/TabConfig');
+    for (const data of WindowManager.getAllWindows()) {
+      data.tabManager.updateKeybinds(DEFAULT_KEYBINDS);
+    }
+    WindowManager.setupApplicationMenu(DEFAULT_KEYBINDS);
+  });
 
   // Tab stacking
   onTabManager("createStack", (tabManager, event, tabIndices, parentStackIds) => tabManager.createStack(tabIndices, parentStackIds));

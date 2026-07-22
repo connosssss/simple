@@ -2,6 +2,7 @@ const { BaseWindow, WebContentsView, app, Menu, ipcMain, session } = require('el
 const path = require('node:path');
 const WindowResizing = require("./WindowResizing");
 const TabManager = require('../tabs/TabManager');
+const { DEFAULT_KEYBINDS } = require('../tabs/TabConfig');
 
 class WindowManager {
     constructor() {
@@ -45,6 +46,10 @@ class WindowManager {
         this.webContentsIds.set(ui.webContents.id, windowId);
 
         ui.webContents.loadFile(path.join(__dirname, '../index.html'));
+
+        if (tabManager.keybinds) {
+            this.setupApplicationMenu(tabManager.keybinds);
+        }
 
 
 
@@ -131,14 +136,17 @@ class WindowManager {
         return win ? this.windows.get(win.id) : null;
     }
 
-    setupApplicationMenu() {
+    setupApplicationMenu(customKeybinds = null) {
+        const keybinds = { ...DEFAULT_KEYBINDS, ...(customKeybinds || {}) };
+        const getAccel = (key) => keybinds[key] ? keybinds[key] : undefined;
+
         const template = [
             {
                 label: 'File',
                 submenu: [
                     {
                         label: 'New Tab',
-                        accelerator: 'CmdOrCtrl+T',
+                        accelerator: getAccel('newTab'),
                         click: (menuItem, browserWindow) => {
                             const data = this.getActiveWindowData(browserWindow);
                             if (data) data.tabManager.createTab({ preventStackInherit: true });
@@ -146,14 +154,14 @@ class WindowManager {
                     },
                     {
                         label: 'New Window',
-                        accelerator: 'CmdOrCtrl+N',
+                        accelerator: getAccel('newWindow'),
                         click: () => {
                             this.createWindow();
                         }
                     },
                     {
                         label: 'Close Tab',
-                        accelerator: 'CmdOrCtrl+W',
+                        accelerator: getAccel('closeTab'),
                         click: (menuItem, browserWindow) => {
                             const data = this.getActiveWindowData(browserWindow);
                             if (data) {
@@ -168,7 +176,7 @@ class WindowManager {
                     },
                     {
                         label: 'Reopen Closed Tab',
-                        accelerator: 'CmdOrCtrl+Shift+T',
+                        accelerator: getAccel('reopenClosedTab'),
                         click: (menuItem, browserWindow) => {
                             const data = this.getActiveWindowData(browserWindow);
                             if (data) data.tabManager.reopenClosedTab();
@@ -176,7 +184,7 @@ class WindowManager {
                     },
                     {
                         label: 'Print',
-                        accelerator: 'CmdOrCtrl+P',
+                        accelerator: getAccel('print'),
                         click: (menuItem, browserWindow) => {
                             const data = this.getActiveWindowData(browserWindow);
 
@@ -211,7 +219,7 @@ class WindowManager {
                 submenu: [
                     {
                         label: 'Toggle Developer Tools',
-                        accelerator: 'CmdOrCtrl+Shift+I',
+                        accelerator: getAccel('toggleDevTools'),
                         click: (menuItem, browserWindow) => {
                             const data = this.getActiveWindowData(browserWindow);
                             if (data) data.tabManager.toggleDevTools();
@@ -219,7 +227,7 @@ class WindowManager {
                     },
                     {
                         label: 'Find in Page',
-                        accelerator: 'CmdOrCtrl+F',
+                        accelerator: getAccel('findInPage'),
                         click: (menuItem, browserWindow) => {
                             const data = this.getActiveWindowData(browserWindow);
                             if (data) {
@@ -231,7 +239,7 @@ class WindowManager {
                     { type: 'separator' },
                     {
                         label: 'Zoom In',
-                        accelerator: 'CmdOrCtrl+=',
+                        accelerator: getAccel('zoomIn'),
                         click: (menuItem, browserWindow) => {
                             const data = this.getActiveWindowData(browserWindow);
                             if (data) data.tabManager.zoomIn();
@@ -239,7 +247,7 @@ class WindowManager {
                     },
                     {
                         label: 'Zoom Out',
-                        accelerator: 'CmdOrCtrl+-',
+                        accelerator: getAccel('zoomOut'),
                         click: (menuItem, browserWindow) => {
                             const data = this.getActiveWindowData(browserWindow);
                             if (data) data.tabManager.zoomOut();
@@ -247,7 +255,7 @@ class WindowManager {
                     },
                     {
                         label: 'Reset Zoom',
-                        accelerator: 'CmdOrCtrl+0',
+                        accelerator: getAccel('resetZoom'),
                         click: (menuItem, browserWindow) => {
                             const data = this.getActiveWindowData(browserWindow);
                             if (data) data.tabManager.resetZoom();
@@ -256,7 +264,7 @@ class WindowManager {
                     { type: 'separator' },
                     {
                         label: 'Picture in Picture',
-                        accelerator: 'Alt+P',
+                        accelerator: getAccel('pip'),
                         click: (menuItem, browserWindow) => {
                             const data = this.getActiveWindowData(browserWindow);
                             if (data) {
@@ -269,7 +277,7 @@ class WindowManager {
                     },
                     {
                         label: 'History',
-                        accelerator: 'CmdOrCtrl+H',
+                        accelerator: getAccel('history'),
                         click: (menuItem, browserWindow) => {
                             const data = this.getActiveWindowData(browserWindow);
                             if (data) {

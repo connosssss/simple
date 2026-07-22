@@ -3,7 +3,28 @@ const { writeJsonAtomic } = require('../utils/fileIO');
 
 const SAVE_DELAY_MS = 150;
 
+const DEFAULT_KEYBINDS = {
+    newTab: "CmdOrCtrl+T",
+    newWindow: "CmdOrCtrl+N",
+    closeTab: "CmdOrCtrl+W",
+    reopenClosedTab: "CmdOrCtrl+Shift+T",
+    print: "CmdOrCtrl+P",
+    toggleDevTools: "CmdOrCtrl+Shift+I",
+    findInPage: "CmdOrCtrl+F",
+    zoomIn: "CmdOrCtrl+=",
+    zoomOut: "CmdOrCtrl+-",
+    resetZoom: "CmdOrCtrl+0",
+    pip: "Alt+P",
+    history: "CmdOrCtrl+H"
+};
+
+
 module.exports = {
+    DEFAULT_KEYBINDS,
+
+    getKeybinds() {
+        return { ...DEFAULT_KEYBINDS, ...(this.keybinds || {}) };
+    },
 
     getSettingsPayload() {
         return {
@@ -11,7 +32,8 @@ module.exports = {
             searchEngine: this.searchEngine,
             showBookmarkBar: this.showBookmarkBar,
             closeAfter: this.closeAfter,
-            uiPosition: this.uiPosition || 'top'
+            uiPosition: this.uiPosition || 'top',
+            keybinds: this.getKeybinds()
         };
     },
 
@@ -57,6 +79,12 @@ module.exports = {
         this.resizeWindow();
     },
 
+    updateKeybinds(keybinds) {
+        this.keybinds = { ...DEFAULT_KEYBINDS, ...(keybinds || {}) };
+        this.saveConfig(true);
+        this.broadcastSettings();
+    },
+
 
     serializeConfig() {
         const savedTabs = this.tabs.filter(tab => !(tab.isSettingsTab)).map(tab => ({
@@ -83,6 +111,7 @@ module.exports = {
             showBookmarkBar: this.showBookmarkBar,
             closeAfter: this.closeAfter,
             uiPosition: this.uiPosition || 'top',
+            keybinds: this.getKeybinds(),
             tabs: savedTabs,
             stackNames: this.stackNames,
             nextStackNumber: this.nextStackNumber,
@@ -153,6 +182,15 @@ module.exports = {
                     this.uiPosition = config.uiPosition;
                 } else {
                     this.uiPosition = 'top';
+                }
+
+                if (config.keybinds) {
+                    this.keybinds = { ...DEFAULT_KEYBINDS, ...config.keybinds };
+                }
+
+
+                else {
+                    this.keybinds = { ...DEFAULT_KEYBINDS };
                 }
 
                 if (config.stackNames) {

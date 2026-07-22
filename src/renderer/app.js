@@ -83,7 +83,7 @@ const setupTabSubscription = () => {
       const windowTitle = document.getElementById("window-title");
 
       if (windowTitle) {
-        windowTitle.textContent = mainTab.title || "simple";
+        windowTitle.textContent = mainTab.title || "New Tab";
         windowTitle.className = "theme-text text-sm max-w-[60%] truncate max-h-full";
       }
 
